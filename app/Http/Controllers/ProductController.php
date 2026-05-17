@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CreateProduct;
+use App\Actions\DeleteProduct;
 use App\Actions\UpdateProduct;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -14,15 +15,6 @@ class ProductController extends Controller
     public function __construct()
     {
         View::share('title', 'Product Management');
-    }
-
-    private function share($data = [])
-    {
-        $default = [
-            'model' => false
-        ];
-
-        return array_merge($default, $data);
     }
 
     public function index()
@@ -40,76 +32,44 @@ class ProductController extends Controller
 
     public function getData()
     {
-        $products = DB::table('products')->get();
-        return response()->json($products);
+        return response()->json(DB::table('products')->get());
     }
 
     public function getCreate()
     {
-        return view('product.create', $this->share());
+        return view('product.form');
     }
 
     public function postCreate(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
-
-        CreateProduct::run($request->only('name', 'price', 'description'));
-
+        CreateProduct::run($request);
         flash()->success('Product created successfully.');
-
         return redirect()->action([self::class, 'getTable']);
     }
 
     public function getUpdate($id)
     {
-        $product = Product::findOrFail($id);
-        return view('product.update', $this->share([
-            'product' => $product
-        ]));
+        return view('product.form', ['product' => Product::findOrFail($id)]);
     }
 
     public function postUpdate(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
-
-        $product = Product::findOrFail($id);
-        UpdateProduct::run($product, $request->only('name', 'price', 'description'));
-
+        UpdateProduct::run($request, $id);
         flash()->success('Product updated successfully.');
-
         return redirect()->action([self::class, 'getTable']);
-    }
-
-    public function getDelete($id)
-    {
-        $product = Product::findOrFail($id);
-        return view('product.delete', compact('product'));
     }
 
     public function postDelete($id)
     {
-        Product::findOrFail($id)->delete();
-
+        DeleteProduct::run($id);
         flash()->success('Product deleted successfully.');
-
         return redirect()->action([self::class, 'getTable']);
     }
 
     public function postDeleteBulk(Request $request)
     {
-        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
-        Product::whereIn('id', $request->ids)->delete();
-
-        flash()->success(count($request->ids) . ' product(s) deleted.');
-
+        $count = (new DeleteProduct)->handleBulk($request);
+        flash()->success($count . ' product(s) deleted.');
         return redirect()->action([self::class, 'getTable']);
     }
 }

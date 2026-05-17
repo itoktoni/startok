@@ -1,4 +1,23 @@
 @import "tailwindcss";
+@theme {
+  --color-red-*: initial;
+  --color-orange-*: initial;
+  --color-amber-*: initial;
+  --color-yellow-*: initial;
+  --color-lime-*: initial;
+  --color-green-*: initial;
+  --color-emerald-*: initial;
+  --color-teal-*: initial;
+  --color-cyan-*: initial;
+  --color-sky-*: initial;
+  --color-blue-*: initial;
+  --color-indigo-*: initial;
+  --color-violet-*: initial;
+  --color-purple-*: initial;
+  --color-fuchsia-*: initial;
+  --color-pink-*: initial;
+  --color-rose-*: initial;
+}
 @plugin "flyonui" {
   themes: shadcn;
 }
