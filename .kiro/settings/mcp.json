@@ -1,0 +1,22 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ],
+            "cwd": "D:/php/livewire"
+        },
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp"
+            ],
+            "env": {
+                "CONTEXT7_API_KEY": "ctx7sk-2971c987-56d0-48c8-a941-1d1afbfb7cd3"
+            }
+        }
+    }
+}
