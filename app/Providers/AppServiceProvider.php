@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Blaze\Blaze;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,19 +27,22 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        \Illuminate\Support\Facades\Blade::directive('bind', function ($expression) {
+        Blade::directive('bind', function ($expression) {
             return "<?php
                 global \$activeBladeModel;
                 \$activeBladeModel = $expression;
             ?>";
         });
 
-        \Illuminate\Support\Facades\Blade::directive('endbind', function () {
+        Blade::directive('endbind', function () {
             return "<?php
                 global \$activeBladeModel;
                 \$activeBladeModel = null;
             ?>";
         });
+
+        Blaze::optimize()->in(resource_path('views/components'));
+
     }
 
     /**

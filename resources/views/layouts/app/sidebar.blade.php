@@ -60,8 +60,10 @@
     </aside>
 
     {{-- Mobile top bar --}}
-    <div class="lg:hidden fixed top-0 left-0 right-0 h-11 bg-base-100 border-b border-base-300 flex items-center px-3 z-50">
-        <button class="btn btn-xs btn-soft" onclick="toggleSB()">☰</button>
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-11 bg-base-100 border-b border-base-300 rounded-b-xl py-6 flex items-center px-3 z-50">
+        <button class="btn btn-xs btn-soft py-4 rounded-2xl" onclick="toggleSB()">
+            <span class="icon-[tabler--adjustments-alt] size-4"></span>
+        </button>
         <span class="ml-2 font-semibold text-sm">{{ $title ?? config('app.name') }}</span>
         <div class="flex-1"></div>
     </div>

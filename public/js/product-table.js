@@ -1,0 +1,116 @@
+let currentSortField = '';
+let currentSortDir = 'asc';
+let mSelected = new Set();
+
+function initTable(sortField, sortDir) {
+    currentSortField = sortField;
+    currentSortDir = sortDir;
+}
+
+function buildUrl() {
+    const params = new URLSearchParams();
+    const q = document.getElementById('searchInput').value.trim();
+    const field = document.getElementById('filterField').value;
+    const perPage = document.getElementById('perPage').value;
+    const minP = document.getElementById('afMin')?.value;
+    const maxP = document.getElementById('afMax')?.value;
+    const from = document.getElementById('afFrom')?.value;
+    const to = document.getElementById('afTo')?.value;
+
+    if (q) {
+        if (field === 'price') {
+            params.set('filters[price][$eq]', q);
+        } else {
+            params.set('filters[' + field + '][$contains]', q);
+        }
+        params.set('_field', field);
+        params.set('_q', q);
+    }
+
+    if (minP) params.set('filters[price][$gte]', minP);
+    if (maxP) params.set('filters[price][$lte]', maxP);
+    if (from) params.set('filters[created_at][$gte]', from);
+    if (to) params.set('filters[created_at][$lte]', to);
+    if (currentSortField) params.set('sort[0]', currentSortField + ':' + currentSortDir);
+    params.set('per_page', perPage);
+
+    window.location.href = '/product/table?' + params.toString();
+}
+
+function doSort(col) {
+    if (currentSortField === col) {
+        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortField = col;
+        currentSortDir = 'asc';
+    }
+    buildUrl();
+}
+
+function applyAdvanced() {
+    document.getElementById('advFilter').classList.add('hidden');
+    buildUrl();
+}
+
+function resetAdvanced() {
+    document.getElementById('afMin').value = '';
+    document.getElementById('afMax').value = '';
+    document.getElementById('afFrom').value = '';
+    document.getElementById('afTo').value = '';
+    applyAdvanced();
+}
+
+function toggleAll(el) {
+    document.querySelectorAll('tbody .checkbox').forEach(c => c.checked = el.checked);
+}
+
+function mToggle(el) {
+    const id = el.dataset.id;
+    const icon = el.querySelector('[data-check]');
+    if (mSelected.has(id)) {
+        mSelected.delete(id);
+        el.style.backgroundColor = '';
+        icon.className = 'icon-[tabler--circle] size-5 text-base-content/20 shrink-0';
+    } else {
+        mSelected.add(id);
+        el.style.backgroundColor = 'rgba(0,0,0,0.03)';
+        icon.className = 'icon-[tabler--circle-check-filled] size-5 text-primary shrink-0';
+    }
+    updateMSel();
+}
+
+function mToggleAll() {
+    const items = document.querySelectorAll('#mBody > div[data-id]');
+    if (mSelected.size) {
+        mSelected.clear();
+        items.forEach(el => { el.style.backgroundColor=''; el.querySelector('[data-check]').className='icon-[tabler--circle] size-5 text-base-content/20 shrink-0'; });
+    } else {
+        items.forEach(el => { mSelected.add(el.dataset.id); el.style.backgroundColor='rgba(0,0,0,0.03)'; el.querySelector('[data-check]').className='icon-[tabler--circle-check-filled] size-5 text-primary shrink-0'; });
+    }
+    updateMSel();
+}
+
+function updateMSel() {
+    document.getElementById('mSelCount').textContent = mSelected.size ? mSelected.size + ' selected' : '';
+    document.getElementById('mToggleAll').textContent = mSelected.size ? 'Unselect' : 'Select All';
+}
+
+function deleteSelected() {
+    const desktopIds = [...document.querySelectorAll('tbody .checkbox:checked')].map(c => c.value);
+    const ids = desktopIds.length ? desktopIds : [...mSelected];
+    if (!ids.length) return alert('No items selected');
+    if (!confirm(`Delete ${ids.length} product(s)?`)) return;
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = '/product/delete-bulk';
+    form.innerHTML = document.querySelector('meta[name="csrf-token"]').content ? `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">` : '';
+    ids.forEach(id => { form.innerHTML += `<input type="hidden" name="ids[]" value="${id}">`; });
+    document.body.appendChild(form); form.submit();
+}
+
+function confirmDelete(id) {
+    if (!confirm('Are you sure want to delete?')) return;
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = '/product/delete/' + id;
+    form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">`;
+    document.body.appendChild(form); form.submit();
+}

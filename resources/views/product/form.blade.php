@@ -1,17 +1,11 @@
 @php $isEdit = isset($model) && $model; @endphp
-<x-layouts::app :title="$title">
-    <nav class="hidden lg:block text-xs" aria-label="Breadcrumb">
-        <ol class="flex items-center gap-1 text-base-content/60">
-            <li><a href="/product/table" class="hover:text-primary">Products</a></li>
-            <li><span class="icon-[tabler--chevron-right] size-3"></span></li>
-            <li class="text-base-content font-medium">{{ $isEdit ? 'Update' : 'Create' }}</li>
-        </ol>
-    </nav>
+<x-layouts::app>
+    <x-breadcrumb :items="[['url' => '/product/table', 'label' => 'Products'], ['url' => '', 'label' => $isEdit ? 'Update' : 'Create']]" />
 
     @if($errors->any())
-        <div class="alert alert-error text-xs py-2">
+        <x-alert type="error">
             <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
+        </x-alert>
     @endif
 
     <x-form :action="$isEdit ? '/product/update/'.$model->id : '/product/create'">
@@ -24,7 +18,7 @@
         </x-card>
 
         <x-action cancel="/product/table">
-            <button type="submit" class="btn btn-sm {{ $isEdit ? 'btn-soft btn-info' : 'btn-primary' }}">{{ $isEdit ? 'Update' : 'Create' }}</button>
+            <x-button type="submit" :variant="$isEdit ? 'soft btn-info' : 'primary'">{{ $isEdit ? 'Update' : 'Create' }}</x-button>
         </x-action>
     </x-form>
 </x-layouts::app>

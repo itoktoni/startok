@@ -1,0 +1,17 @@
+@props(['empty' => 'No data found.'])
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body p-0">
+        {{-- Desktop table --}}
+        <div class="hidden lg:block overflow-x-auto">
+            <table class="table table-sm w-full">
+                <thead><tr>{{ $head }}</tr></thead>
+                <tbody>{{ $body }}</tbody>
+            </table>
+        </div>
+
+        {{-- Mobile list --}}
+        @if(isset($mobile))
+        <div class="lg:hidden">{{ $mobile }}</div>
+        @endif
+    </div>
+</div>
