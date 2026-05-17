@@ -22,6 +22,15 @@ class ProductController extends Controller
         return redirect()->action([self::class, 'getTable']);
     }
 
+    private function share(array $data)
+    {
+        $default = [
+            'model' => null
+        ];
+
+        return array_merge($default, $data);
+    }
+
     public function getTable(Request $request)
     {
         $perPage = in_array($request->input('per_page'), ['5','10','25','50']) ? (int)$request->per_page : 10;
@@ -37,7 +46,7 @@ class ProductController extends Controller
 
     public function getCreate()
     {
-        return view('product.form');
+        return view('product.form', $this->share());
     }
 
     public function postCreate(Request $request)
@@ -49,7 +58,9 @@ class ProductController extends Controller
 
     public function getUpdate($id)
     {
-        return view('product.form', ['product' => Product::findOrFail($id)]);
+        return view('product.form', $this->share([
+            'model' => Product::findOrFail($id)
+        ]));
     }
 
     public function postUpdate(Request $request, $id)

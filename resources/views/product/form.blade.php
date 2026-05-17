@@ -1,4 +1,4 @@
-@php $isEdit = isset($product); $model = $product ?? null; @endphp
+@php $isEdit = isset($model) && $model; @endphp
 <x-layouts::app :title="$title">
     <nav class="hidden lg:block text-xs" aria-label="Breadcrumb">
         <ol class="flex items-center gap-1 text-base-content/60">
@@ -14,16 +14,17 @@
         </div>
     @endif
 
-    <form action="{{ $isEdit ? '/product/update/'.$product->id : '/product/create' }}" method="POST">
-        @csrf
+    <x-form :action="$isEdit ? '/product/update/'.$model->id : '/product/create'">
         <x-card :label="($isEdit ? 'Update' : 'Create') . ' Product'">
-            <x-input col="6" name="name" required />
-            <x-input col="6" name="price" type="number" required />
-            <x-textarea col="12" name="description" />
+            @bind($model ?? null)
+                <x-input col="6" name="name" required />
+                <x-input col="6" name="price" type="number" required />
+                <x-textarea col="12" name="description" />
+            @endbind
         </x-card>
 
         <x-action cancel="/product/table">
             <button type="submit" class="btn btn-sm {{ $isEdit ? 'btn-soft btn-info' : 'btn-primary' }}">{{ $isEdit ? 'Update' : 'Create' }}</button>
         </x-action>
-    </form>
+    </x-form>
 </x-layouts::app>

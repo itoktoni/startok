@@ -1,7 +1,9 @@
-@props(['name', 'label' => null, 'col' => '12', 'options' => [], 'default' => null, 'multiple' => false, 'placeholder' => ''])
+@props(['name', 'label' => null, 'col' => '12', 'options' => [], 'default' => null, 'multiple' => false, 'placeholder' => '', 'model' => null])
 @php
+    global $activeBladeModel;
     $label = $label ?? ucwords(str_replace('_', ' ', $name));
-    $selected = $default ?? (isset($model) ? old($name, $model->{$name} ?? '') : old($name, ''));
+    $m = $model ?? $activeBladeModel ?? null;
+    $selected = $default ?? ($m ? old($name, data_get($m, $name, '')) : old($name, ''));
 @endphp
 <div class="col-span-{{ $col }} md:col-span-{{ $col }}">
     <label class="label-text text-xs">{{ $label }}</label>

@@ -24,6 +24,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        \Illuminate\Support\Facades\Blade::directive('bind', function ($expression) {
+            return "<?php
+                global \$activeBladeModel;
+                \$activeBladeModel = $expression;
+            ?>";
+        });
+
+        \Illuminate\Support\Facades\Blade::directive('endbind', function () {
+            return "<?php
+                global \$activeBladeModel;
+                \$activeBladeModel = null;
+            ?>";
+        });
     }
 
     /**
