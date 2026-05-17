@@ -7,26 +7,37 @@
         </ol>
     </nav>
 
-    {{-- Filters --}}
+    <div class="content">
+        {{-- Filters --}}
     <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-3 space-y-2">
+        <div class="card-body p-3 space-y-2 default-filter">
             <div class="grid grid-cols-12 gap-2">
-                <select id="perPage" class="col-span-6 md:col-span-3 select select-sm" onchange="buildUrl()">
+                <select id="perPage" class="col-span-4 md:col-span-2 select select-sm" onchange="buildUrl()">
                     @foreach([5,10,25,50] as $pp)
                     <option value="{{ $pp }}" {{ request('per_page', 10) == $pp ? 'selected' : '' }}>{{ $pp }} / page</option>
                     @endforeach
                 </select>
-                <button type="button" class="col-span-6 md:col-span-3 btn btn-sm btn-outline gap-1"
-                    onclick="document.getElementById('advFilter').classList.remove('hidden')"><span
-                        class="icon-[tabler--filter] size-3.5"></span>Advanced</button>
+
+                <button type="button" class="col-span-4 md:col-span-2 btn btn-sm btn-outline gap-1" onclick="document.getElementById('advFilter').classList.remove('hidden')">
+                    <span class="icon-[tabler--filter] size-3.5"></span> Advanced
+                </button>
+
+                <select id="filterField" class="col-span-4 md:col-span-2 select select-sm">
+                    <option value="name" {{ request('_field','name')==='name'?'selected':'' }}>Name</option>
+                    <option value="price" {{ request('_field')==='price'?'selected':'' }}>Price</option>
+                    <option value="description" {{ request('_field')==='description'?'selected':'' }}>Description</option>
+                </select>
+
+                <div class="join col-span-12 md:col-span-6">
+                    <span class="join-item btn btn-sm no-animation text-xs">Cari</span>
+                    <input type="text" id="searchInput" class="input input-sm join-item flex-1"
+                        value="{{ request('_q') }}"
+                        placeholder="Search..." onkeydown="if(event.key==='Enter')buildUrl()">
+                    <button type="button" class="btn btn-sm btn-primary join-item" onclick="buildUrl()"><span class="icon-[tabler--search] size-3.5"></span></button>
+                </div>
+
             </div>
-            <div class="join w-full">
-                <span class="join-item btn btn-sm no-animation text-xs">Cari</span>
-                <input type="text" id="searchInput" class="input input-sm join-item flex-1"
-                    value="{{ request('filters.name.$contains') }}"
-                    placeholder="Search name..." onkeydown="if(event.key==='Enter')buildUrl()">
-                <button type="button" class="btn btn-sm btn-primary join-item" onclick="buildUrl()"><span class="icon-[tabler--search] size-3.5"></span></button>
-            </div>
+
         </div>
     </div>
 
@@ -102,26 +113,28 @@
     </div>
 
     {{-- Fixed bottom bar --}}
-    <div class="fixed bottom-14 lg:bottom-0 left-0 lg:left-56 right-0 bg-base-100 border-t border-base-300 px-3 py-2 z-30 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span class="text-[10px] text-base-content/50">{{ $products->firstItem() ?? 0 }}-{{ $products->lastItem() ?? 0 }} of {{ $products->total() }}</span>
-            <div class="join">
-                @if($products->onFirstPage())
-                <span class="btn btn-xs join-item btn-disabled"><span class="icon-[tabler--chevron-left] size-3.5"></span></span>
-                @else
-                <a href="{{ $products->previousPageUrl() }}" class="btn btn-xs join-item"><span class="icon-[tabler--chevron-left] size-3.5"></span></a>
-                @endif
-                <span class="btn btn-xs join-item no-animation font-medium">{{ $products->currentPage() }}/{{ $products->lastPage() }}</span>
-                @if($products->hasMorePages())
-                <a href="{{ $products->nextPageUrl() }}" class="btn btn-xs join-item"><span class="icon-[tabler--chevron-right] size-3.5"></span></a>
-                @else
-                <span class="btn btn-xs join-item btn-disabled"><span class="icon-[tabler--chevron-right] size-3.5"></span></span>
-                @endif
+    <div class="fixed left-0 lg:left-56 right-0 bg-base-100 border-t border-base-300 px-3 py-2 z-30" style="bottom:0">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] text-base-content/50">{{ $products->firstItem() ?? 0 }}-{{ $products->lastItem() ?? 0 }} of {{ $products->total() }}</span>
+                <div class="join">
+                    @if($products->onFirstPage())
+                    <span class="btn btn-xs join-item btn-disabled"><span class="icon-[tabler--chevron-left] size-3.5"></span></span>
+                    @else
+                    <a href="{{ $products->previousPageUrl() }}" class="btn btn-xs join-item"><span class="icon-[tabler--chevron-left] size-3.5"></span></a>
+                    @endif
+                    <span class="btn btn-xs join-item no-animation font-medium">{{ $products->currentPage() }}/{{ $products->lastPage() }}</span>
+                    @if($products->hasMorePages())
+                    <a href="{{ $products->nextPageUrl() }}" class="btn btn-xs join-item"><span class="icon-[tabler--chevron-right] size-3.5"></span></a>
+                    @else
+                    <span class="btn btn-xs join-item btn-disabled"><span class="icon-[tabler--chevron-right] size-3.5"></span></span>
+                    @endif
+                </div>
             </div>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <a href="/product/create" class="btn btn-xs btn-primary gap-1"><span class="icon-[tabler--plus] size-3.5"></span>Create</a>
-            <button class="btn btn-xs btn-soft btn-error gap-1" onclick="deleteSelected()"><span class="icon-[tabler--trash] size-3.5"></span>Delete</button>
+            <div class="flex gap-1.5">
+                <a href="/product/create" class="btn btn-sm btn-primary gap-1">Create</a>
+                <button class="btn btn-sm btn-soft btn-error gap-1" onclick="deleteSelected()">Delete</button>
+            </div>
         </div>
     </div>
 
@@ -141,6 +154,7 @@
             <button class="btn btn-sm btn-soft btn-block" onclick="resetAdvanced()">Reset</button>
         </div>
     </div>
+    </div>
 
     <script>
     // Current sort state
@@ -151,14 +165,25 @@
     function buildUrl() {
         const params = new URLSearchParams();
         const q = document.getElementById('searchInput').value.trim();
+        const field = document.getElementById('filterField').value;
         const perPage = document.getElementById('perPage').value;
         const minP = document.getElementById('afMin').value;
         const maxP = document.getElementById('afMax').value;
         const from = document.getElementById('afFrom').value;
         const to = document.getElementById('afTo').value;
 
-        // Purity filter format
-        if (q) params.set('filters[name][$contains]', q);
+        // Purity filter based on selected field
+        if (q) {
+            if (field === 'price') {
+                params.set('filters[price][$eq]', q);
+            } else {
+                params.set('filters[' + field + '][$contains]', q);
+            }
+            params.set('_field', field);
+            params.set('_q', q);
+        }
+
+        // Advanced filters
         if (minP) params.set('filters[price][$gte]', minP);
         if (maxP) params.set('filters[price][$lte]', maxP);
         if (from) params.set('filters[created_at][$gte]', from);
