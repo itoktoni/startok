@@ -86,17 +86,21 @@ abstract class Controller
         return $this->model->filter()->sort();
     }
 
-    protected function response(string $message = null, $redirect = null, $data = null, int $status = 200)
+    protected function response($message = null, $redirect = null, $data = null, int $status = 200)
     {
-        if(empty($message))
-        {
-            $message = "Berhasil !";
-        }
-
         if ($this->isApi()) {
             $payload = ['message' => $message];
             if ($data) $payload['data'] = $data;
             return response()->json($payload, $status);
+        }
+
+        if(empty($message))
+        {
+            $message = "Action Kamu Berhasil !";
+        }
+        else
+        {
+            $message = "Action Kamu Berhasil !";
         }
 
         flash()->success($message);

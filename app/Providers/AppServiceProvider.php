@@ -26,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Blaze::optimize()->in(resource_path('views/components'));
 
         Blade::directive('bind', function ($expression) {
             return "<?php
@@ -41,7 +42,6 @@ class AppServiceProvider extends ServiceProvider
             ?>";
         });
 
-        Blaze::optimize()->in(resource_path('views/components'));
 
     }
 

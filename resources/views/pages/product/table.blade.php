@@ -1,5 +1,5 @@
 <x-layouts::app>
-    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => 'data']]" />
+    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
         <x-filter :per-page="25" :fields="['name' => 'Name', 'price' => 'Price', 'description' => 'Description']">
@@ -72,13 +72,13 @@
                     @forelse($data as $table)
                     <div class="border rounded-lg p-3 cursor-pointer active:bg-base-200" data-id="{{ $table->id }}" onclick="mToggle(this)">
                         <div class="flex items-center justify-between gap-2">
-                            <p class="text-xs font-bold truncate flex-1">{{ $table->name }}</p>
+                            <p class="font-bold text-lg truncate flex-1">{{ $table->name }}</p>
                             <span data-check class="icon-[tabler--circle] size-5 text-base-content/20 shrink-0"></span>
                         </div>
                         <p class="text-sm font-bold font-mono text-primary mt-1">Rp {{ number_format($table->price, 0, ',', '.') }}</p>
-                        <p class="text-[10px] text-base-content/50 mt-1 line-clamp-1">{{ $table->description }}</p>
+                        <p class="text-xs text-base-content/50 mt-1 line-clamp-1">{{ $table->description }}</p>
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-200">
-                            <span class="text-[10px] text-base-content/40">{{ formatDate($table->created_at) }}</span>
+                            <span class="text-xs text-base-content/40">{{ formatDate($table->created_at) }}</span>
                             <div class="flex gap-1">
                                 @can('save', $model)
                                 <a href="{{ moduleRoute('getUpdate', ['id' => $table->id]) }}" class="btn btn-circle" onclick="event.stopPropagation()"><span class="icon-[tabler--edit] size-4"></span></a>

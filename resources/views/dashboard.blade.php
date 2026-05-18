@@ -1,7 +1,7 @@
 <x-layouts::app :title="__('Dashboard')">
 
 {{-- Stat Widgets --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 lg:mt-0">
     <div class="card bg-base-100 shadow-sm"><div class="card-body p-4 flex-row items-center gap-3">
         <div class="bg-primary/10 rounded-xl p-2.5"><span class="icon-[tabler--currency-dollar] size-6 text-primary"></span></div>
         <div><p class="text-xs text-base-content/50">Revenue</p><p class="text-lg font-bold leading-tight">Rp 45.2M</p></div>

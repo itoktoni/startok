@@ -2,10 +2,9 @@
 
 @php
 $isEdit = isset($model) && $model;
-$isEdit ? moduleRoute('getUpdate', ['id' => $model->field_primary]) : moduleRoute('getCreate');
 if(empty($action))
 {
-    $action = $isEdit;
+    $action = $isEdit ? moduleRoute('getUpdate', ['id' => $model->field_primary]) : moduleRoute('getCreate');
 }
 
 @endphp

@@ -17,16 +17,19 @@
         </div>
         <nav class="flex-1 p-2 space-y-0.5 overflow-y-auto">
             <a href="{{ route('dashboard') }}" class="btn btn-sm btn-soft w-full justify-start gap-2" wire:navigate>
-                <span class="icon-[tabler--dashboard] size-4"></span>Dashboard
+                <span class="icon-[tabler--dashboard] size-4"></span>
+                <span class="text-sm">Dashboard</span>
             </a>
             <div class="divider my-1 text-xs">Menu</div>
             <a href="/product/table" class="btn btn-sm btn-soft w-full justify-start gap-2">
-                <span class="icon-[tabler--package] size-4"></span>Products
+                <span class="icon-[tabler--package] size-4"></span>
+                <span class="text-sm">Product</span>
             </a>
             {{ $sidebar ?? '' }}
             <div class="divider my-1 text-xs">System</div>
             <a href="#" class="btn btn-sm btn-soft w-full justify-start gap-2">
-                <span class="icon-[tabler--settings] size-4"></span>Settings
+                <span class="icon-[tabler--settings] size-4"></span>
+                <span class="text-sm">Settings</span>
             </a>
         </nav>
         @auth
@@ -39,8 +42,8 @@
                     </div>
                 </div>
                 <div class="flex-1 min-w-0 text-left">
-                    <p class="text-xs font-medium truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-[10px] text-base-content/50 truncate">{{ auth()->user()->email }}</p>
+                    <p class="font-medium text-sm truncate">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-base-content/50 truncate">{{ auth()->user()->email }}</p>
                 </div>
                 <span class="icon-[tabler--dots-vertical] size-4 text-base-content/40"></span>
             </button>
@@ -61,10 +64,10 @@
 
     {{-- Mobile top bar --}}
     <div class="lg:hidden fixed top-0 left-0 right-0 h-11 bg-base-100 border-b border-base-300 rounded-b-2xl py-7 flex items-center px-3 z-50">
-        <button class="btn btn-xs btn-soft py-4 rounded-2xl" onclick="toggleSB()">
-            <span class="icon-[tabler--adjustments-alt] size-4"></span>
+        <button class="btn btn-xs py-4 px-2 rounded-3xl" onclick="toggleSB()">
+            <span class="icon-[tabler--adjustments-alt] size-5"></span>
         </button>
-        <span class="ml-2 font-semibold text-sm">{{ $title ?? config('app.name') }}</span>
+        <span class="ml-2 font-semibold text-lg">{{ $title ?? config('app.name') }}</span>
         <div class="flex-1"></div>
     </div>
 
