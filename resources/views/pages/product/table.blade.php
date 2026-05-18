@@ -23,7 +23,7 @@
 
         <x-table>
             <x-slot:head>
-                <th><input type="checkbox" class="checkbox checkbox-xs" onchange="toggleAll(this)"></th>
+                <th>@can('delete', App\Models\Product::class)<input type="checkbox" class="checkbox checkbox-xs" onchange="toggleAll(this)">@endcan</th>
                 <th class="cursor-pointer select-none" onclick="doSort('name')">Name
                     <span class="icon-[tabler--{{ $sortField==='name' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
                 <th class="cursor-pointer select-none" onclick="doSort('price')">Price
@@ -37,15 +37,19 @@
             <x-slot:body>
                 @forelse($tables as $table)
                 <tr>
-                    <td><input type="checkbox" class="checkbox checkbox-xs" value="{{ $table->id }}"></td>
+                    <td>@can('delete', App\Models\Product::class)<input type="checkbox" class="checkbox checkbox-xs" value="{{ $table->id }}">@endcan</td>
                     <td class="font-medium">{{ $table->name }}</td>
                     <td class="font-mono">Rp {{ number_format($table->price, 0, ',', '.') }}</td>
                     <td class="text-base-content/60">{{ Str::limit($table->description, 40) }}</td>
                     <td class="text-base-content/60">{{ $table->created_at->format('Y-m-d') }}</td>
                     <td>
                         <div class="flex gap-0.5">
+                            @can('update', App\Models\Product::class)
                             <a href="/product/update/{{ $table->id }}" class="btn btn-xs btn-soft btn-circle"><span class="icon-[tabler--edit] size-3"></span></a>
+                            @endcan
+                            @can('delete', App\Models\Product::class)
                             <button onclick="confirmDelete({{ $table->id }})" class="btn btn-xs btn-soft btn-error btn-circle"><span class="icon-[tabler--trash] size-3"></span></button>
+                            @endcan
                         </div>
                     </td>
                 </tr>
@@ -72,8 +76,12 @@
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-200">
                             <span class="text-[10px] text-base-content/40">{{ $table->created_at->format('d M Y') }}</span>
                             <div class="flex gap-1">
+                                @can('update', App\Models\Product::class)
                                 <a href="/product/update/{{ $table->id }}" class="btn btn-xs btn-soft btn-circle" onclick="event.stopPropagation()"><span class="icon-[tabler--edit] size-3"></span></a>
+                                @endcan
+                                @can('delete', App\Models\Product::class)
                                 <button onclick="event.stopPropagation();confirmDelete({{ $table->id }})" class="btn btn-xs btn-soft btn-error btn-circle"><span class="icon-[tabler--trash] size-3"></span></button>
+                                @endcan
                             </div>
                         </div>
                     </div>
@@ -82,6 +90,7 @@
                     @endforelse
                 </div>
             </x-slot:mobile>
+
         </x-table>
 
         {{-- Pagination --}}
@@ -89,8 +98,12 @@
 
         {{-- Fixed action bar --}}
         <x-action cancel="/product/table">
+            @can('update', App\Models\Product::class)
             <a href="/product/create" class="btn btn-sm btn-primary gap-1">Create</a>
+            @endcan
+            @can('delete', App\Models\Product::class)
             <x-button variant="soft btn-error" onclick="deleteSelected()">Delete</x-button>
+            @endcan
         </x-action>
     </div>
 

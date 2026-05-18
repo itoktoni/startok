@@ -2,14 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Function\ControllerHelper;
+
 abstract class Controller
 {
+    use ControllerHelper;
+
+    public $model;
+
     protected function isApi(): bool
     {
+        if (request()->hasHeader('authorization')) {
+            return true;
+        }
+
+        if (request()->wantsJson()) {
+            return true;
+        }
+
         return request()->expectsJson() || request()->is('api/*');
     }
 
-    protected function respond(string $message, $redirect, $data = null, int $status = 200)
+    protected function getData()
+    {
+        return $this->model->filter()->sort();
+    }
+
+    protected function response(string $message = null, $redirect = null, $data = null, int $status = 200)
     {
         if ($this->isApi()) {
             $payload = ['message' => $message];
@@ -18,7 +37,7 @@ abstract class Controller
         }
 
         flash()->success($message);
-        return $redirect;
+        return redirect()->back();
     }
 
     protected function respondView(string $view, array $data = [])

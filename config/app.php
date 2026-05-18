@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -122,5 +125,9 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    'aliases' => Facade::defaultAliases()->merge([
+        'MobileDetect' => Riverskies\Laravel\MobileDetect\Facades\MobileDetect::class,
+    ])->toArray(),
 
 ];

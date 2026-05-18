@@ -7,65 +7,71 @@ use App\Actions\DeleteProduct;
 use App\Actions\UpdateProduct;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
+    public $model;
+    public static $action;
+    public static $template;
+
+    public function __construct(Product $model)
+    {
+        $this->model = $model;
+    }
+
     public function index()
     {
         return redirect()->action([self::class, 'getTable']);
     }
 
-    private function share(array $data = [])
-    {
-        return array_merge(['model' => null], $data);
-    }
-
     public function getTable(Request $request)
     {
         $perPage = in_array($request->input('per_page'), ['5','10','25','50','100']) ? (int)$request->per_page : 25;
-        $tables = Product::filter()->sort()->paginate($perPage)->withQueryString();
+        $tables = $this->getData()->paginate($perPage)->withQueryString();
 
-        return $this->respondView('product.table', ['tables' => $tables]);
-    }
-
-    public function getData()
-    {
-        return response()->json(Product::all());
+        return $this->views($this->template(), ['tables' => $tables]);
     }
 
     public function getCreate()
     {
-        return view('product.form', $this->share());
+        Gate::authorize('save', $this->model);
+        return view($this->template(), $this->share());
     }
 
     public function postCreate(Request $request)
     {
-        $product = CreateProduct::run($request);
-        return $this->respond('Product created successfully.', redirect()->action([self::class, 'getTable']), $product, 201);
+        Gate::authorize('save', $this->model);
+        $response = CreateProduct::run($request);
+        return $this->response($response);
     }
 
     public function getUpdate($id)
     {
-        return $this->respondView('product.form', $this->share([
-            'model' => Product::findOrFail($id),
+        Gate::authorize('save', $this->model);
+        return $this->views($this->template(), $this->share([
+            'model' => $this->model->findOrFail($id),
         ]));
     }
 
     public function postUpdate(Request $request, $id)
     {
-        $product = UpdateProduct::run($request, $id);
-        return $this->respond('Product updated successfully.', redirect()->action([self::class, 'getTable']), $product);
+        Gate::authorize('save', $this->model);
+        $response = UpdateProduct::run($request, $id);
+        return $this->response($response);
     }
 
     public function postDelete($id)
     {
-        DeleteProduct::run($id);
-        return $this->respond('Product deleted successfully.', redirect()->action([self::class, 'getTable']));
+        Gate::authorize('delete', $this->model);
+        $response = DeleteProduct::run($id);
+        return $this->response($response);
     }
 
     public function postDeleteBulk(Request $request)
     {
+        Gate::authorize('delete', $this->model);
         $count = (new DeleteProduct)->handleBulk($request);
-        return $this->respond($count . ' product(s) deleted.', redirect()->action([self::class, 'getTable']));
+        return $this->response($count);
     }
 }
