@@ -1,6 +1,6 @@
 @php $isEdit = isset($model) && $model; @endphp
 <x-layouts::app>
-    <x-breadcrumb :items="[['url' => '/product/table', 'label' => 'Products'], ['url' => '', 'label' => $isEdit ? 'Update' : 'Create']]" />
+    <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => $isEdit ? 'Update' : 'Create']]" />
 
     @if($errors->any())
         <x-alert type="error">
@@ -8,17 +8,17 @@
         </x-alert>
     @endif
 
-    <x-form :action="$isEdit ? '/product/update/'.$model->id : '/product/create'">
-        <x-card :label="($isEdit ? 'Update' : 'Create') . ' Product'">
+    <x-form :model="$model">
+        <x-card :label="ucfirst(module())">
             @bind($model ?? null)
-                <x-input col="6" name="name" required />
-                <x-input col="6" name="price" type="number" required />
+                <x-input col="6" name="name" />
+                <x-input col="6" name="price" type="number" />
                 <x-textarea col="12" name="description" />
             @endbind
         </x-card>
 
-        <x-action cancel="/product/table">
-            <x-button type="submit" :variant="$isEdit ? 'soft btn-info' : 'primary'">{{ $isEdit ? 'Update' : 'Create' }}</x-button>
+        <x-action>
+            <x-button type="submit" :variant="$isEdit ? 'btn-info' : 'primary'">{{ $isEdit ? 'Update' : 'Create' }}</x-button>
         </x-action>
     </x-form>
 </x-layouts::app>

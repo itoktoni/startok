@@ -4,7 +4,7 @@
         {{-- Desktop table --}}
         @desktop()
         <div class="hidden lg:block overflow-x-auto">
-            <table class="table table-sm w-full">
+            <table class="table w-full">
                 <thead><tr>{{ $head }}</tr></thead>
                 <tbody>{{ $body }}</tbody>
             </table>

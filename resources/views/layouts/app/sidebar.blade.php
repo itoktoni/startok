@@ -60,7 +60,7 @@
     </aside>
 
     {{-- Mobile top bar --}}
-    <div class="lg:hidden fixed top-0 left-0 right-0 h-11 bg-base-100 border-b border-base-300 rounded-b-xl py-6 flex items-center px-3 z-50">
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-11 bg-base-100 border-b border-base-300 rounded-b-2xl py-7 flex items-center px-3 z-50">
         <button class="btn btn-xs btn-soft py-4 rounded-2xl" onclick="toggleSB()">
             <span class="icon-[tabler--adjustments-alt] size-4"></span>
         </button>

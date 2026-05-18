@@ -1,7 +1,6 @@
 <x-layouts::app>
-    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => 'Products']]" />
-
-    <div class="content">
+    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => 'data']]" />
+    <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
         <x-filter :per-page="25" :fields="['name' => 'Name', 'price' => 'Price', 'description' => 'Description']">
             <x-slot:advanced>
@@ -23,7 +22,8 @@
 
         <x-table>
             <x-slot:head>
-                <th>@can('delete', App\Models\Product::class)<input type="checkbox" class="checkbox checkbox-xs" onchange="toggleAll(this)">@endcan</th>
+                <th class="w-1">@can('delete', $model)<input type="checkbox" class="checkbox checkbox-xs" onchange="toggleAll(this)">@endcan</th>
+                <th>Actions</th>
                 <th class="cursor-pointer select-none" onclick="doSort('name')">Name
                     <span class="icon-[tabler--{{ $sortField==='name' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
                 <th class="cursor-pointer select-none" onclick="doSort('price')">Price
@@ -31,30 +31,34 @@
                 <th>Description</th>
                 <th class="cursor-pointer select-none" onclick="doSort('created_at')">Created
                     <span class="icon-[tabler--{{ $sortField==='created_at' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
-                <th>Actions</th>
             </x-slot:head>
 
             <x-slot:body>
-                @forelse($tables as $table)
+                @forelse($data as $table)
                 <tr>
-                    <td>@can('delete', App\Models\Product::class)<input type="checkbox" class="checkbox checkbox-xs" value="{{ $table->id }}">@endcan</td>
-                    <td class="font-medium">{{ $table->name }}</td>
-                    <td class="font-mono">Rp {{ number_format($table->price, 0, ',', '.') }}</td>
-                    <td class="text-base-content/60">{{ Str::limit($table->description, 40) }}</td>
-                    <td class="text-base-content/60">{{ $table->created_at->format('Y-m-d') }}</td>
-                    <td>
+                    <td>@can('delete', $model)<input type="checkbox" class="checkbox checkbox-xs" value="{{ $table->id }}">@endcan</td>
+                    <td class="w-1">
                         <div class="flex gap-0.5">
-                            @can('update', App\Models\Product::class)
-                            <a href="/product/update/{{ $table->id }}" class="btn btn-xs btn-soft btn-circle"><span class="icon-[tabler--edit] size-3"></span></a>
+                            @can('save', $model)
+                            <a href="{{ moduleRoute('getUpdate', ['id' => $table->id]) }}" class="btn btn-primary btn-circle">
+                                <span class="icon-[tabler--edit] size-4"></span>
+                            </a>
                             @endcan
-                            @can('delete', App\Models\Product::class)
-                            <button onclick="confirmDelete({{ $table->id }})" class="btn btn-xs btn-soft btn-error btn-circle"><span class="icon-[tabler--trash] size-3"></span></button>
+                            @can('delete', $model)
+                            <a onclick="return confirm('Apakah anda yakin ingin menghapus ?')" href="{{ moduleRoute('getDelete', ['id' => $table->field_primary]) }}" class="btn btn-error btn-circle">
+                                <span class="icon-[tabler--trash] size-4"></span>
+                            </a>
                             @endcan
                         </div>
                     </td>
+                    <td>{{ $table->name }}</td>
+                    <td>{{ formatRupiah($table->price) }}</td>
+                    <td>{{ Str::limit($table->description, 40) }}</td>
+                    <td class="w-1">{{ formatDate($table->created_at) }}</td>
+
                 </tr>
                 @empty
-                <tr><td colspan="6" class="text-center text-base-content/50">No products found.</td></tr>
+                <tr><td colspan="6" class="text-center text-base-content/50">No data found.</td></tr>
                 @endforelse
             </x-slot:body>
 
@@ -65,8 +69,8 @@
                     <span id="mSelCount" class="text-xs text-primary font-medium"></span>
                 </div>
                 <div class="p-2 space-y-2" id="mBody">
-                    @forelse($tables as $table)
-                    <div class="border rounded-lg p-3 cursor-pointer active:bg-base-200" style="border-color:#ddd" data-id="{{ $table->id }}" onclick="mToggle(this)">
+                    @forelse($data as $table)
+                    <div class="border rounded-lg p-3 cursor-pointer active:bg-base-200" data-id="{{ $table->id }}" onclick="mToggle(this)">
                         <div class="flex items-center justify-between gap-2">
                             <p class="text-xs font-bold truncate flex-1">{{ $table->name }}</p>
                             <span data-check class="icon-[tabler--circle] size-5 text-base-content/20 shrink-0"></span>
@@ -74,39 +78,38 @@
                         <p class="text-sm font-bold font-mono text-primary mt-1">Rp {{ number_format($table->price, 0, ',', '.') }}</p>
                         <p class="text-[10px] text-base-content/50 mt-1 line-clamp-1">{{ $table->description }}</p>
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-200">
-                            <span class="text-[10px] text-base-content/40">{{ $table->created_at->format('d M Y') }}</span>
+                            <span class="text-[10px] text-base-content/40">{{ formatDate($table->created_at) }}</span>
                             <div class="flex gap-1">
-                                @can('update', App\Models\Product::class)
-                                <a href="/product/update/{{ $table->id }}" class="btn btn-xs btn-soft btn-circle" onclick="event.stopPropagation()"><span class="icon-[tabler--edit] size-3"></span></a>
+                                @can('save', $model)
+                                <a href="{{ moduleRoute('getUpdate', ['id' => $table->id]) }}" class="btn btn-circle" onclick="event.stopPropagation()"><span class="icon-[tabler--edit] size-4"></span></a>
                                 @endcan
-                                @can('delete', App\Models\Product::class)
-                                <button onclick="event.stopPropagation();confirmDelete({{ $table->id }})" class="btn btn-xs btn-soft btn-error btn-circle"><span class="icon-[tabler--trash] size-3"></span></button>
+                                @can('delete', $model)
+                                <a onclick="event.stopPropagation();return confirm('Apakah anda yakin ingin menghapus ?')" href="{{ moduleRoute('getDelete', ['id' => $table->field_primary]) }}" class="btn btn-error btn-circle"><span class="icon-[tabler--trash] size-4"></span></a>
                                 @endcan
                             </div>
                         </div>
                     </div>
                     @empty
-                    <div class="px-3 py-6 text-center text-base-content/50 text-xs">No products found.</div>
+                    <div class="px-3 py-6 text-center text-base-content/50 text-xs">No data found.</div>
                     @endforelse
                 </div>
             </x-slot:mobile>
 
         </x-table>
-
         {{-- Pagination --}}
-        <x-pagination :paginator="$tables" />
+        <x-pagination :paginator="$data" />
 
         {{-- Fixed action bar --}}
-        <x-action cancel="/product/table">
-            @can('update', App\Models\Product::class)
-            <a href="/product/create" class="btn btn-sm btn-primary gap-1">Create</a>
+        <x-action>
+            @can('save', $model)
+            <a href="{{ moduleRoute('getCreate') }}" class="btn btn-sm btn-primary gap-1">Create</a>
             @endcan
-            @can('delete', App\Models\Product::class)
-            <x-button variant="soft btn-error" onclick="deleteSelected()">Delete</x-button>
+            @can('delete', $model)
+            <button class="btn btn-sm btn-error" onclick="deleteSelected()">Delete</button>
             @endcan
         </x-action>
     </div>
 
-    <script src="/js/product-table.js"></script>
+    <script src="/js/table.js"></script>
     <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
 </x-layouts::app>

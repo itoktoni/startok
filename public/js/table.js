@@ -106,11 +106,3 @@ function deleteSelected() {
     ids.forEach(id => { form.innerHTML += `<input type="hidden" name="ids[]" value="${id}">`; });
     document.body.appendChild(form); form.submit();
 }
-
-function confirmDelete(id) {
-    if (!confirm('Are you sure want to delete?')) return;
-    const form = document.createElement('form');
-    form.method = 'POST'; form.action = '/product/delete/' + id;
-    form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">`;
-    document.body.appendChild(form); form.submit();
-}

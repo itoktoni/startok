@@ -3,21 +3,51 @@
 namespace App\Policies;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class ProductPolicy
 {
-    public function viewAny(User $user): bool
+    protected $module;
+    protected $restrict;
+
+    public function __construct()
     {
-        return in_array($user->role, ['developer', 'admin']);
+        $this->module = request()->route()->getAction('name');
+        $this->restrict = config('permision');
+    }
+
+    private function checkPermision($user, $permision)
+    {
+        $role = $user->role ?? 'guest';
+
+        if (isset($this->restrict[$role][$this->module])) {
+
+            if(in_array($permision, $this->restrict[$role][$this->module]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function create(User $user): bool
+    {
+        return $this->checkPermision($user, __FUNCTION__);
+    }
+
+    public function update(User $user): bool
+    {
+        return $this->checkPermision($user, __FUNCTION__);
     }
 
     public function save(User $user): bool
     {
-        return in_array($user->role, ['developer', 'admin']);
+        return $this->checkPermision($user, __FUNCTION__);
     }
 
     public function delete(User $user): bool
     {
-        return $user->role === 'developer';
+        return $this->checkPermision($user, __FUNCTION__);
     }
 }
