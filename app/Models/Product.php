@@ -18,6 +18,14 @@ class Product extends Model
     public $timestamps = true;
     public $incrementing = true;
 
+    public function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'price' => 'required',
+        ];
+    }
+
     protected $fillable = ['name', 'price', 'description'];
 
     public function toArray()

@@ -11,6 +11,8 @@ define('ACTION_TABLE', 'getTable');
 define('ACTION_PRINT', 'getPrint');
 define('ACTION_EXPORT', 'getExport');
 define('ERROR_PERMISION', 'This action is unauthorized.');
+define('TOAST_SUCCESS', 'Data berhasil di proses !.');
+define('TOAST_FAILED', 'Proses Error !');
 
 function formatDate($value, $datetime = false)
 {
