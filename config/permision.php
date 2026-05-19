@@ -4,6 +4,6 @@ $restrict = [];
 
 $restrict['user']['product'][] = 'save';
 $restrict['user']['product'][] = 'delete';
-$restrict['user']['test'] = null;
+$restrict['user']['test'] = false;
 
 return $restrict;

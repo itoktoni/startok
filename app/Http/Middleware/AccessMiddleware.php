@@ -10,6 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AccessMiddleware
 {
+    protected array $abilityMap = [
+        'getTable' => 'view',
+        'getCreate' => 'save',
+        'postCreate' => 'save',
+        'getUpdate' => 'save',
+        'postUpdate' => 'save',
+        'postDelete' => 'delete',
+        'postDeleteBulk' => 'delete',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -25,11 +35,26 @@ class AccessMiddleware
 
         $role = $user->role;
         $module = request()->route()->getAction('name');
+        $method = request()->route()->getActionMethod();
+        $ability = $this->abilityMap[$method] ?? null;
+
         $restrict = config('permision');
 
-        if(isset($restrict[$role]) && !isset($restrict[$role][$module]))
+        if(isset($restrict[$role][$module]))
         {
-            abort(403, ERROR_PERMISION);
+            if(is_bool($restrict[$role][$module]) && $restrict[$role][$module])
+            {
+                abort(403, ERROR_PERMISION);
+            }
+
+            if(is_array($restrict[$role][$module]))
+            {
+                $permision = $restrict[$role][$module];
+                if(!empty($ability) && in_array($ability, $permision))
+                {
+                    abort(403, ERROR_PERMISION);
+                }
+            }
         }
 
         return $next($request);

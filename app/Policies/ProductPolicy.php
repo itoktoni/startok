@@ -22,7 +22,7 @@ class ProductPolicy
 
         if (isset($this->restrict[$role][$this->module])) {
 
-            if(in_array($permision, $this->restrict[$role][$this->module]))
+            if(is_array(($this->restrict[$role][$this->module])) && in_array($permision, $this->restrict[$role][$this->module]))
             {
                 return false;
             }
