@@ -34,7 +34,8 @@ function buildUrl() {
     if (currentSortField) params.set('sort[0]', currentSortField + ':' + currentSortDir);
     params.set('per_page', perPage);
 
-    window.location.href = '/product/table?' + params.toString();
+    const module = document.querySelector('input.module').value;
+    window.location.href = '/' + module + '/table?' + params.toString();
 }
 
 function doSort(col) {
@@ -101,7 +102,8 @@ function deleteSelected() {
     if (!ids.length) return alert('No items selected');
     if (!confirm(`Delete ${ids.length} product(s)?`)) return;
     const form = document.createElement('form');
-    form.method = 'POST'; form.action = '/product/delete-bulk';
+    const module = document.querySelector('input.module').value;
+    form.method = 'POST'; form.action = '/' + module + '/delete-bulk';
     form.innerHTML = document.querySelector('meta[name="csrf-token"]').content ? `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">` : '';
     ids.forEach(id => { form.innerHTML += `<input type="hidden" name="ids[]" value="${id}">`; });
     document.body.appendChild(form); form.submit();

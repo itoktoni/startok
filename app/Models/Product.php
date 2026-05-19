@@ -21,8 +21,9 @@ class Product extends Model
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
-            'price' => 'required',
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric'],
+            'description' => ['sometimes', 'nullable', 'string'],
         ];
     }
 
@@ -32,7 +33,7 @@ class Product extends Model
     {
         $data = parent::toArray();
 
-        if (auth()->check() && !auth()->user()->can('viewPrice', self::class)) {
+        if (auth()->check()) {
             unset($data['price']);
         }
 
