@@ -18,6 +18,16 @@ class BaseModel extends Model
     public $timestamps = true;
     public $incrementing = true;
 
+    /**
+     * Columns available for filtering.
+     */
+    public static $filterColumns = [];
+
+    /**
+     * Columns available for sorting.
+     */
+    public static $sortColumns = [];
+
     public function rules()
     {
         return [
@@ -25,3 +35,4 @@ class BaseModel extends Model
         ];
     }
 }
+

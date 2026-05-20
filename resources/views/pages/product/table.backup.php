@@ -2,7 +2,7 @@
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
-        <x-filter :per-page="25" :fields="$fields">
+        <x-filter :per-page="25" :fields="['name' => 'Name', 'price' => 'Price', 'description' => 'Description']">
             <x-slot:advanced>
                 <div><x-label text="Min Price" /><input type="number" id="afMin" class="input input-sm w-full" value="{{ request('filters.price.$gte') }}" placeholder="0"></div>
                 <div><x-label text="Max Price" /><input type="number" id="afMax" class="input input-sm w-full" value="{{ request('filters.price.$lte') }}" placeholder="∞"></div>

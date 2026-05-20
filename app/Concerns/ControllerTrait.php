@@ -31,8 +31,10 @@ trait ControllerTrait
     public function getTable(GeneralRequest $request)
     {
         $data = $this->getData()->paginate($request->input('per_page', 25))->withQueryString();
+
         return $this->views($this->template(), [
             'data' => $data,
+            'fields' => $this->getFields(),
         ]);
     }
 
@@ -82,6 +84,30 @@ trait ControllerTrait
         ];
 
         return array_merge($default, $data);
+    }
+
+    protected function getFields()
+    {
+        // Build fields for filter from model's $filterColumns
+        $fields = [];
+        if (property_exists($this->model, 'filterColumns') && !empty($this->model::$filterColumns)) {
+            foreach ($this->model::$filterColumns as $key => $value) {
+                // If value is false/null/empty, skip (for advanced filters only)
+                if ($value === false || $value === null || $value === '' || is_int($key)) {
+                    continue;
+                }
+
+                // If key is numeric (array value only), use value as both key and column
+                if (is_numeric($key)) {
+                    $fields[$value] = ucwords(str_replace('_', ' ', $value));
+                } else {
+                    // If key is string, use it as label and value as column name
+                    $fields[$key] = $value;
+                }
+            }
+        }
+
+        return $fields;
     }
 
     protected function views(string $view, array $data = [], int $status = 200)
@@ -190,3 +216,4 @@ trait ControllerTrait
         return view($view, $data);
     }
 }
+

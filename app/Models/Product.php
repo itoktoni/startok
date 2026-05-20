@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\Auth;
-use App\Models\BaseModel;
 
 class Product extends BaseModel
 {
@@ -12,6 +11,29 @@ class Product extends BaseModel
 
     public $timestamps = true;
     public $incrementing = true;
+
+    /**
+     * Columns available for filtering.
+     */
+    public static $filterColumns = [
+        'id' => 'Code',
+        'name' => 'Nama',
+        'price' => 'Harga',
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
+     * Columns available for sorting.
+     */
+    public static $sortColumns = [
+        'id',
+        'name',
+        'price',
+        'description',
+        'created_at',
+        'updated_at',
+    ];
 
     public function rules()
     {

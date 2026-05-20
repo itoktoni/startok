@@ -4,8 +4,6 @@
         {{-- Filters --}}
         <x-filter :per-page="25" :fields="$fields">
             <x-slot:advanced>
-                <div><x-label text="Min Price" /><input type="number" id="afMin" class="input input-sm w-full" value="{{ request('filters.price.$gte') }}" placeholder="0"></div>
-                <div><x-label text="Max Price" /><input type="number" id="afMax" class="input input-sm w-full" value="{{ request('filters.price.$lte') }}" placeholder="∞"></div>
                 <div><x-label text="From Date" /><input type="date" id="afFrom" class="input input-sm w-full" value="{{ request('filters.created_at.$gte') }}"></div>
                 <div><x-label text="To Date" /><input type="date" id="afTo" class="input input-sm w-full" value="{{ request('filters.created_at.$lte') }}"></div>
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
@@ -26,9 +24,7 @@
                 <th>Actions</th>
                 <th class="cursor-pointer select-none" onclick="doSort('name')">Name
                     <span class="icon-[tabler--{{ $sortField==='name' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
-                <th class="cursor-pointer select-none" onclick="doSort('price')">Price
-                    <span class="icon-[tabler--{{ $sortField==='price' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
-                <th>Description</th>
+{{tableHeader}}
                 <th class="cursor-pointer select-none" onclick="doSort('created_at')">Created
                     <span class="icon-[tabler--{{ $sortField==='created_at' ? ($sortDir==='asc'?'sort-ascending':'sort-descending') : 'arrows-sort' }}] size-3 align-middle text-base-content/40"></span></th>
             </x-slot:head>
@@ -52,8 +48,7 @@
                         </div>
                     </td>
                     <td>{{ $table->name }}</td>
-                    <td>{{ formatRupiah($table->price) }}</td>
-                    <td>{{ Str::limit($table->description, 40) }}</td>
+{{tableBody}}
                     <td class="w-1">{{ formatDate($table->created_at) }}</td>
 
                 </tr>
@@ -75,8 +70,7 @@
                             <p class="font-bold text-lg truncate flex-1">{{ $table->name }}</p>
                             <span data-check class="icon-[tabler--circle] size-5 text-base-content/20 shrink-0"></span>
                         </div>
-                        <p class="text-sm font-bold font-mono text-primary mt-1">Rp {{ number_format($table->price, 0, ',', '.') }}</p>
-                        <p class="text-xs text-base-content/50 mt-1 line-clamp-1">{{ $table->description }}</p>
+                        <p class="text-sm font-bold font-mono text-primary mt-1">{{ $table->name }}</p>
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-200">
                             <span class="text-xs text-base-content/40">{{ formatDate($table->created_at) }}</span>
                             <div class="flex gap-1">

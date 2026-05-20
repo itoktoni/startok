@@ -12,11 +12,8 @@ function buildUrl() {
     const q = document.getElementById('searchInput').value.trim();
     const field = document.getElementById('filterField').value;
     const perPage = document.getElementById('perPage').value;
-    const minP = document.getElementById('afMin')?.value;
-    const maxP = document.getElementById('afMax')?.value;
-    const from = document.getElementById('afFrom')?.value;
-    const to = document.getElementById('afTo')?.value;
 
+    // Build URL from main search
     if (q) {
         if (field === 'price') {
             params.set('filters[price][$eq]', q);
@@ -27,10 +24,15 @@ function buildUrl() {
         params.set('_q', q);
     }
 
-    if (minP) params.set('filters[price][$gte]', minP);
-    if (maxP) params.set('filters[price][$lte]', maxP);
-    if (from) params.set('filters[created_at][$gte]', from);
-    if (to) params.set('filters[created_at][$lte]', to);
+    // Build URL from advanced filters (exact match = operator)
+    document.querySelectorAll('[data-field]').forEach(input => {
+        const fieldName = input.dataset.field;
+        const value = input.value.trim();
+        if (value) {
+            params.set('filters[' + fieldName + ']', value);
+        }
+    });
+
     if (currentSortField) params.set('sort[0]', currentSortField + ':' + currentSortDir);
     params.set('per_page', perPage);
 
@@ -54,10 +56,7 @@ function applyAdvanced() {
 }
 
 function resetAdvanced() {
-    document.getElementById('afMin').value = '';
-    document.getElementById('afMax').value = '';
-    document.getElementById('afFrom').value = '';
-    document.getElementById('afTo').value = '';
+    document.querySelectorAll('[data-field]').forEach(input => input.value = '');
     applyAdvanced();
 }
 
