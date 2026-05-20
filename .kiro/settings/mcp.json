@@ -4,9 +4,9 @@
             "command": "php",
             "args": [
                 "artisan",
-                "boost:mcp"
+                "mcp:start"
             ],
-            "cwd": "D:/php/livewire"
+            "cwd": "D:/laravel/startok"
         },
         "context7": {
             "command": "npx",
