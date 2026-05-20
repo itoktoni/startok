@@ -1,0 +1,23 @@
+<?php
+
+namespace {{modelNamespace}};
+
+use App\Models\BaseModel;
+
+{{softDeletesNamespace}}
+
+class {{modelName}} extends BaseModel
+{
+    protected $perPage = 20;
+    protected $table = '{{tableName}}';
+    protected $primaryKey = '{{tableName}}_id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [{{fillable}}];
+
+{{relations}}
+}

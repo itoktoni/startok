@@ -1,5 +1,6 @@
 <?php
 
+use Ibex\CrudGenerator\CrudServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -9,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         \App\Providers\ModelAliasServiceProvider::class,
+        CrudServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

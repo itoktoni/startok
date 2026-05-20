@@ -43,7 +43,8 @@
             "App\\": "app/",
             "Function\\": "function/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Ibex\\CrudGenerator\\": "plugins/ibex/crud-generator/src/"
         },
         "files": [
             "function/Global.php"

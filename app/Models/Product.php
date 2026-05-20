@@ -2,16 +2,11 @@
 
 namespace App\Models;
 
-use Abbasudo\Purity\Traits\Filterable;
-use Abbasudo\Purity\Traits\Sortable;
-use App\Concerns\DefaultEntity;
-use App\Concerns\OptionTrait;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use App\Models\BaseModel;
 
-class Product extends Model
+class Product extends BaseModel
 {
-    use Filterable, Sortable, DefaultEntity, OptionTrait;
-
     protected $table   = 'products';
     protected $primaryKey = 'id';
 
@@ -33,7 +28,7 @@ class Product extends Model
     {
         $data = parent::toArray();
 
-        if (auth()->check()) {
+        if (Auth::check()) {
             unset($data['price']);
         }
 
