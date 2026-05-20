@@ -7,6 +7,13 @@
     'options' => [],
     'placeholder' => '...'
 ])
+
+@php
+if(str_contains($name, '_at')) {
+    $type = 'date';
+}
+@endphp
+
 <div>
     <x-label text="{{ $label }}" />
     @if(count($options))
