@@ -40,7 +40,7 @@ trait ControllerTrait
 
     public function getCreate(GeneralRequest $request)
     {
-        return $this->views($this->template(), ['model' => null]);
+        return $this->views($this->template());
     }
 
     public function postCreate(GeneralRequest $request)

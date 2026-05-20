@@ -2,6 +2,6 @@
 
 $restrict = [];
 
-$restrict['user']['product'][] = 'create';
+$restrict['user']['product'][] = 'show';
 
 return $restrict;

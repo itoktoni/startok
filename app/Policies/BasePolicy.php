@@ -40,6 +40,11 @@ class BasePolicy
         return false;
     }
 
+    public function save(User $user) : Response
+    {
+        return $this->accessProtected($user, __FUNCTION__) ? Response::deny() : Response::allow();
+    }
+
     public function create(User $user) : Response
     {
         return $this->accessProtected($user, __FUNCTION__) ? Response::deny() : Response::allow();

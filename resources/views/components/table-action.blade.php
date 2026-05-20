@@ -1,7 +1,7 @@
 @props(['model' => null, 'id' => null])
 <td class="w-1">
     <div class="flex gap-1.5">
-        @can('save', $model ?? null)
+        @can('update', $model ?? null)
         <a href="{{ moduleRoute('getUpdate', ['id' => $id]) }}" class="btn btn-primary btn-circle">
             <span class="icon-[tabler--edit] size-4"></span>
         </a>
