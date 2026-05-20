@@ -4,10 +4,27 @@
         {{-- Filters --}}
         <x-filter :per-page="25" :fields="$fields">
             <x-slot:advanced>
-                <div><x-label text="Min Price" /><input type="number" id="afMin" class="input input-sm w-full" value="{{ request('filters.price.$gte') }}" placeholder="0"></div>
-                <div><x-label text="Max Price" /><input type="number" id="afMax" class="input input-sm w-full" value="{{ request('filters.price.$lte') }}" placeholder="∞"></div>
-                <div><x-label text="From Date" /><input type="date" id="afFrom" class="input input-sm w-full" value="{{ request('filters.created_at.$gte') }}"></div>
-                <div><x-label text="To Date" /><input type="date" id="afTo" class="input input-sm w-full" value="{{ request('filters.created_at.$lte') }}"></div>
+                @foreach ($fields as $key => $advance)
+                @php
+                $filterType = 'text';
+                if(str_contains($key, '_at')) {
+                    $filterType = 'date';
+                }
+                @endphp
+                <x-filter-item :label="$advance" :name="$key" :type="$filterType" />
+                @endforeach
+                <x-filter-item label="Status" name="status" :options="[1 => 'Active', 0 => 'Inactive']" />
+                <x-filter-item label="Min Price" name="price" type="number" :operators="['$gte' => '>=']" />
+                <x-filter-item label="Max Price" name="price" type="number" :operators="['$lte' => '<=']" />
+
+                <div class="card py-2 px-3">
+                    <div class="card-header">
+                        Test
+                    </div>
+                    <x-filter-item label="Date From" name="date_from" type="date" :operators="['$gte' => '>=']" />
+                    <x-filter-item label="Date To" name="date_to" type="date" :operators="['$lte' => '<=']" />
+                </div>
+
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
                 <x-button variant="soft" class="btn-block" onclick="resetAdvanced()">Reset</x-button>
             </x-slot:advanced>

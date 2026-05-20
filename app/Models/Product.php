@@ -16,10 +16,10 @@ class Product extends BaseModel
      * Columns available for filtering.
      */
     public static $filterColumns = [
-        'id' => 'Code',
         'name' => 'Nama',
+        'id' => 'Code',
         'price' => 'Harga',
-        'created_at',
+        'created_at' => 'Tanggal',
         'updated_at',
     ];
 
@@ -55,5 +55,10 @@ class Product extends BaseModel
         }
 
         return $data;
+    }
+
+    public static function field_name()
+    {
+        return 'name';
     }
 }

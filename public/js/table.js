@@ -24,12 +24,22 @@ function buildUrl() {
         params.set('_q', q);
     }
 
-    // Build URL from advanced filters (exact match = operator)
+    // Build URL from advanced filters
     document.querySelectorAll('[data-field]').forEach(input => {
         const fieldName = input.dataset.field;
-        const value = input.value.trim();
+        const operator = document.querySelector('[data-op="' + fieldName + '"]')?.value || '$eq';
+        const value = input.tagName === 'SELECT' ? input.value : input.value.trim();
         if (value) {
-            params.set('filters[' + fieldName + ']', value);
+            params.set('filters[' + fieldName + '][' + operator + ']', value);
+            params.set('filter_op[' + fieldName + ']', operator);
+        }
+    });
+
+    // Also save filter operators even if value is empty
+    document.querySelectorAll('[data-op]').forEach(select => {
+        const fieldName = select.dataset.op;
+        if (!params.has('filters[' + fieldName + ']')) {
+            params.set('filter_op[' + fieldName + ']', select.value);
         }
     });
 
@@ -50,6 +60,10 @@ function doSort(col) {
     buildUrl();
 }
 
+function updateFilterOp(fieldName) {
+    // Operator is stored in select[data-op], this function can be used for future enhancements
+}
+
 function applyAdvanced() {
     document.getElementById('advFilter').classList.add('hidden');
     buildUrl();
@@ -57,6 +71,7 @@ function applyAdvanced() {
 
 function resetAdvanced() {
     document.querySelectorAll('[data-field]').forEach(input => input.value = '');
+    document.querySelectorAll('[data-op]').forEach(select => select.value = '$eq');
     applyAdvanced();
 }
 
