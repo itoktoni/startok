@@ -39,7 +39,7 @@
                                         <td class="col-md-2 text-center column-action">
                                             <x-crud :model="$table" />
                                         </td>
-                                        
+
 										<td >{{ $table->name }}</td>
 										<td >{{ $table->email }}</td>
 										<td >{{ $table->role }}</td>

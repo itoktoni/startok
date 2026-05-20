@@ -250,7 +250,7 @@ class CrudGenerator extends GeneratorCommand
             $viewTemplate = str_replace(
                 array_keys($replace),
                 array_values($replace),
-                $this->getStub("views/bootstrap/$view")
+                $this->getStub("views/$view")
             );
 
             $this->write($this->_getViewPath($view), $viewTemplate);

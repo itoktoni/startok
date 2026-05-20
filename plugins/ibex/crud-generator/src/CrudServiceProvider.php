@@ -10,11 +10,6 @@ use Illuminate\Support\ServiceProvider;
  */
 class CrudServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap services.
-     *
-     * @return void
-     */
     public function boot()
     {
         if ($this->app->runningInConsole()) {
