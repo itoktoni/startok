@@ -8,7 +8,10 @@ class GeneralRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $model = request()->route()->getController()->model;
+        $action = str_replace(['get', 'post'], '', strtolower(request()->route()->getActionMethod()));
+
+        return $this->user()->can($action, $model);
     }
 
     public function rules(): array

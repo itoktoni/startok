@@ -14,12 +14,12 @@ trait ControllerTrait
 
     public $model;
 
-    public function index()
+    public function index(GeneralRequest $request)
     {
         return redirect()->action([self::class, 'getTable']);
     }
 
-    public function getShow($id)
+    public function getShow(GeneralRequest $request, $id)
     {
         try {
             return $this->payload(TOAST_SUCCESS, $this->model->findOrFail($id));
@@ -38,7 +38,7 @@ trait ControllerTrait
         ]);
     }
 
-    public function getCreate()
+    public function getCreate(GeneralRequest $request)
     {
         return $this->views($this->template(), ['model' => null]);
     }
@@ -49,11 +49,11 @@ trait ControllerTrait
         return $this->response($response);
     }
 
-    public function getUpdate($id)
+    public function getUpdate(GeneralRequest $request, $id)
     {
-        $model = $this->getShow($id);
+        $data = $this->model->findOrFail($id);
         return $this->views($this->template(), [
-            'model' => $model['status'] ? $model['data'] : null,
+            'model' => $data,
         ]);
     }
 
@@ -63,13 +63,13 @@ trait ControllerTrait
         return $this->response($response);
     }
 
-    public function getDelete($id)
+    public function getDelete(GeneralRequest $request, $id)
     {
         $response = (new DeleteAction)->remove($id, $this->model);
         return $this->response($response);
     }
 
-    public function postDeleteBulk(GeneralRequest $request)
+    public function postDelete(GeneralRequest $request)
     {
         $count = DeleteAction::run($request, $this->model);
         return $this->response($count);
