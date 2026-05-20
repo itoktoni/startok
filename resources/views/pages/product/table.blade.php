@@ -13,16 +13,28 @@
                 @endphp
                 <x-filter-item :label="$advance" :name="$key" :type="$filterType" />
                 @endforeach
-                <x-filter-item label="Status" name="status" :options="[1 => 'Active', 0 => 'Inactive']" />
-                <x-filter-item label="Min Price" name="price" type="number" :operators="['$gte' => '>=']" />
-                <x-filter-item label="Max Price" name="price" type="number" :operators="['$lte' => '<=']" />
 
-                <div class="card py-2 px-3">
-                    <div class="card-header">
-                        Test
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-sm">Status Filter</h3>
+                        <x-filter-item label="Status" name="status" :options="[1 => 'Active', 0 => 'Inactive']" />
                     </div>
-                    <x-filter-item label="Date From" name="date_from" type="date" :operators="['$gte' => '>=']" />
-                    <x-filter-item label="Date To" name="date_to" type="date" :operators="['$lte' => '<=']" />
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-sm">Price Filter</h3>
+                        <x-filter-item label="Min Price" name="price" type="number" :operators="['$gte' => '>=']" />
+                        <x-filter-item label="Max Price" name="price" type="number" :operators="['$lte' => '<=']" />
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-sm">Date Filter</h3>
+                        <x-filter-item label="Date From" name="date_from" type="date" :operators="['$gte' => '>=']" />
+                        <x-filter-item label="Date To" name="date_to" type="date" :operators="['$lte' => '<=']" />
+                    </div>
                 </div>
 
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
