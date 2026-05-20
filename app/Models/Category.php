@@ -1,14 +1,14 @@
 <?php
 
-namespace {{modelNamespace}};
+namespace App\Models;
 
 use App\Models\BaseModel;
 
-class {{modelName}} extends BaseModel
+class Category extends BaseModel
 {
-    protected $table = '{{tableName}}';
+    protected $table = 'category';
     protected $keyType = 'int';
-    protected $primaryKey = '{{tableName}}_id';
+    protected $primaryKey = 'category_id';
 
     public $timestamps = false;
     public $incrementing = true;
@@ -17,14 +17,18 @@ class {{modelName}} extends BaseModel
      * Columns available for filtering.
      */
     public static $filterColumns = [
-        {{filterColumns}}
+        'category_id' => 'Category Id',
+        'category_nama' => 'Category Nama',
+        'category_keterangan' => 'Category Keterangan'
     ];
 
     /**
      * Columns available for sorting.
      */
     public static $sortColumns = [
-        {{sortColumns}}
+        'category_id',
+        'category_nama',
+        'category_keterangan'
     ];
 
     /**
@@ -32,6 +36,6 @@ class {{modelName}} extends BaseModel
      *
      * @var array<int, string>
      */
-    protected $fillable = [{{fillable}}];
+    protected $fillable = ['category_id', 'category_nama', 'category_keterangan'];
 
 }

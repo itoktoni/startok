@@ -268,25 +268,21 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
         return str_replace(
             array_keys($replace),
             array_values($replace),
-            $this->getStub("views/{$this->options['stack']}/$type")
+            $this->getStub("views/$type")
         );
     }
 
-    protected function getHead($title): string
+    protected function getHead($column, $title): string
     {
         $replace = array_merge($this->buildReplacements(), [
+            '{{column}}' => $column,
             '{{title}}' => $title,
         ]);
-
-        $attr = match ($this->options['stack']) {
-            'tailwind', 'livewire' => 'scope="col" class="py-3 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"',
-            default => ''
-        };
 
         return str_replace(
             array_keys($replace),
             array_values($replace),
-            $this->_getSpace(9).'<th '.$attr.'>{{title}}</th>'."\n"
+            $this->_getSpace(9).'<x-table-sort field="{{column}}" label="{{title}}" :sortField="$sortField" :sortDir="$sortDir" />'."\n"
         );
     }
 
@@ -296,16 +292,16 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
             '{{column}}' => $column,
         ]);
 
-        $attr = match ($this->options['stack']) {
-            'tailwind', 'livewire' => 'class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"',
-            default => ''
-        };
-
         return str_replace(
             array_keys($replace),
             array_values($replace),
-            $this->_getSpace(10).'<td '.$attr.'>{{ $table->{{column}} }}</td>'."\n"
+            $this->_getSpace(10).'<td>{{ $table->{{column}} }}</td>'."\n"
         );
+    }
+
+    protected function getMobile($column, $label): string
+    {
+        return $this->_getSpace(11).'<x-table-mobile-text :text="$table->'.$column.'" size="sm" color="primary" />'."\n";
     }
 
     /**
@@ -433,12 +429,37 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
             return implode(', ', $filterColumns);
         };
 
+        $filterColumnsArray = function () {
+            $columns = [];
+            $filterColumns = $this->getFilteredColumns();
+
+            foreach ($filterColumns as $column) {
+                $label = Str::title(str_replace('_', ' ', $column));
+                $columns[] = "'$column' => '$label'";
+            }
+
+            return implode(",\n        ", $columns);
+        };
+
+        $sortColumnsArray = function () {
+            $columns = [];
+            $filterColumns = $this->getFilteredColumns();
+
+            foreach ($filterColumns as $column) {
+                $columns[] = "'$column'";
+            }
+
+            return implode(",\n        ", $columns);
+        };
+
         $properties .= "\n *";
 
         [$relations, $properties] = (new ModelGenerator($this->table, $properties, $this->modelNamespace))->getEloquentRelations();
 
         return [
             '{{fillable}}' => $fillable(),
+            '{{filterColumns}}' => $filterColumnsArray(),
+            '{{sortColumns}}' => $sortColumnsArray(),
             '{{rules}}' => $rules(),
             '{{relations}}' => $relations,
             '{{properties}}' => $properties,

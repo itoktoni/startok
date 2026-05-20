@@ -47,6 +47,7 @@ class CrudGenerator extends GeneratorCommand
             ->buildMigration()
             ->buildController()
             ->buildModel()
+            ->buildPolicy()
             ->buildViews()
             ->writeRoute();
 
@@ -152,6 +153,42 @@ class CrudGenerator extends GeneratorCommand
         return $this;
     }
 
+    protected function _getPolicyPath($name): string
+    {
+        return $this->makeDirectory(app_path("Policies/{$name}Policy.php"));
+    }
+
+    /**
+     * Build the Policy Class.
+     *
+     * @return $this
+     *
+     * @throws FileNotFoundException
+     */
+    protected function buildPolicy(): static
+    {
+        $policyPath = $this->_getPolicyPath($this->name);
+
+        if ($this->files->exists($policyPath)) {
+            $this->info("Policy for `{$this->name}` already exists, skipping...");
+            return $this;
+        }
+
+        $this->info('Creating Policy ...');
+
+        $replace = $this->buildReplacements();
+
+        $policyTemplate = str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $this->getStub('Policy')
+        );
+
+        $this->write($policyPath, $policyTemplate);
+
+        return $this;
+    }
+
     /**
      * Build the Controller Class and save in app/Http/Controllers.
      *
@@ -220,23 +257,17 @@ class CrudGenerator extends GeneratorCommand
     {
         $this->info('Creating Views ...');
 
-        $tableHead = "\n";
-        $tableBody = "\n";
         $viewRows = "\n";
         $form = "\n";
 
         foreach ($this->getFilteredColumns() as $column) {
             $title = Str::title(str_replace('_', ' ', $column));
 
-            $tableHead .= $this->getHead($title);
-            $tableBody .= $this->getBody($column);
             $viewRows .= $this->getField($title, $column, 'view-field');
             $form .= $this->getField($title, $column);
         }
 
         $replace = array_merge($this->buildReplacements(), [
-            '{{tableHeader}}' => $tableHead,
-            '{{tableBody}}' => $tableBody,
             '{{viewRows}}' => $viewRows,
             '{{form}}' => $form,
         ]);

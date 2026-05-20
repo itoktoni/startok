@@ -7,7 +7,7 @@ Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified', 'access'])->group(function () {
     Route::auto('/product', 'ProductController', ['name' => 'product']);
-    Route::auto('/test', 'ProductController', ['name' => 'test']);
+    Route::auto('/category', 'CategoryController', ['name' => 'category']);
 
     Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
 });

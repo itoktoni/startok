@@ -21,9 +21,13 @@
                 <span class="text-sm">Dashboard</span>
             </a>
             <div class="divider my-1 text-xs">Menu</div>
-            <a href="/product/table" class="btn btn-sm btn-soft w-full justify-start gap-2">
+            <a href="{{ route('product.getTable') }}" class="btn btn-sm btn-soft w-full justify-start gap-2">
                 <span class="icon-[tabler--package] size-4"></span>
                 <span class="text-sm">Product</span>
+            </a>
+             <a href="{{ route('category.getTable') }}" class="btn btn-sm btn-soft w-full justify-start gap-2">
+                <span class="icon-[tabler--package] size-4"></span>
+                <span class="text-sm">Category</span>
             </a>
             {{ $sidebar ?? '' }}
             <div class="divider my-1 text-xs">System</div>

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 class Product extends BaseModel
 {
     protected $table   = 'products';
+    protected $keyType = 'int';
     protected $primaryKey = 'id';
 
     public $timestamps = true;
@@ -16,23 +17,20 @@ class Product extends BaseModel
      * Columns available for filtering.
      */
     public static $filterColumns = [
-        'name' => 'Nama',
-        'id' => 'Code',
-        'price' => 'Harga',
-        'created_at' => 'Tanggal',
-        'updated_at',
+        'name' => 'Name',
+        'id' => 'Id',
+        'price' => 'Price',
+        'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
     ];
 
     /**
      * Columns available for sorting.
      */
     public static $sortColumns = [
-        'id',
         'name',
         'price',
         'description',
-        'created_at',
-        'updated_at',
     ];
 
     public function rules()
