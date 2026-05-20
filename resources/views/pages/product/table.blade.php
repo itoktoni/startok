@@ -68,12 +68,12 @@
             </x-slot:body>
 
             <x-slot:mobile>
-                <x-table-mobile-select :model="$model" />
+                <x-table-mobile-select :model="$model" :total="$data" />
                 <div class="p-2 space-y-2" id="mBody">
                     @foreach($data as $table)
                     <x-table-mobile-item :id="$table->id">
                         <x-table-mobile-header title="{{ $table->name }}" />
-                        <x-table-mobile-text :text="formatRupiah($table->price)" size="sm" color="primary" />
+                        <x-table-mobile-text :text="formatAngka($table->price, 'Rp. ')" size="sm" color="primary" />
                         <x-table-mobile-text :text="$table->description" size="xs" color="muted" />
                         <x-table-mobile-footer :label="formatDate($table->created_at)">
                             <x-table-action :model="$model" :id="$table->field_primary" />

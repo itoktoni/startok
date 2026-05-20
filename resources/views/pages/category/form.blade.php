@@ -4,10 +4,10 @@
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">
             @bind($model ?? null)
-
-                <x-form-input col="6" name="category_id" />
-                <x-form-input col="6" name="category_nama" />
-                <x-form-input col="6" name="category_keterangan" />
+                 
+                <x-input col="6" name="category_id" />
+                <x-input col="6" name="category_nama" />
+                <x-input col="6" name="category_keterangan" />
 
             @endbind
         </x-card>

@@ -39,9 +39,9 @@ function formatDate($value, $datetime = false)
     return $value ?: null;
 }
 
-function formatRupiah(int $value)
+function formatAngka(int $value, $simbol = null)
 {
-    return 'Rp. '.number_format($value, 0, ',', '.');
+    return $simbol.number_format($value, 0, ',', '.');
 }
 
 function unic($length)

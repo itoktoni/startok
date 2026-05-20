@@ -8,29 +8,6 @@
                 <x-filter-item :label="$advance" :name="$key"/>
                 @endforeach
 
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Status Filter</h3>
-                        <x-filter-item label="Status" name="status" :options="[1 => 'Active', 0 => 'Inactive']" />
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Price Filter</h3>
-                        <x-filter-item label="Min Price" name="price" type="number" :operators="['$gte' => '>=']" />
-                        <x-filter-item label="Max Price" name="price" type="number" :operators="['$lte' => '<=']" />
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Date Filter</h3>
-                        <x-filter-item label="Date From" name="date_from" type="date" :operators="['$gte' => '>=']" />
-                        <x-filter-item label="Date To" name="date_to" type="date" :operators="['$lte' => '<=']" />
-                    </div>
-                </div>
-
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
                 <x-button variant="soft" class="btn-block" onclick="resetAdvanced()">Reset</x-button>
             </x-slot:advanced>
@@ -65,11 +42,11 @@
             </x-slot:body>
 
             <x-slot:mobile>
-                <x-table-mobile-select :model="$model" />
+                <x-table-mobile-select :model="$model" :total="$data"/>
                 <div class="p-2 space-y-2" id="mBody">
                     @foreach($data as $table)
-                    <x-table-mobile-item :id="$table->id">
-                        <x-table-mobile-header title="{{ $table->field_display }}" />
+                    <x-table-mobile-item :id="$table->field_primary">
+                        <x-table-mobile-header title="{{ $table->field_name }}" />
                         @foreach ($model::$sortColumns as $column)
                         <x-table-mobile-text :text="$table->$column" size="sm" color="primary" />
                         @endforeach

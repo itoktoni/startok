@@ -32,6 +32,23 @@ class {{modelName}} extends BaseModel
      *
      * @var array<int, string>
      */
-    protected $fillable = [{{fillable}}];
+    protected $fillable = [
+        {{fillable}}
+    ];
+
+    /**
+     * Validation rules.
+     */
+    public function rules(): array
+    {
+        return [
+            {{rules}}
+        ];
+    }
+
+    public static function field_name()
+    {
+        return '{{tableName}}_nama';
+    }
 
 }

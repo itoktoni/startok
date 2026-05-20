@@ -1,7 +1,7 @@
 @props(['perPage' => 25, 'perPageOptions' => [5,10,25,50,100], 'fields' => [], 'searchPlaceholder' => 'Search...'])
 <div class="card bg-base-100 shadow-sm mb-3">
     <div class="card-body p-3 space-y-2 default-filter">
-        <div class="grid grid-cols-12 gap-2">
+        <div class="grid grid-cols-12 gap-y-3 gap-x-4">
             <select id="perPage" class="col-span-4 md:col-span-2 select select-sm" onchange="buildUrl()">
                 @foreach($perPageOptions as $pp)
                 <option value="{{ $pp }}" {{ request('per_page', $perPage) == $pp ? 'selected' : '' }}>{{ $pp }} / page</option>

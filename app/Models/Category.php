@@ -36,6 +36,27 @@ class Category extends BaseModel
      *
      * @var array<int, string>
      */
-    protected $fillable = ['category_id', 'category_nama', 'category_keterangan'];
+    protected $fillable = [
+        'category_id',
+        'category_nama',
+        'category_keterangan'
+    ];
+
+    /**
+     * Validation rules.
+     */
+    public function rules(): array
+    {
+        return [
+
+			'category_nama' => 'string',
+			'category_keterangan' => 'string',
+        ];
+    }
+
+    public static function field_name()
+    {
+        return 'category_nama';
+    }
 
 }

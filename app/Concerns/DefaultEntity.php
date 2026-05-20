@@ -11,12 +11,12 @@ trait DefaultEntity
 
     public static function getTableName()
     {
-        return self::getModel()->getTable();
+        return static::getModel()->getTable();
     }
 
     public static function field_key()
     {
-        return self::getModel()->getKeyName();
+        return static::getModel()->getKeyName();
     }
 
     public function getFieldKeyAttribute()
@@ -26,7 +26,7 @@ trait DefaultEntity
 
     public static function field_primary()
     {
-        return self::field_key();
+        return static::field_key();
     }
 
     public function getFieldPrimaryAttribute()
@@ -36,11 +36,11 @@ trait DefaultEntity
 
     public static function field_name()
     {
-        return self::field_key();
+        return static::field_key();
     }
 
     public function getFieldNameAttribute()
     {
-        return $this->{self::field_name()};
+        return $this->{static::field_name()};
     }
 }
