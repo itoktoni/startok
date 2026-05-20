@@ -61,7 +61,8 @@
         </x-table>
 
         <x-pagination :paginator="$data" />
-        <x-action :model="$model"/>
+        <x-action :model="$model" :action="['create', 'delete]"/>
+
     </div>
 
     <input type="hidden" class="module" value="{{ module() }}">

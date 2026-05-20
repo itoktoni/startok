@@ -1,4 +1,4 @@
-@props(['perPage' => 25, 'perPageOptions' => [5,10,25,50,100], 'fields' => [], 'searchPlaceholder' => 'Search...'])
+@props(['perPage' => 25, 'perPageOptions' => [5,10,25,50,100], 'fields' => [], 'searchPlaceholder' => 'Pencarian...'])
 <div class="card bg-base-100 shadow-sm mb-3">
     <div class="card-body p-3 space-y-2 default-filter">
         <div class="grid grid-cols-12 gap-y-3 gap-x-4">
@@ -23,7 +23,6 @@
             @endif
 
             <div class="join col-span-12 md:col-span-{{ isset($advanced) || count($fields) ? '6' : '10' }}">
-                <span class="join-item btn btn-sm no-animation text-xs">Pencarian</span>
                 <input type="text" id="searchInput" class="input input-sm join-item flex-1"
                     value="{{ request('_q') }}"
                     placeholder="{{ $searchPlaceholder }}" onkeydown="if(event.key==='Enter')buildUrl()">

@@ -12,8 +12,6 @@
             @endbind
         </x-card>
 
-        <x-action>
-            <x-button type="submit">Save</x-button>
-        </x-action>
+        <x-action :model="$model" :action="['save']"/>
     </x-form>
 </x-layouts::app>

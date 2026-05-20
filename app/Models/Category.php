@@ -48,7 +48,6 @@ class Category extends BaseModel
     public function rules(): array
     {
         return [
-
 			'category_nama' => 'string',
 			'category_keterangan' => 'string',
         ];
