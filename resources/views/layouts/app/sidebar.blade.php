@@ -31,11 +31,25 @@
         <x-bottombar-item route="{{ route('profile.edit') }}" icon="user" label="Profile" />
         <x-bottombar-item route="{{ route('profile.edit') }}" icon="settings" label="Setting" />
     </x-bottombar>
+</script>
 
     <script>
         function toggleSB(){document.getElementById('sb').classList.toggle('-translate-x-full');document.getElementById('ov').classList.toggle('hidden')}
         function closeSB(){document.getElementById('sb').classList.add('-translate-x-full');document.getElementById('ov').classList.add('hidden')}
         document.querySelector('main').addEventListener('click',()=>{if(innerWidth<1024)closeSB()});
+
     </script>
+
+    @if ($errors->any())
+        <link href="/vendor/flasher/flasher.min.css" rel="stylesheet">
+        <script src="/vendor/flasher/flasher.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                @foreach ($errors->all() as $error)
+                    flasher.error("{{ $error }}");
+                @endforeach
+            });
+        </script>
+    @endif
 </body>
 </html>

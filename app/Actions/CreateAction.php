@@ -20,7 +20,6 @@ class CreateAction
     {
         $this->model = $model;
         $data = $request->validate($this->rules());
-        dd($data);
 
         try {
             return $this->payload(TOAST_SUCCESS, $model->create($data));

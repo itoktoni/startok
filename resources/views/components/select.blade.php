@@ -10,13 +10,12 @@
 @endphp
 <div class="col-span-{{ $col }} md:col-span-{{ $col }}">
     <label class="label-text text-xs">{{ $label }}</label>
-    <select name="{{ $name }}" {{ $multiple ? 'multiple' : '' }} id="select-{{ $name }}" @if(!$isTomSelect) class="select select-sm w-full{{ $hasError ? ' is-invalid' : '' }}{{ $extraClass ? ' ' . $extraClass : '' }}" @else class="{{ $extraClass }}" @endif {{ $attributes->except('class') }}>
+    <select name="{{ $name }}" {{ $multiple ? 'multiple' : '' }} id="select-{{ $name }}" @if(!$isTomSelect) class="select select-sm w-full{{ $hasError ? ' is-invalid' : '' }}{{ $extraClass ? ' ' . $extraClass : '' }}" @else class="{{ $extraClass }}{{ $hasError ? ' is-invalid' : '' }}" @endif {{ $attributes->except('class') }}>
         @if(!$multiple && $placeholder !== false)
         <option value="">{{ $placeholder ?: '-- '.$label.' --' }}</option>
         @endif
         @foreach($options as $key => $text)
-        @php $optVal = is_numeric($key) ? $text : $key; @endphp
-        <option value="{{ $optVal }}" @if($multiple) {{ is_array($selected) && in_array($optVal, $selected) ? 'selected' : '' }} @else {{ (string)$selected === (string)$optVal ? 'selected' : '' }} @endif>{{ $text }}</option>
+        <option value="{{ $key }}" @if($multiple) {{ is_array($selected) && in_array($key, $selected) ? 'selected' : '' }} @else {{ (string)$selected === (string)$key ? 'selected' : '' }} @endif>{{ $text }}</option>
         @endforeach
     </select>
     @if($helper && !$hasError)<span class="helper-text ps-3">{{ $helper }}</span>@endif
@@ -29,10 +28,13 @@
 @endonce
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    new TomSelect('#select-{{ $name }}', {
+    var ts = new TomSelect('#select-{{ $name }}', {
         {!! $multiple ? 'create: true,' : 'create: false,' !!}
         plugins: {!! $multiple ? json_encode(['remove_button']) : json_encode([]) !!}
     });
+    @if($hasError)
+    ts.wrapper.classList.add('has-error');
+    @endif
 });
 </script>
 @endif

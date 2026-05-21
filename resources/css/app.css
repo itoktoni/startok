@@ -44,6 +44,10 @@
   display: block !important;
   width: 100% !important;
 }
+.ts-wrapper.has-error .ts-control,
+.ts-wrapper .ts-control.has-error {
+  border-color: var(--color-error) !important;
+}
 .ts-wrapper .ts-control {
   min-height: 32px !important;
   height: 32px !important;

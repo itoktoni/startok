@@ -5,11 +5,11 @@
 
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">
-            @bind($model ?? null)
+            @bind($model)
 
                 <x-select col="6" name="product_id_category" class="search" :options="$category"/>
                 <x-input col="6" name="product_nama" />
-                <x-input col="6" name="product_harga" />
+                <x-input type="number" col="6" name="product_harga" />
                 <x-input col="6" name="product_keterangan" />
 
             @endbind

@@ -52,12 +52,10 @@ class Product extends BaseModel
     public function rules(): array
     {
         return [
-
-			'product_id' => 'required',
 			'product_nama' => 'required|string',
 			'product_harga' => 'required|string',
 			'product_keterangan' => 'string',
-			'product_id_category' => 'string',
+			'product_id_category' => 'required',
         ];
     }
 
