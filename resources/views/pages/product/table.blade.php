@@ -1,3 +1,5 @@
+<?php /** @var App\Models\Product $table */ ?>
+
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
@@ -7,29 +9,6 @@
                 @foreach ($fields as $key => $advance)
                 <x-filter-item :label="$advance" :name="$key"/>
                 @endforeach
-
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Status Filter</h3>
-                        <x-filter-item label="Status" name="status" :options="[1 => 'Active', 0 => 'Inactive']" />
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Price Filter</h3>
-                        <x-filter-item label="Min Price" name="price" type="number" :operators="['$gte' => '>=']" />
-                        <x-filter-item label="Max Price" name="price" type="number" :operators="['$lte' => '<=']" />
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-sm">Date Filter</h3>
-                        <x-filter-item label="Date From" name="date_from" type="date" :operators="['$gte' => '>=']" />
-                        <x-filter-item label="Date To" name="date_to" type="date" :operators="['$lte' => '<=']" />
-                    </div>
-                </div>
 
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
                 <x-button variant="soft" class="btn-block" onclick="resetAdvanced()">Reset</x-button>
@@ -47,10 +26,9 @@
             <x-slot:head>
                 <x-table-checkbox :model="$model" onchange="toggleAll(this)" />
                 <th>Actions</th>
-                <x-table-sort field="name" label="Name" :sortField="$sortField" :sortDir="$sortDir" />
-                <x-table-sort field="price" label="Price" :sortField="$sortField" :sortDir="$sortDir" />
-                <x-table-sort field="description" label="Description" :sortField="$sortField" :sortDir="$sortDir" />
-                <x-table-sort field="created_at" label="Created" :sortField="$sortField" :sortDir="$sortDir" />
+                @foreach ($model::$sortColumns as $column)
+                <x-table-sort field="{{ $column }}" label="{{ Str::title(str_replace('_', ' ', $column)) }}" :sortField="$sortField" :sortDir="$sortDir" />
+                @endforeach
             </x-slot:head>
 
             <x-slot:body>
@@ -58,24 +36,23 @@
                 <tr>
                     <x-table-row-checkbox :model="$model" :value="$table->field_primary" />
                     <x-table-action :model="$model" :id="$table->field_primary" />
-
-                    <td>{{ $table->name }}</td>
-                    <td>{{ $table->price }}</td>
-                    <td>{{ $table->description }}</td>
-                    <td>{{ $table->created_at }}</td>
+                    @foreach ($model::$sortColumns as $column)
+                    <td>{{ $table->$column }}</td>
+                    @endforeach
                 </tr>
                 @endforeach
             </x-slot:body>
 
             <x-slot:mobile>
-                <x-table-mobile-select :model="$model" :total="$data" />
+                <x-table-mobile-select :model="$model" :total="$data"/>
                 <div class="p-2 space-y-2" id="mBody">
                     @foreach($data as $table)
-                    <x-table-mobile-item :id="$table->id">
-                        <x-table-mobile-header title="{{ $table->name }}" />
-                        <x-table-mobile-text :text="formatAngka($table->price, 'Rp. ')" size="sm" color="primary" />
-                        <x-table-mobile-text :text="$table->description" size="xs" color="muted" />
-                        <x-table-mobile-footer :label="formatDate($table->created_at)">
+                    <x-table-mobile-item :id="$table->field_primary">
+                        <x-table-mobile-header title="{{ $table->field_name }}" />
+                        @foreach ($model::$sortColumns as $column)
+                        <x-table-mobile-text :text="$table->$column" size="sm" color="primary" />
+                        @endforeach
+                        <x-table-mobile-footer :label="$table->field_primary">
                             <x-table-action :model="$model" :id="$table->field_primary" />
                         </x-table-mobile-footer>
                     </x-table-mobile-item>
@@ -87,6 +64,7 @@
 
         <x-pagination :paginator="$data" />
         <x-action :model="$model" :action="['create', 'delete']"/>
+
     </div>
 
     <input type="hidden" class="module" value="{{ module() }}">

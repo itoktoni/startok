@@ -2,6 +2,7 @@
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 define('ACTION_CREATE', 'getCreate');
 define('ACTION_UPDATE', 'getUpdate');
@@ -42,6 +43,18 @@ function formatDate($value, $datetime = false)
 function formatAngka(int $value, $simbol = null)
 {
     return $simbol.number_format($value, 0, ',', '.');
+}
+
+function formatLabel($value)
+{
+    $label = Str::of($value);
+    if ($label->contains('_')) {
+        $label = $label = $label->explode('_')->last();
+    } else {
+        $label = $label->replace('[]', '');
+    }
+
+    return ucfirst($label);
 }
 
 function unic($length)

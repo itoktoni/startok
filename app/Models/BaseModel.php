@@ -8,6 +8,9 @@ use App\Concerns\DefaultEntity;
 use App\Concerns\OptionTrait;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperBaseModel
+ */
 class BaseModel extends Model
 {
     use Filterable, Sortable, DefaultEntity, OptionTrait;

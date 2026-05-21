@@ -46,6 +46,8 @@ class {{modelName}} extends BaseModel
         ];
     }
 
+    public function toArray(){}
+
     public static function field_name()
     {
         return '{{tableName}}_nama';

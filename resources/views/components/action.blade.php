@@ -4,7 +4,7 @@
         return empty($action) || in_array($actionName, $action);
     };
 @endphp
-<div class="fixed bottom-[60px] lg:bottom-0 left-0 lg:left-56 right-0 bg-base-100 shadow-2xl px-3 py-3 z-30">
+<div class="fixed bottom-[57px] lg:bottom-0 left-0 lg:left-56 right-0 border border-base-300/20 bg-base-100 shadow-xl px-3 py-3 z-30">
     <div class="flex gap-x-2.5 justify-end">
         {{ $slot }}
         @if($showAction('create'))

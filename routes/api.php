@@ -8,7 +8,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
-   Route::auto('/product', ProductController::class, ['name' => 'api_product']);
+   // Route::auto('/product', ProductController::class, ['name' => 'api_product']);
 
 });
 

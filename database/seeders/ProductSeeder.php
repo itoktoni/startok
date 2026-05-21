@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
@@ -16,21 +17,19 @@ class ProductSeeder extends Seeder
 
         for ($i = 0; $i < 10000; $i++) {
             $chunks[] = [
-                'name' => $faker->words(rand(2, 4), true),
-                'price' => $faker->randomFloat(2, 10000, 50000000),
-                'description' => $faker->sentence(),
-                'created_at' => $now->copy()->subDays(rand(0, 365)),
-                'updated_at' => $now,
+                'product_nama' => $faker->words(rand(2, 4), true),
+                'product_harga' => $faker->randomFloat(2, 10000, 50000000),
+                'product_keterangan' => $faker->sentence(),
             ];
 
             if (count($chunks) === 500) {
-                DB::table('products')->insert($chunks);
+                Product::insert($chunks);
                 $chunks = [];
             }
         }
 
         if ($chunks) {
-            DB::table('products')->insert($chunks);
+            Product::insert($chunks);
         }
     }
 }

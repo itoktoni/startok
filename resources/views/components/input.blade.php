@@ -1,7 +1,7 @@
 @props(['name', 'label' => null, 'type' => 'text', 'col' => '12', 'value' => null, 'placeholder' => '', 'model' => null, 'helper' => null])
 @php
     global $activeBladeModel;
-    $label = $label ?? ucwords(str_replace('_', ' ', $name));
+    $label = $label ?? formatLabel($name);
     $m = $model ?? $activeBladeModel ?? null;
     $bound = $value ?? ($m ? old($name, data_get($m, $name, '')) : old($name, ''));
     $hasError = $errors->has($name);

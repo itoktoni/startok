@@ -1,12 +1,18 @@
+<?php /** @var App\Models\Product $model */ ?>
+
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model ? 'Update' : 'Create']]" />
 
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">
             @bind($model ?? null)
-                <x-input col="6" name="name" />
-                <x-input col="6" name="price" type="number" />
-                <x-textarea col="12" name="description" />
+                 
+                <x-input col="6" name="product_id" />
+                <x-input col="6" name="product_nama" />
+                <x-input col="6" name="product_harga" />
+                <x-input col="6" name="product_keterangan" />
+                <x-input col="6" name="product_category_id" />
+
             @endbind
         </x-card>
 

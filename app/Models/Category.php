@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Models\BaseModel;
 
+/**
+ * @mixin IdeHelperCategory
+ */
 class Category extends BaseModel
 {
     protected $table = 'category';

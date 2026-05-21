@@ -2,61 +2,69 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\BaseModel;
 
 class Product extends BaseModel
 {
-    protected $table   = 'products';
+    protected $table = 'product';
     protected $keyType = 'int';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'product_id';
 
-    public $timestamps = true;
+    public $timestamps = false;
     public $incrementing = true;
 
     /**
      * Columns available for filtering.
      */
     public static $filterColumns = [
-        'name' => 'Name',
-        'id' => 'Id',
-        'price' => 'Price',
-        'created_at' => 'Created At',
-        'updated_at' => 'Updated At',
+        'product_id' => 'Product Id',
+        'product_nama' => 'Product Nama',
+        'product_harga' => 'Product Harga',
+        'product_keterangan' => 'Product Keterangan',
+        'product_category_id' => 'Product Category Id'
     ];
 
     /**
      * Columns available for sorting.
      */
     public static $sortColumns = [
-        'name',
-        'price',
-        'description',
+        'product_nama',
+        'product_harga',
+        'product_keterangan',
+        'product_category_id'
     ];
 
-    public function rules()
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'product_id',
+        'product_nama',
+        'product_harga',
+        'product_keterangan',
+        'product_category_id'
+    ];
+
+    /**
+     * Validation rules.
+     */
+    public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'description' => ['sometimes', 'nullable', 'string'],
+
+			'product_id' => 'required',
+			'product_nama' => 'required|string',
+			'product_keterangan' => 'string',
         ];
     }
 
-    protected $fillable = ['name', 'price', 'description'];
-
-    public function toArray()
-    {
-        $data = parent::toArray();
-
-        if (Auth::check()) {
-            unset($data['price']);
-        }
-
-        return $data;
-    }
+    public function toArray(){}
 
     public static function field_name()
     {
-        return 'name';
+        return 'product_nama';
     }
+
 }
