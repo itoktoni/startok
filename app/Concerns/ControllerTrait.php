@@ -30,7 +30,7 @@ trait ControllerTrait
 
     public function getTable(GeneralRequest $request)
     {
-        $data = $this->getData()->paginate($request->input('per_page', 25))->withQueryString();
+        $data = $this->getData()->cursorPaginate($request->input('per_page', 25))->withQueryString();
 
         return $this->views($this->template(), [
             'data' => $data,

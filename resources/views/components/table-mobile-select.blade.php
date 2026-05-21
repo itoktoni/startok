@@ -4,5 +4,5 @@
     @can('delete', $model ?? null)
     @endcan
     <span class="flex-1"></span>
-    <span id="mSelCount" class="text-xs text-primary font-medium">Total {{ formatAngka($total->total()) }}</span>
+    <span id="mSelCount" class="text-xs text-primary font-medium"></span>
 </div>

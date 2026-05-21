@@ -1,65 +1,73 @@
-<x-layout>
+<?php /** @var App\Models\Users $table */ ?>
 
-    <x-card class="table-container">
+<x-layouts::app>
+    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
+    <div class="content mt-4 lg:mt-0">
+        {{-- Filters --}}
+        <x-filter :per-page="25" :fields="$fields">
+            <x-slot:advanced>
+                @foreach ($fields as $key => $advance)
+                <x-filter-item :label="$advance" :name="$key"/>
+                @endforeach
 
-        <div class="col-md-12">
+                <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
+                <x-button variant="soft" class="btn-block" onclick="resetAdvanced()">Reset</x-button>
+            </x-slot:advanced>
+        </x-filter>
 
-            <x-form method="GET" x-init="" x-target="table" role="search" aria-label="Contacts"
-                autocomplete="off" action="{{ moduleRoute('getTable') }}">
-                <x-filter toggle="Filter" :fields="$fields" />
-            </x-form>
+        {{-- Table --}}
+        @php
+            $currentSort = request('sort.0', '');
+            $sortField = str_replace(':desc','',str_replace(':asc','',$currentSort));
+            $sortDir = str_contains($currentSort, ':desc') ? 'desc' : 'asc';
+        @endphp
 
-            <x-form method="POST" action="{{ moduleRoute('getTable') }}">
+        <x-table>
+            <x-slot:head>
+                <x-table-checkbox :model="$model" onchange="toggleAll(this)" />
+                <th>Actions</th>
+                @foreach ($model::$sortColumns as $column)
+                <x-table-sort field="{{ $column }}" label="{{ formatLabel($column) }}" :sortField="$sortField" :sortDir="$sortDir" />
+                @endforeach
+            </x-slot:head>
 
-                <x-action />
+            <x-slot:body>
+                @foreach($data as $table)
+                <tr>
+                    <x-table-row-checkbox :model="$model" :value="$table->field_primary" />
+                    <x-table-action :model="$model" :id="$table->field_primary" />
+                    @foreach ($model::$sortColumns as $column)
+                    <td>{{ $table->$column }}</td>
+                    @endforeach
+                </tr>
+                @endforeach
+            </x-slot:body>
 
-                <div class="container-fluid" id="table">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th width="9" class="center">
-                                        <input class="btn-check-d" type="checkbox">
-                                    </th>
-                                    <th class="text-center column-action">{{ __('Action') }}</th>
-                                    @foreach ($fields as $value)
-                                        <th {{ Template::extractColumn($value) }}>
-                                           {{ __($value->name) }}
-                                        </th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($data as $table)
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" class="checkbox" name="code[]"
-                                                value="{{ $table->field_primary }}">
-                                        </td>
-                                        <td class="col-md-2 text-center column-action">
-                                            <x-crud :model="$table" />
-                                        </td>
-
-										<td >{{ $table->name }}</td>
-										<td >{{ $table->email }}</td>
-										<td >{{ $table->role }}</td>
-										<td >{{ $table->two_factor_secret }}</td>
-										<td >{{ $table->two_factor_recovery_codes }}</td>
-										<td >{{ $table->two_factor_confirmed_at }}</td>
-
-                                    </tr>
-                                @empty
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <x-pagination :data="$data" />
+            <x-slot:mobile>
+                <x-table-mobile-select :model="$model" :total="$data"/>
+                <div class="p-2 space-y-2" id="mBody">
+                    @foreach($data as $table)
+                    <x-table-mobile-item :id="$table->field_primary">
+                        <x-table-mobile-header title="{{ $table->field_name }}" />
+                        @foreach ($model::$sortColumns as $column)
+                        <x-table-mobile-text :text="$table->$column" size="sm" color="primary" />
+                        @endforeach
+                        <x-table-mobile-footer :label="$table->field_primary">
+                            <x-table-action :model="$model" :id="$table->field_primary" />
+                        </x-table-mobile-footer>
+                    </x-table-mobile-item>
+                    @endforeach
                 </div>
+            </x-slot:mobile>
 
-            </x-form>
+        </x-table>
 
-        </div>
+        <x-pagination :paginator="$data" />
+        <x-action :model="$model" :action="['create', 'delete']"/>
 
-    </x-card>
+    </div>
 
-</x-layout>
+    <input type="hidden" class="module" value="{{ module() }}">
+    <script src="/js/table.js"></script>
+    <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
+</x-layouts::app>

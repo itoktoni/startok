@@ -17,9 +17,12 @@ class CrudGenerator extends GeneratorCommand
      *
      * @var string
      */
-    protected $signature = 'make:crud
-                            {name : Table name}
-                            {--route= : Custom route name}';
+ protected $signature = 'make:crud
+                              {name : Table name}
+                              {--route= : Custom route name}
+                              {--migration : Generate a migration for the table}
+                              {--no-migration : Skip generating a migration}
+                              {--seeder : Generate a seeder for the table}';
 
     /**
      * The console command description.
@@ -33,27 +36,48 @@ class CrudGenerator extends GeneratorCommand
      *
      * @throws FileNotFoundException
      */
-    public function handle()
+     public function handle()
+     {
+         $this->info('Running Crud Generator ...');
+
+         $this->table = $this->getNameInput();
+
+         // Build the class name from table name
+         $this->name = $this->_buildClassName();
+
+          // Generate the crud
+          $this->buildOptions()
+              ->maybeBuildMigration()
+              ->buildController()
+              ->buildModel()
+              ->buildPolicy()
+              ->buildViews()
+              ->writeRoute();
+
+         // Generate seeder if requested
+         if ($this->option('seeder')) {
+             $this->buildSeeder();
+         }
+
+         $this->info('Created Successfully.');
+
+         return true;
+     }
+
+    /**
+     * Conditionally build the migration file, respecting the --migration flag.
+     *
+     * @return $this
+     *
+     * @throws FileNotFoundException
+     */
+    protected function maybeBuildMigration(): static
     {
-        $this->info('Running Crud Generator ...');
+        if (! ($this->option('migration') ?? true)) {
+            return $this;
+        }
 
-        $this->table = $this->getNameInput();
-
-        // Build the class name from table name
-        $this->name = $this->_buildClassName();
-
-        // Generate the crud
-        $this->buildOptions()
-            ->buildMigration()
-            ->buildController()
-            ->buildModel()
-            ->buildPolicy()
-            ->buildViews()
-            ->writeRoute();
-
-        $this->info('Created Successfully.');
-
-        return true;
+        return $this->buildMigration();
     }
 
     /**
@@ -159,20 +183,64 @@ class CrudGenerator extends GeneratorCommand
         return $columns;
     }
 
-    protected function writeRoute(): static
-    {
-        $this->info('Please add route below: i:e; web.php');
+     protected function writeRoute(): static
+     {
+         $this->info('Please add route below: i:e; web.php');
 
-        $this->info('');
+         $this->info('');
 
-        $line = "Route::resource('".$this->_getRoute()."', {$this->name}Controller::class);";
+         $line = "Route::resource('".$this->_getRoute()."', {$this->name}Controller::class);";
 
-        $this->info('<bg=blue;fg=white>'.$line.'</>');
+         $this->info('<bg=blue;fg=white>'.$line.'</>');
 
-        $this->info('');
+         $this->info('');
 
-        return $this;
-    }
+         return $this;
+     }
+
+     /**
+      * Build Seeder File.
+      *
+      * @return $this
+      *
+      * @throws FileNotFoundException
+      */
+     protected function buildSeeder(): static
+     {
+         $seederPath = $this->_getSeederPath($this->name);
+
+         // Check if seeder already exists
+         if ($this->files->exists($seederPath)) {
+             $this->info("Seeder for `{$this->table}` already exists, skipping...");
+             return $this;
+         }
+
+         $this->info('Creating Seeder ...');
+
+          $replace = array_merge($this->buildReplacements(), [
+              '{{tableName}}' => Str::snake($this->name),
+              '{{modelName}}' => $this->name,
+              '{{modelNamespace}}' => $this->modelNamespace,
+          ]);
+
+         $seederTemplate = str_replace(
+             array_keys($replace),
+             array_values($replace),
+             $this->getStub('Seeder')
+         );
+
+         $this->write($seederPath, $seederTemplate);
+
+         return $this;
+     }
+
+     /**
+      * Get the seeder file path.
+      */
+     protected function _getSeederPath($name): string
+     {
+         return $this->makeDirectory(database_path("seeders/{$name}Seeder.php"));
+     }
 
     protected function _getPolicyPath($name): string
     {
@@ -307,6 +375,20 @@ class CrudGenerator extends GeneratorCommand
 
             $this->write($this->_getViewPath($view), $viewTemplate);
         }
+
+        return $this;
+    }
+
+    /**
+     * Build the options, extending the base options with the migration flag.
+     *
+     * @return $this
+     */
+    protected function buildOptions(): static
+    {
+        parent::buildOptions();
+
+        $this->options['migration'] = $this->option('migration') ?? true;
 
         return $this;
     }

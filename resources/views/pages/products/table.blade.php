@@ -1,3 +1,5 @@
+<?php /** @var App\Models\Products $table */ ?>
+
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
@@ -50,7 +52,7 @@
                         @foreach ($model::$sortColumns as $column)
                         <x-table-mobile-text :text="$table->$column" size="sm" color="primary" />
                         @endforeach
-                        <x-table-mobile-footer :label="formatDate($table->created_at)">
+                        <x-table-mobile-footer :label="$table->field_primary">
                             <x-table-action :model="$model" :id="$table->field_primary" />
                         </x-table-mobile-footer>
                     </x-table-mobile-item>

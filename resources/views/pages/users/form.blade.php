@@ -1,21 +1,20 @@
-<x-layout>
+<?php /** @var App\Models\Users $model */ ?>
+
+<x-layouts::app>
+    <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']]" />
+
     <x-form :model="$model">
-        <x-card>
-            <x-action form="form" />
+        <x-card :label="ucfirst(module())">
+            @bind($model ?? null)
 
-            <div class="row">
-                @bind($model)
+                <x-input col="3" name="name" />
+                <x-input col="3" name="email" />
+                <x-input col="3" type="password" name="password" />
+                <x-select col="3" name="role" :options="$role"/>
 
-                <x-form-input col="6" name="name" />
-                <x-form-input col="6" name="email" />
-                <x-form-input col="6" name="role" />
-                <x-form-input col="6" name="two_factor_secret" />
-                <x-form-input col="6" name="two_factor_recovery_codes" />
-                <x-form-input col="6" name="two_factor_confirmed_at" />
-
-                @endbind
-            </div>
-
+            @endbind
         </x-card>
+
+        <x-action :model="$model" :action="['save']"/>
     </x-form>
-</x-layout>
+</x-layouts::app>

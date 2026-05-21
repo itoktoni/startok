@@ -6,6 +6,7 @@ Route::view('/', 'welcome')->name('home');
 
 
 Route::middleware(['auth', 'verified', 'access'])->group(function () {
+    Route::auto('/user', 'UsersController', ['name' => 'user']);
     Route::auto('/product', 'ProductController', ['name' => 'product']);
     Route::auto('/category', 'CategoryController', ['name' => 'category']);
 

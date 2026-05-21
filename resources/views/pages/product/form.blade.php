@@ -1,7 +1,7 @@
 <?php /** @var App\Models\Product $model */ ?>
 
 <x-layouts::app>
-    <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model ? 'Update' : 'Create']]" />
+    <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']]" />
 
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">

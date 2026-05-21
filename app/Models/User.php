@@ -12,6 +12,10 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Abbasudo\Purity\Traits\Filterable;
+use Abbasudo\Purity\Traits\Sortable;
+use App\Concerns\DefaultEntity;
+use App\Concerns\OptionTrait;
 
 /**
  * @mixin IdeHelperUser
@@ -21,7 +25,11 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasApiTokens;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasApiTokens, Filterable, Sortable, DefaultEntity, OptionTrait;
+
+    protected $table = 'users';
+    protected $keyType = 'int';
+    protected $primaryKey = 'id';
 
     /**
      * Get the attributes that should be cast.
@@ -34,6 +42,42 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Columns available for filtering.
+     */
+    public static $filterColumns = [
+        'name' => 'Name',
+        'email' => 'Email',
+        'role' => 'Role',
+    ];
+
+     /**
+     * Columns available for sorting.
+     */
+    public static $sortColumns = [
+        'name',
+        'email',
+        'role',
+    ];
+
+     /**
+     * Validation rules.
+     */
+    public function rules(): array
+    {
+        return [
+			'name' => 'required|string',
+			'email' => 'required|string',
+			'role' => 'string',
+			'password' => 'string',
+        ];
+    }
+
+    public static function field_name()
+    {
+        return 'users_nama';
     }
 
     public function isDeveloper(): bool

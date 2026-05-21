@@ -1,4 +1,4 @@
-<?php /** @var {{modelNamespace}}\{{modelName}} $model */ ?>
+<?php /** @var App\Models\Products $model */ ?>
 
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']]" />
@@ -6,7 +6,8 @@
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">
             @bind($model ?? null)
-                 {{form}}
+
+
             @endbind
         </x-card>
 

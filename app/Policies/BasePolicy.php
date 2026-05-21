@@ -8,14 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class BasePolicy
 {
-    public function allow(User $user): ?bool
-    {
-        if ($user->isDeveloper()) return true;
-
-        // Default allow untuk admin dan user
-        return null;
-    }
-
     protected $module;
     protected $restrict;
 

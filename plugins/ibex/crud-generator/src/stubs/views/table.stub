@@ -27,7 +27,7 @@
                 <x-table-checkbox :model="$model" onchange="toggleAll(this)" />
                 <th>Actions</th>
                 @foreach ($model::$sortColumns as $column)
-                <x-table-sort field="{{ $column }}" label="{{ Str::title(str_replace('_', ' ', $column)) }}" :sortField="$sortField" :sortDir="$sortDir" />
+                <x-table-sort field="{{ $column }}" label="{{ formatLabel($column) }}" :sortField="$sortField" :sortDir="$sortDir" />
                 @endforeach
             </x-slot:head>
 
