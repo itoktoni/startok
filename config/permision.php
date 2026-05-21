@@ -2,8 +2,6 @@
 
 $restrict = [];
 
-$restrict['user']['product'][] = 'save';
-$restrict['user']['product'][] = 'delete';
-$restrict['admin']['category'] = false;
+$restrict['user']['product'][] = 'show';
 
 return $restrict;

@@ -61,7 +61,7 @@
         </x-table>
 
         <x-pagination :paginator="$data" />
-        <x-action :model="$model" :action="['create', 'delete]"/>
+        <x-action :model="$model" :action="['create', 'delete']"/>
 
     </div>
 

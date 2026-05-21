@@ -1,7 +1,7 @@
 @props(['model', 'action', 'method' => 'POST'])
 
 @php
-$isEdit = isset($model) && $model;
+$isEdit = isset($model) && $model->exists;
 if(empty($action))
 {
     $action = $isEdit ? moduleRoute('getUpdate', ['id' => $model->field_primary]) : moduleRoute('getCreate');

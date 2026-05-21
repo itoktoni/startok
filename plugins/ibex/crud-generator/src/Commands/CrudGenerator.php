@@ -111,7 +111,28 @@ class CrudGenerator extends GeneratorCommand
             }
 
             $nullableStr = $nullable ? '->nullable()' : '';
-            $defaultStr = $default !== null ? "->default('$default')" : '';
+            $rawDefault = $default;
+
+            // Normalise: some DB engines (e.g. SQLite) store the default of a
+            // nullable string column as "'NULL'" (single-quotes included) or as
+            // the bare string "NULL".  Both mean SQL NULL — strip them so the
+            // generator emits no ->default() clause instead of ->default('NULL').
+            if (is_string($rawDefault)) {
+                $trimmed = trim($rawDefault);
+                // Remove surrounding single-quotes first (handles "'NULL'")
+                if (str_starts_with($trimmed, "'") && str_ends_with($trimmed, "'")) {
+                    $trimmed = substr($trimmed, 1, -1);
+                }
+                if (strtoupper($trimmed) === 'NULL') {
+                    $rawDefault = null;
+                } else {
+                    $rawDefault = $trimmed;
+                }
+            }
+
+            $defaultStr = $rawDefault !== null && $rawDefault !== ''
+                ? "->default('$rawDefault')"
+                : '';
 
             // Determine column type based on database type
             $columnType = match ($type) {
