@@ -5,7 +5,6 @@ namespace App\Concerns;
 use App\Actions\CreateAction;
 use App\Actions\DeleteAction;
 use App\Actions\UpdateAction;
-use App\Concerns\PayloadTrait;
 use App\Http\Requests\GeneralRequest;
 
 trait ControllerTrait
@@ -46,12 +45,14 @@ trait ControllerTrait
     public function postCreate(GeneralRequest $request)
     {
         $response = CreateAction::run($request, $this->model);
+
         return $this->response($response);
     }
 
     public function getUpdate(GeneralRequest $request, $id)
     {
         $data = $this->model->findOrFail($id);
+
         return $this->views($this->template(), [
             'model' => $data,
         ]);
@@ -60,18 +61,21 @@ trait ControllerTrait
     public function postUpdate(GeneralRequest $request, $id)
     {
         $response = UpdateAction::run($request, $id, $this->model);
+
         return $this->response($response);
     }
 
     public function getDelete(GeneralRequest $request, $id)
     {
         $response = (new DeleteAction)->remove($id, $this->model);
+
         return $this->response($response);
     }
 
     public function postDelete(GeneralRequest $request)
     {
         $count = DeleteAction::run($request, $this->model);
+
         return $this->response($count);
     }
 
@@ -90,7 +94,7 @@ trait ControllerTrait
     {
         // Build fields for filter from model's $filterColumns
         $fields = [];
-        if (property_exists($this->model, 'filterColumns') && !empty($this->model::$filterColumns)) {
+        if (property_exists($this->model, 'filterColumns') && ! empty($this->model::$filterColumns)) {
             foreach ($this->model::$filterColumns as $key => $value) {
                 // If value is false/null/empty, skip (for advanced filters only)
                 if ($value === false || $value === null || $value === '' || is_int($key)) {
@@ -133,30 +137,25 @@ trait ControllerTrait
         // Remove 'get' or 'post' prefix and convert to lowercase
         $action = strtolower(preg_replace('/^(get|post)/', '', $method));
 
-        if(in_array($action, ['update', 'create']))
-        {
+        if (in_array($action, ['update', 'create'])) {
             $action = 'form';
         }
 
-        if ($file)
-        {
+        if ($file) {
             $action = $file;
         }
 
-        if($file === true)
-        {
+        if ($file === true) {
             return $module;
         }
 
-        if($folder)
-        {
+        if ($folder) {
             $module = $folder;
         }
 
         $path = 'pages.';
 
-        if($core)
-        {
+        if ($core) {
             $path = 'core.';
         }
 
@@ -183,24 +182,17 @@ trait ControllerTrait
 
     protected function response(array $response, $redirect = null)
     {
-        if ($this->isApi())
-        {
+        if ($this->isApi()) {
             return response()->json($response);
-        }
-        else
-        {
-            if($response['status'])
-            {
+        } else {
+            if ($response['status']) {
                 flash()->success($response['message']);
-            }
-            else
-            {
+            } else {
                 flash()->error($response['data']);
             }
         }
 
-        if($redirect)
-        {
+        if ($redirect) {
             return $redirect;
         }
 
@@ -216,4 +208,3 @@ trait ControllerTrait
         return view($view, $data);
     }
 }
-

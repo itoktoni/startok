@@ -2,7 +2,4 @@
 
 namespace App\Policies;
 
-class ProductsPolicy extends BasePolicy
-{
-
-}
+class ProductsPolicy extends BasePolicy {}

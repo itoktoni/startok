@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
-
 class Product extends BaseModel
 {
     protected $table = 'product';
+
     protected $keyType = 'int';
+
     protected $primaryKey = 'product_id';
 
     public $timestamps = false;
+
     public $incrementing = true;
 
     /**
@@ -21,7 +22,7 @@ class Product extends BaseModel
         'product_nama' => 'Product Nama',
         'product_harga' => 'Product Harga',
         'product_keterangan' => 'Product Keterangan',
-        'product_id_category' => 'Product Category'
+        'product_id_category' => 'Product Category',
     ];
 
     /**
@@ -43,7 +44,7 @@ class Product extends BaseModel
         'product_nama',
         'product_harga',
         'product_keterangan',
-        'product_id_category'
+        'product_id_category',
     ];
 
     /**
@@ -52,14 +53,14 @@ class Product extends BaseModel
     public function rules(): array
     {
         return [
-			'product_nama' => 'required|string',
-			'product_harga' => 'required|string',
-			'product_keterangan' => 'string',
-			'product_id_category' => 'required',
+            'product_nama' => 'required|string',
+            'product_harga' => 'required|string',
+            'product_keterangan' => 'string',
+            'product_id_category' => 'required',
         ];
     }
 
-    public function toArray(){}
+    public function toArray() {}
 
     public static function field_name()
     {
@@ -70,5 +71,4 @@ class Product extends BaseModel
     {
         return $this->hasOne(Category::getModel(), Category::field_key(), 'product_id_category');
     }
-
 }

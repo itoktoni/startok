@@ -17,7 +17,7 @@ class CrudGenerator extends GeneratorCommand
      *
      * @var string
      */
- protected $signature = 'make:crud
+    protected $signature = 'make:crud
                               {name : Table name}
                               {--route= : Custom route name}
                               {--migration : Generate a migration for the table}
@@ -36,33 +36,33 @@ class CrudGenerator extends GeneratorCommand
      *
      * @throws FileNotFoundException
      */
-     public function handle()
-     {
-         $this->info('Running Crud Generator ...');
+    public function handle()
+    {
+        $this->info('Running Crud Generator ...');
 
-         $this->table = $this->getNameInput();
+        $this->table = $this->getNameInput();
 
-         // Build the class name from table name
-         $this->name = $this->_buildClassName();
+        // Build the class name from table name
+        $this->name = $this->_buildClassName();
 
-          // Generate the crud
-          $this->buildOptions()
-              ->maybeBuildMigration()
-              ->buildController()
-              ->buildModel()
-              ->buildPolicy()
-              ->buildViews()
-              ->writeRoute();
+        // Generate the crud
+        $this->buildOptions()
+            ->maybeBuildMigration()
+            ->buildController()
+            ->buildModel()
+            ->buildPolicy()
+            ->buildViews()
+            ->writeRoute();
 
-         // Generate seeder if requested
-         if ($this->option('seeder')) {
-             $this->buildSeeder();
-         }
+        // Generate seeder if requested
+        if ($this->option('seeder')) {
+            $this->buildSeeder();
+        }
 
-         $this->info('Created Successfully.');
+        $this->info('Created Successfully.');
 
-         return true;
-     }
+        return true;
+    }
 
     /**
      * Conditionally build the migration file, respecting the --migration flag.
@@ -94,6 +94,7 @@ class CrudGenerator extends GeneratorCommand
         // Check if migration already exists
         if ($this->files->exists($migrationPath)) {
             $this->info("Migration for `{$this->table}` already exists, skipping...");
+
             return $this;
         }
 
@@ -183,64 +184,65 @@ class CrudGenerator extends GeneratorCommand
         return $columns;
     }
 
-     protected function writeRoute(): static
-     {
-         $this->info('Please add route below: i:e; web.php');
+    protected function writeRoute(): static
+    {
+        $this->info('Please add route below: i:e; web.php');
 
-         $this->info('');
+        $this->info('');
 
-         $line = "Route::resource('".$this->_getRoute()."', {$this->name}Controller::class);";
+        $line = "Route::resource('".$this->_getRoute()."', {$this->name}Controller::class);";
 
-         $this->info('<bg=blue;fg=white>'.$line.'</>');
+        $this->info('<bg=blue;fg=white>'.$line.'</>');
 
-         $this->info('');
+        $this->info('');
 
-         return $this;
-     }
+        return $this;
+    }
 
-     /**
-      * Build Seeder File.
-      *
-      * @return $this
-      *
-      * @throws FileNotFoundException
-      */
-     protected function buildSeeder(): static
-     {
-         $seederPath = $this->_getSeederPath($this->name);
+    /**
+     * Build Seeder File.
+     *
+     * @return $this
+     *
+     * @throws FileNotFoundException
+     */
+    protected function buildSeeder(): static
+    {
+        $seederPath = $this->_getSeederPath($this->name);
 
-         // Check if seeder already exists
-         if ($this->files->exists($seederPath)) {
-             $this->info("Seeder for `{$this->table}` already exists, skipping...");
-             return $this;
-         }
+        // Check if seeder already exists
+        if ($this->files->exists($seederPath)) {
+            $this->info("Seeder for `{$this->table}` already exists, skipping...");
 
-         $this->info('Creating Seeder ...');
+            return $this;
+        }
 
-          $replace = array_merge($this->buildReplacements(), [
-              '{{tableName}}' => Str::snake($this->name),
-              '{{modelName}}' => $this->name,
-              '{{modelNamespace}}' => $this->modelNamespace,
-          ]);
+        $this->info('Creating Seeder ...');
 
-         $seederTemplate = str_replace(
-             array_keys($replace),
-             array_values($replace),
-             $this->getStub('Seeder')
-         );
+        $replace = array_merge($this->buildReplacements(), [
+            '{{tableName}}' => Str::snake($this->name),
+            '{{modelName}}' => $this->name,
+            '{{modelNamespace}}' => $this->modelNamespace,
+        ]);
 
-         $this->write($seederPath, $seederTemplate);
+        $seederTemplate = str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $this->getStub('Seeder')
+        );
 
-         return $this;
-     }
+        $this->write($seederPath, $seederTemplate);
 
-     /**
-      * Get the seeder file path.
-      */
-     protected function _getSeederPath($name): string
-     {
-         return $this->makeDirectory(database_path("seeders/{$name}Seeder.php"));
-     }
+        return $this;
+    }
+
+    /**
+     * Get the seeder file path.
+     */
+    protected function _getSeederPath($name): string
+    {
+        return $this->makeDirectory(database_path("seeders/{$name}Seeder.php"));
+    }
 
     protected function _getPolicyPath($name): string
     {
@@ -260,6 +262,7 @@ class CrudGenerator extends GeneratorCommand
 
         if ($this->files->exists($policyPath)) {
             $this->info("Policy for `{$this->name}` already exists, skipping...");
+
             return $this;
         }
 

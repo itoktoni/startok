@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
-
 /**
  * @mixin IdeHelperCategory
  */
 class Category extends BaseModel
 {
     protected $table = 'category';
+
     protected $keyType = 'int';
+
     protected $primaryKey = 'category_id';
 
     public $timestamps = false;
+
     public $incrementing = true;
 
     /**
@@ -22,7 +23,7 @@ class Category extends BaseModel
     public static $filterColumns = [
         'category_id' => 'Category Id',
         'category_nama' => 'Category Nama',
-        'category_keterangan' => 'Category Keterangan'
+        'category_keterangan' => 'Category Keterangan',
     ];
 
     /**
@@ -31,7 +32,7 @@ class Category extends BaseModel
     public static $sortColumns = [
         'category_id',
         'category_nama',
-        'category_keterangan'
+        'category_keterangan',
     ];
 
     /**
@@ -42,7 +43,7 @@ class Category extends BaseModel
     protected $fillable = [
         'category_id',
         'category_nama',
-        'category_keterangan'
+        'category_keterangan',
     ];
 
     /**
@@ -51,8 +52,8 @@ class Category extends BaseModel
     public function rules(): array
     {
         return [
-			'category_nama' => 'string',
-			'category_keterangan' => 'string',
+            'category_nama' => 'string',
+            'category_keterangan' => 'string',
         ];
     }
 
@@ -60,5 +61,4 @@ class Category extends BaseModel
     {
         return 'category_nama';
     }
-
 }

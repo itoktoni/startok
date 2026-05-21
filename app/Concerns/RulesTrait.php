@@ -10,7 +10,7 @@ trait RulesTrait
     {
         $rules = [];
 
-        if (!empty($model) && method_exists($model, 'rules')) {
+        if (! empty($model) && method_exists($model, 'rules')) {
             $rules = $model->rules();
         }
 

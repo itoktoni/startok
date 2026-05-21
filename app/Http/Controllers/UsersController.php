@@ -15,7 +15,7 @@ class UsersController extends Controller
     {
         $default = [
             'model' => $this->model,
-            'role' => RoleEnum::getOptions()
+            'role' => RoleEnum::getOptions(),
         ];
 
         return array_merge($default, $data);
@@ -30,8 +30,7 @@ class UsersController extends Controller
     {
         parent::saving(function ($model) {
 
-            if(!empty(request()->get('password')))
-            {
+            if (! empty(request()->get('password'))) {
                 $model->password = Hash::make(request()->get('password'));
             }
         });

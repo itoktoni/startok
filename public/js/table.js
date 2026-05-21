@@ -1,6 +1,6 @@
-let currentSortField = '';
-let currentSortDir = 'asc';
-let mSelected = new Set();
+var currentSortField = window.currentSortField || '';
+var currentSortDir = window.currentSortDir || 'asc';
+var mSelected = window.mSelected || new Set();
 
 function initTable(sortField, sortDir) {
     currentSortField = sortField;

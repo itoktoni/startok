@@ -19,7 +19,7 @@ class ProductController extends Controller
     {
         $default = [
             'model' => $this->model,
-            'category' => Category::getOptions()
+            'category' => Category::getOptions(),
         ];
 
         return array_merge($default, $data);

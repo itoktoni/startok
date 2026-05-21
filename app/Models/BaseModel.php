@@ -13,12 +13,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BaseModel extends Model
 {
-    use Filterable, Sortable, DefaultEntity, OptionTrait;
+    use DefaultEntity, Filterable, OptionTrait, Sortable;
 
-    protected $table   = 'products';
+    protected $table = 'products';
+
     protected $primaryKey = 'id';
 
     public $timestamps = true;
+
     public $incrementing = true;
 
     /**
@@ -38,4 +40,3 @@ class BaseModel extends Model
         ];
     }
 }
-

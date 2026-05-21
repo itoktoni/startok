@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
-        Blaze::optimize()->in(resource_path('views/components'));
+        // Blaze::optimize()->in(resource_path('views/components'));
 
         Blade::directive('bind', function ($expression) {
             return "<?php
@@ -36,12 +36,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('endbind', function () {
-            return "<?php
-                global \$activeBladeModel;
-                \$activeBladeModel = null;
-            ?>";
+            return '<?php
+                global $activeBladeModel;
+                $activeBladeModel = null;
+            ?>';
         });
-
 
     }
 

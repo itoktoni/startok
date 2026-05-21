@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Concerns;
 
 trait OptionTrait
@@ -18,13 +19,13 @@ trait OptionTrait
     public static function getOptions($raw = false)
     {
         self::$option_model = self::getModel();
-        $query              = self::$option_model->query();
+        $query = self::$option_model->query();
 
         if (is_bool($raw) && $raw) {
             return $query->get();
         } elseif (is_array($raw)) {
 
-            $field_id   = array_keys($raw)[0];
+            $field_id = array_keys($raw)[0];
             $field_name = array_values($raw)[0];
 
             $query = $query->select($field_id, $field_name);

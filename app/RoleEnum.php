@@ -4,7 +4,7 @@ namespace App;
 
 use App\Concerns\EnumTrait;
 
-enum RoleEnum : string
+enum RoleEnum: string
 {
     use EnumTrait;
 
@@ -14,7 +14,7 @@ enum RoleEnum : string
 
     public function description(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ADMIN => 'Administrator Utama',
             self::DEVELOPER => 'Developer',
             self::USER => 'Pengguna Biasa',

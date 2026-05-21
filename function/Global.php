@@ -77,8 +77,7 @@ function module($action = null)
 {
     $module = request()->route()->getAction('name');
 
-    if($action)
-    {
+    if ($action) {
         return $module.'.'.$action;
     }
 
@@ -88,5 +87,6 @@ function module($action = null)
 function moduleRoute($action = null, $params = [])
 {
     $route = route(module($action), $params);
+
     return $route;
 }

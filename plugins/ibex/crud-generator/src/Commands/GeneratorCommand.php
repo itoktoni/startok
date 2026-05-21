@@ -189,6 +189,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
     protected function _getMigrationPath($name): string
     {
         $timestamp = date('Y_m_d_His');
+
         return database_path("migrations/{$timestamp}_create_{$name}_table.php");
     }
 
@@ -332,7 +333,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
                 default => 'php artisan ui bootstrap --auth'
             };
 
-            //$this->runCommands([$uiCommand]);
+            // $this->runCommands([$uiCommand]);
         }
     }
 

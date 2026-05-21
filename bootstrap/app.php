@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\AccessMiddleware;
+use App\Providers\ModelAliasServiceProvider;
 use Ibex\CrudGenerator\CrudServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -9,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
-        \App\Providers\ModelAliasServiceProvider::class,
+        ModelAliasServiceProvider::class,
         CrudServiceProvider::class,
     ])
     ->withRouting(
@@ -20,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'access' => \App\Http\Middleware\AccessMiddleware::class,
+            'access' => AccessMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

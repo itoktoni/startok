@@ -3,6 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Abbasudo\Purity\Traits\Filterable;
+use Abbasudo\Purity\Traits\Sortable;
+use App\Concerns\DefaultEntity;
+use App\Concerns\OptionTrait;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,10 +16,6 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Abbasudo\Purity\Traits\Filterable;
-use Abbasudo\Purity\Traits\Sortable;
-use App\Concerns\DefaultEntity;
-use App\Concerns\OptionTrait;
 
 /**
  * @mixin IdeHelperUser
@@ -25,10 +25,12 @@ use App\Concerns\OptionTrait;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasApiTokens, Filterable, Sortable, DefaultEntity, OptionTrait;
+    use DefaultEntity, Filterable, HasApiTokens, HasFactory, Notifiable, OptionTrait, Sortable, TwoFactorAuthenticatable;
 
     protected $table = 'users';
+
     protected $keyType = 'int';
+
     protected $primaryKey = 'id';
 
     /**
@@ -53,7 +55,7 @@ class User extends Authenticatable
         'role' => 'Role',
     ];
 
-     /**
+    /**
      * Columns available for sorting.
      */
     public static $sortColumns = [
@@ -62,16 +64,16 @@ class User extends Authenticatable
         'role',
     ];
 
-     /**
+    /**
      * Validation rules.
      */
     public function rules(): array
     {
         return [
-			'name' => 'required|string',
-			'email' => 'required|string',
-			'role' => 'string',
-			'password' => 'string',
+            'name' => 'required|string',
+            'email' => 'required|string',
+            'role' => 'string',
+            'password' => 'string',
         ];
     }
 

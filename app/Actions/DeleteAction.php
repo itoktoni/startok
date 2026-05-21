@@ -4,19 +4,18 @@ namespace App\Actions;
 
 use App\Concerns\PayloadTrait;
 use App\Concerns\RulesTrait;
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Lorisleiva\Actions\Concerns\AsAction;
 use Illuminate\Support\Facades\Validator;
+use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction, RulesTrait, PayloadTrait;
+    use AsAction, PayloadTrait, RulesTrait;
 
     public function rules(): array
     {
         return [
-            'ids' => 'required|array'
+            'ids' => 'required|array',
         ];
     }
 
@@ -28,6 +27,7 @@ class DeleteAction
         try {
 
             $model->whereIn($model->field_primary(), $data['ids'])->delete();
+
             return $this->payload(TOAST_SUCCESS, $data['ids']);
 
         } catch (\Throwable $th) {
@@ -39,14 +39,15 @@ class DeleteAction
     {
         $validator = Validator::make(['id' => request()->input('id', $id)], ['id' => 'required']);
 
-         if ($validator->fails()) {
+        if ($validator->fails()) {
             $errors = $validator->errors();
 
             return $this->payload($validator->errors()->first(), $errors);
-         }
+        }
 
         try {
             $model->findOrFail($id)->delete();
+
             return $this->payload(TOAST_SUCCESS, ['id' => $id]);
 
         } catch (\Throwable $th) {

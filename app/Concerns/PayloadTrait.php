@@ -4,12 +4,11 @@ namespace App\Concerns;
 
 trait PayloadTrait
 {
-    private function payload(String $message, $data = null, $code = 200)
+    private function payload(string $message, $data = null, $code = 200)
     {
         $status = true;
 
-        if($message == TOAST_FAILED)
-        {
+        if ($message == TOAST_FAILED) {
             $status = false;
             $code = 500;
         }
@@ -18,7 +17,7 @@ trait PayloadTrait
             'code' => $code,
             'status' => $status,
             'message' => $message,
-            'data' => $data
+            'data' => $data,
         ];
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Str;
+use Riverskies\Laravel\MobileDetect\Facades\MobileDetect;
 
 return [
 
@@ -127,7 +127,7 @@ return [
     ],
 
     'aliases' => Facade::defaultAliases()->merge([
-        'MobileDetect' => Riverskies\Laravel\MobileDetect\Facades\MobileDetect::class,
+        'MobileDetect' => MobileDetect::class,
     ])->toArray(),
 
 ];

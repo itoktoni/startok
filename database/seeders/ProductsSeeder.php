@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Products;
-use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class ProductsSeeder extends Seeder
 {
@@ -15,8 +14,7 @@ class ProductsSeeder extends Seeder
         $now = now();
         $chunks = [];
 
-        foreach(range(1, 10) as $item)
-        {
+        foreach (range(1, 10) as $item) {
             $products[] = [
                 'products_id' => $item,
                 'products_nama' => $faker->name,
@@ -31,7 +29,7 @@ class ProductsSeeder extends Seeder
                 'products_nama' => $faker->words(rand(2, 4), true),
                 'products_harga' => $faker->randomFloat(2, 10000, 50000000),
                 'products_keterangan' => $faker->sentence(),
-                'products_id_category' => rand(1, 10)
+                'products_id_category' => rand(1, 10),
             ];
 
             if (count($chunks) === 500) {

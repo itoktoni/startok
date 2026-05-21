@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\ServiceProvider;
 
 class ModelAliasServiceProvider extends ServiceProvider
 {
@@ -16,7 +16,7 @@ class ModelAliasServiceProvider extends ServiceProvider
         $modelsPath = app_path('Models');
 
         // Check if the directory exists to prevent errors
-        if (!File::isDirectory($modelsPath)) {
+        if (! File::isDirectory($modelsPath)) {
             return;
         }
 
@@ -29,14 +29,14 @@ class ModelAliasServiceProvider extends ServiceProvider
 
             // Convert the file path to a fully qualified class name
             // e.g., "Tenant/User.php" -> "App\Models\Tenant\User"
-            $className = 'App\\Models\\' . str_replace(['/', '.php'], ['\\', ''], $relativePath);
+            $className = 'App\\Models\\'.str_replace(['/', '.php'], ['\\', ''], $relativePath);
 
             if (class_exists($className)) {
                 // Get just the class name without the namespace (e.g., "User")
                 $alias = class_basename($className);
 
                 // Create the global alias if it doesn't already exist
-                if (!class_exists($alias)) {
+                if (! class_exists($alias)) {
                     class_alias($className, $alias);
                 }
             }
