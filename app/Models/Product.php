@@ -21,7 +21,7 @@ class Product extends BaseModel
         'product_nama' => 'Product Nama',
         'product_harga' => 'Product Harga',
         'product_keterangan' => 'Product Keterangan',
-        'product_category_id' => 'Product Category Id'
+        'product_id_category' => 'Product Category'
     ];
 
     /**
@@ -31,7 +31,6 @@ class Product extends BaseModel
         'product_nama',
         'product_harga',
         'product_keterangan',
-        'product_category_id'
     ];
 
     /**
@@ -44,7 +43,7 @@ class Product extends BaseModel
         'product_nama',
         'product_harga',
         'product_keterangan',
-        'product_category_id'
+        'product_id_category'
     ];
 
     /**
@@ -56,7 +55,9 @@ class Product extends BaseModel
 
 			'product_id' => 'required',
 			'product_nama' => 'required|string',
+			'product_harga' => 'required|string',
 			'product_keterangan' => 'string',
+			'product_id_category' => 'string',
         ];
     }
 
@@ -65,6 +66,11 @@ class Product extends BaseModel
     public static function field_name()
     {
         return 'product_nama';
+    }
+
+    public function has_category()
+    {
+        return $this->hasOne(Category::getModel(), Category::field_key(), 'product_id_category');
     }
 
 }

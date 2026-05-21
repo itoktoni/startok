@@ -25,13 +25,11 @@
   height: 29px !important;
   padding: 0 0.5rem !important;
   font-size: 0.8125rem !important;
-  border-color: var(--color-base-300) !important;
   border-radius: var(--radius-field) !important;
   display: flex !important;
   align-items: center !important;
 }
 .ts-wrapper.focus .ts-control {
-  border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 1px var(--color-primary) !important;
 }
 .ts-wrapper .ts-dropdown {

@@ -1,14 +1,16 @@
 @props(['name', 'label' => null, 'col' => '12', 'options' => [], 'default' => null, 'multiple' => false, 'placeholder' => '', 'model' => null, 'helper' => null])
 @php
     global $activeBladeModel;
-    $label = $label ?? ucwords(str_replace('_', ' ', $name));
+    $label = $label ?? formatLabel($name);
     $m = $model ?? $activeBladeModel ?? null;
     $selected = $default ?? ($m ? old($name, data_get($m, $name, '')) : old($name, ''));
     $hasError = $errors->has($name);
+    $isTomSelect = $attributes->get('class') && str_contains($attributes->get('class'), 'search');
+    $extraClass = $attributes->get('class') ? $attributes->get('class') : '';
 @endphp
 <div class="col-span-{{ $col }} md:col-span-{{ $col }}">
     <label class="label-text text-xs">{{ $label }}</label>
-    <select name="{{ $name }}" {{ $multiple ? 'multiple' : '' }} class="select select-sm w-full {{ $hasError ? 'is-invalid' : '' }} {{ $attributes->get('class') }}" {{ $attributes->except('class') }}>
+    <select name="{{ $name }}" {{ $multiple ? 'multiple' : '' }} id="select-{{ $name }}" @if(!$isTomSelect) class="select select-sm w-full{{ $hasError ? ' is-invalid' : '' }}{{ $extraClass ? ' ' . $extraClass : '' }}" @else class="{{ $extraClass }}" @endif {{ $attributes->except('class') }}>
         @if(!$multiple && $placeholder !== false)
         <option value="">{{ $placeholder ?: '-- '.$label.' --' }}</option>
         @endif
@@ -20,3 +22,17 @@
     @if($helper && !$hasError)<span class="helper-text ps-3">{{ $helper }}</span>@endif
     @if($hasError)<span class="helper-text text-xs ps-3 text-error">{{ $errors->first($name) }}</span>@endif
 </div>
+@if($isTomSelect)
+@once
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+@endonce
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#select-{{ $name }}', {
+        {!! $multiple ? 'create: true,' : 'create: false,' !!}
+        plugins: {!! $multiple ? json_encode(['remove_button']) : json_encode([]) !!}
+    });
+});
+</script>
+@endif

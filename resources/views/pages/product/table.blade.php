@@ -26,8 +26,9 @@
             <x-slot:head>
                 <x-table-checkbox :model="$model" onchange="toggleAll(this)" />
                 <th>Actions</th>
+                <th>Category</th>
                 @foreach ($model::$sortColumns as $column)
-                <x-table-sort field="{{ $column }}" label="{{ Str::title(str_replace('_', ' ', $column)) }}" :sortField="$sortField" :sortDir="$sortDir" />
+                <x-table-sort field="{{ $column }}" label="{{ formatLabel($column) }}" :sortField="$sortField" :sortDir="$sortDir" />
                 @endforeach
             </x-slot:head>
 
@@ -36,6 +37,7 @@
                 <tr>
                     <x-table-row-checkbox :model="$model" :value="$table->field_primary" />
                     <x-table-action :model="$model" :id="$table->field_primary" />
+                    <td>{{ $table->category_nama }}</td>
                     @foreach ($model::$sortColumns as $column)
                     <td>{{ $table->$column }}</td>
                     @endforeach
@@ -48,7 +50,7 @@
                 <div class="p-2 space-y-2" id="mBody">
                     @foreach($data as $table)
                     <x-table-mobile-item :id="$table->field_primary">
-                        <x-table-mobile-header title="{{ $table->field_name }}" />
+                        <x-table-mobile-header title="{{ $table->category_nama }}" />
                         @foreach ($model::$sortColumns as $column)
                         <x-table-mobile-text :text="$table->$column" size="sm" color="primary" />
                         @endforeach

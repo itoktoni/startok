@@ -33,7 +33,7 @@ trait OptionTrait
         } else {
 
             $query = $query->select(self::$option_model->field_name(), self::$option_model->getKeyName());
-            self::$option_model = $query->get()->pluck(self::$option_model->fieldSearching(), self::$option_model->getKeyName()) ?? [];
+            self::$option_model = $query->get()->pluck(self::$option_model->field_name(), self::$option_model->getKeyName()) ?? [];
         }
 
         return self::$option_model;

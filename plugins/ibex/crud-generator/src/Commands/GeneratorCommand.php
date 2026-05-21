@@ -434,7 +434,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
             $filterColumns = $this->getFilteredColumns();
 
             foreach ($filterColumns as $column) {
-                $label = Str::title(str_replace('_', ' ', $column));
+                $label = formatLabel($column);
                 $columns[] = "'$column' => '$label'";
             }
 

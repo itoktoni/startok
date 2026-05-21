@@ -40,15 +40,27 @@
 }
 
 /* TomSelect match FlyonUI input-sm height */
+.ts-wrapper {
+  display: block !important;
+  width: 100% !important;
+}
 .ts-wrapper .ts-control {
-  min-height: 29px !important;
-  height: 29px !important;
+  min-height: 32px !important;
+  height: 32px !important;
   padding: 0 0.5rem !important;
   font-size: 0.8125rem !important;
-  border-color: var(--color-base-300) !important;
   border-radius: var(--radius-field) !important;
   display: flex !important;
   align-items: center !important;
+  width: 100% !important;
+}
+.ts-wrapper .ts-control > input {
+  height: auto !important;
+  font-size: 0.8125rem !important;
+}
+.ts-wrapper .items-disabled,
+.ts-wrapper .item {
+  line-height: 1.5 !important;
 }
 .ts-wrapper.focus .ts-control {
   border-color: var(--color-primary) !important;
@@ -62,4 +74,9 @@
 }
 .ts-wrapper .ts-dropdown .option {
   padding: 0.375rem 0.625rem !important;
+  line-height: 1.5 !important;
+}
+.ts-wrapper .ts-dropdown .active {
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-content) !important;
 }
