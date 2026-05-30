@@ -84,9 +84,9 @@ class PosController extends Controller
 
         return response()->json($products->map(function ($product) {
             return [
-                'n' => $product->product_nama,
-                'p' => (int) $product->product_harga,
-                'c' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
+                'product_nama' => $product->product_nama,
+                'product_harga' => (int) $product->product_harga,
+                'product_category' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
             ];
         }));
     }
