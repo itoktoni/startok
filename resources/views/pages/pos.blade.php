@@ -8,6 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/dexie@4/dist/dexie.min.js"></script>
     <style>.pc:active{transform:scale(.96);transition:transform .1s}</style>
 </head>
 <body class="bg-base-200 h-screen flex flex-col overflow-hidden text-sm">
@@ -18,7 +19,11 @@
         <span class="icon-[tabler--arrow-left] size-3.5"></span>
     </a>
     <strong class="text-sm">POS</strong>
-    <span class="text-xs text-base-content/60" id="clk"></span>
+    <div class="flex items-center gap-2">
+        <span id="syncStatus" class="badge badge-xs badge-success">Online</span>
+        <span id="pendingSync" class="badge badge-xs badge-warning hidden">0 pending</span>
+        <span class="text-xs text-base-content/60" id="clk"></span>
+    </div>
 </nav>
 
 <!-- Mobile tabs -->
@@ -191,13 +196,84 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-<script>
-const P=@json($products ?? []);
-const CATEGORIES=@json($categories ?? ['All']);
-const DISCOUNTS=@json($discounts ?? []);
-let cart=[],cat="All",view="grid",dP=true,pay="",noteProd=null,shipCost=0,voucherDisc=0;
-const fmt=n=>"Rp "+n.toLocaleString("id-ID");
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <script>
+    const P=@json($products ?? []);
+    const CATEGORIES=@json($categories ?? ['All']);
+    const DISCOUNTS=@json($discounts ?? []);
+    let cart=[],cat="All",view="grid",dP=true,pay="",noteProd=null,shipCost=0,voucherDisc=0;
+    const fmt=n=>"Rp "+n.toLocaleString("id-ID");
+
+    // Dexie DB for offline storage
+    const db = new Dexie('POSOffline');
+    db.version(1).stores({
+        orders: '++id, order_code, status, created_at'
+    });
+
+    // Online/Offline Status
+    let isOnline = navigator.onLine;
+    function updateOnlineStatus() {
+        isOnline = navigator.onLine;
+        const statusEl = document.getElementById('syncStatus');
+        if (statusEl) {
+            statusEl.textContent = isOnline ? 'Online' : 'Offline';
+            statusEl.className = isOnline ? 'badge badge-xs badge-success' : 'badge badge-xs badge-error';
+        }
+    }
+    window.addEventListener('online', () => { updateOnlineStatus(); syncPendingOrders(); });
+    window.addEventListener('offline', () => { updateOnlineStatus(); });
+
+    // Update pending sync badge
+    async function updatePendingBadge() {
+        const count = await db.orders.where('status').equals('pending').count();
+        const el = document.getElementById('pendingSync');
+        if (el) {
+            if (count > 0) {
+                el.textContent = count + ' pending';
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    }
+
+    // Save order locally
+    async function saveOrderLocal(data) {
+        const orderCode = 'POS' + Date.now();
+        await db.orders.add({
+            order_code: orderCode,
+            data: JSON.stringify(data),
+            status: 'pending',
+            created_at: new Date().toISOString()
+        });
+        await updatePendingBadge();
+        return orderCode;
+    }
+
+    // Sync pending orders to server
+    async function syncPendingOrders() {
+        if (!isOnline) return;
+        const pending = await db.orders.where('status').equals('pending').toArray();
+        for (const order of pending) {
+            try {
+                const res = await fetch('/pos-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || ''
+                    },
+                    body: order.data
+                });
+                const result = await res.json();
+                if (result.success) {
+                    await db.orders.update(order.id, { status: 'synced', server_order_id: result.order_id });
+                }
+            } catch (e) {
+                console.log('Sync failed:', e);
+            }
+        }
+        await updatePendingBadge();
+    }
 
 function applyVoucher(){
   const code=document.getElementById('voucherCode').value.trim().toUpperCase();
@@ -284,7 +360,7 @@ function uQ(key,d){const i=cart.find(x=>x.key===key);i.q+=d;if(i.q<=0)cart=cart.
   if(v&&v.min&&st<v.min){document.getElementById('voucherCode').value='';voucherDisc=0;document.getElementById('voucherInfo').classList.add('hidden');}
   rCart();calcT();}
 function clearCart(){cart=[];rCart();calcT();}
-function rCart(){const c=document.getElementById("cart");const cnt=cart.reduce((s,i)=>s+i.q,0);document.getElementById("cc").textContent=cnt?"("+cnt+")":"";document.getElementById("ccM").textContent=cnt||"";if(!cart.length){c.innerHTML='<p class="text-center text-base-content/40 text-xs py-4">Empty</p>';return;}c.innerHTML=cart.map(i=>{const hasInfo=i.variant!=='Regular'||i.note;const unitPrice=i.p;const lineTotal=(unitPrice+i.extra)*i.q;return `<div class="py-1 border-b border-base-200 last:border-0"><div class="flex items-center gap-1"><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${i.n}</p>${hasInfo?`<p class="text-[9px] text-base-content/50">${i.variant!=='Regular'?'<span class="badge badge-xs">'+i.variant+'</span> ':''}${i.note?'📝 '+i.note:''}</p>`:''}<p class="text-[10px] text-base-content/60">${fmt(unitPrice)}${i.extra&&i.variant!=='Regular'?' <span class="text-primary">(+'+fmt(i.extra)+')</span>':''}</p></div><div class="join shrink-0"><button class="btn btn-xs join-item" onclick="uQ('${i.key}',-1)">−</button><span class="btn btn-xs join-item no-animation font-bold">${i.q}</span><button class="btn btn-xs join-item" onclick="uQ('${i.key}',1)">+</button></div><span class="text-xs font-bold w-14 text-right shrink-0">${fmt(lineTotal)}</span></div></div>`;}).join("");}
+function rCart(){const c=document.getElementById("cart");const cnt=cart.reduce((s,i)=>s+i.q,0);document.getElementById("cc").textContent=cnt?"("+cnt+")":"";document.getElementById("ccM").textContent=cnt||"";if(!cart.length){c.innerHTML='<p class="text-center text-base-content/40 text-xs py-4">Empty</p>';return;}c.innerHTML=cart.map(i=>{const hasInfo=i.variant!=="Regular"||i.note;const unitPrice=i.p;const lineTotal=(unitPrice+i.extra)*i.q;return `<div class="py-1 border-b border-base-200 last:border-0"><div class="flex items-center gap-1"><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${i.n}</p>${hasInfo?`<p class="text-[9px] text-base-content/50">${i.variant!=="Regular"?`<span class="badge badge-xs">${i.variant}</span> `:""}${i.note?"📝 "+i.note:""}</p>`:""}<p class="text-[10px] text-base-content/60">${fmt(unitPrice)}${i.extra&&i.variant!=="Regular"?" <span class=\"text-primary\">(+ "+fmt(i.extra)+")</span>":""}</p></div><div class="join shrink-0"><button class="btn btn-xs join-item" onclick="uQ('${i.key}',-1)">−</button><span class="btn btn-xs join-item no-animation font-bold">${i.q}</span><button class="btn btn-xs join-item" onclick="uQ('${i.key}',1)">+</button></div><span class="text-xs font-bold w-14 text-right shrink-0">${fmt(lineTotal)}</span></div></div>`;}).join("");}
 function calcT(){const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);
   // Voucher with max amount check
   const vType=document.getElementById('voucherInfo').dataset.type;
@@ -295,12 +371,15 @@ function calcT(){const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(d
   if(voucherDisc)document.getElementById('voucherAmt').textContent='-'+fmt(Math.round(vAmt));
   af=Math.max(0,af-vAmt);
   const g=Math.round(af+af*tv/100+shipCost);document.getElementById("sub").textContent=fmt(st);document.getElementById("tot").textContent=fmt(g);}
-async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({name:i.n,price:i.p,quantity:i.q,variant:i.variant,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt)};try{const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}catch(e){alert('Error: '+e.message);}}
+async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({name:i.n,price:i.p,quantity:i.q,variant:i.variant,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt)};try{if(isOnline){const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}else{await saveOrderLocal(data);alert('Order disimpan offline! Akan sync saat online.');clearCart();}}catch(e){await saveOrderLocal(data);alert('Koneksi gagal - order disimpan offline! Akan sync saat online.');clearCart();}}
 function expPDF(){if(!cart.length)return alert("Empty!");const d=document.createElement('div');d.style.cssText='padding:16px;font:12px sans-serif';d.innerHTML='<h3>Struk - '+new Date().toLocaleString('id-ID')+'</h3><hr><br>'+cart.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.n} x${i.q}</span><span>${fmt((i.p+i.extra)*i.q)}</span></div>`).join('')+'<hr><div style="display:flex;justify-content:space-between;font-weight:bold;margin-top:8px"><span>Total</span><span>'+document.getElementById("tot").textContent+'</span></div>';html2pdf().set({margin:5,filename:'struk.pdf',jsPDF:{format:[80,200],unit:'mm'}}).from(d).save();}
 document.querySelectorAll(".cat").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".cat").forEach(x=>{x.className="cat btn btn-xs btn-outline shrink-0"});b.className="cat btn btn-xs btn-primary shrink-0";cat=b.dataset.c;render();}));
 document.querySelectorAll(".pay").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".pay").forEach(x=>{x.className="pay btn btn-xs btn-outline flex-1"});b.className="pay btn btn-xs btn-primary flex-1";pay=b.dataset.m;document.getElementById("qr").classList.toggle("hidden",pay!=="qris");}));
 setInterval(()=>{document.getElementById("clk").textContent=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"})},1000);
 render();
+// Init offline status
+updateOnlineStatus();
+updatePendingBadge();
 </script>
 </body>
 </html>
