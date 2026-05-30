@@ -25,21 +25,23 @@ class PosController extends Controller
         $posProducts = $products->map(function ($product) {
             $variants = $product->variants->map(function ($v) {
                 return [
-                    'n' => $v->variant_nama,
-                    'p' => (int) $v->variant_harga,
+                    'variant_nama' => $v->variant_nama,
+                    'variant_harga' => (int) $v->variant_harga,
                 ];
             })->toArray();
             return [
-                'n' => $product->product_nama,
-                'p' => (int) $product->product_harga,
-                'c' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
-                'v' => $variants,
+                'product_nama' => $product->product_nama,
+                'product_harga' => (int) $product->product_harga,
+                'product_category' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
+                'variants' => $variants,
             ];
         });
 
         // Transform categories
         $posCategories = $categories->map(function ($category) {
-            return $category->{Category::field_name()};
+            return [
+                'category_nama' => $category->{Category::field_name()},
+            ];
         })->toArray();
 
         // Transform discounts
