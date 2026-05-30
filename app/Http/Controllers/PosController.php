@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Variant;
+use App\Models\Discount;
 use App\Models\PosOrder;
 use App\Models\PosOrderItem;
 use Illuminate\Http\Request;
@@ -41,9 +42,22 @@ class PosController extends Controller
             return $category->{Category::field_name()};
         })->toArray();
 
+        // Transform discounts
+        $discounts = Discount::where('discount_active', true)->get()->map(function ($d) {
+            return [
+                'code' => $d->discount_code,
+                'nama' => $d->discount_nama,
+                'type' => $d->discount_type,
+                'val' => (int) $d->discount_value,
+                'min' => (int) $d->discount_min_transaction,
+                'max' => $d->discount_max_amount ? (int) $d->discount_max_amount : null,
+            ];
+        })->toArray();
+
         return view('pages.pos', [
             'products' => $posProducts,
             'categories' => $posCategories,
+            'discounts' => $discounts,
             'store_lat' => config('shipping.store_lat'),
             'store_lng' => config('shipping.store_lng'),
             'price_per_km' => config('shipping.price_per_km'),

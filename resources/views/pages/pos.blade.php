@@ -195,18 +195,21 @@
 <script>
 const P=@json($products ?? []);
 const CATEGORIES=@json($categories ?? ['All']);
+const DISCOUNTS=@json($discounts ?? []);
 let cart=[],cat="All",view="grid",dP=true,pay="",noteProd=null,shipCost=0,voucherDisc=0;
 const fmt=n=>"Rp "+n.toLocaleString("id-ID");
-const variants=['Regular','Large','Extra'];
-const VOUCHERS={HEMAT10:{type:'pct',val:10,label:'HEMAT10 (-10%)'},DISKON5K:{type:'fix',val:5000,label:'DISKON5K (-Rp 5.000)'},GRATIS20:{type:'pct',val:20,label:'GRATIS20 (-20%)'}};
 
 function applyVoucher(){
   const code=document.getElementById('voucherCode').value.trim().toUpperCase();
-  const v=VOUCHERS[code];
+  const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);
+  const v=DISCOUNTS.find(d=>d.code===code);
   if(!v){alert('Voucher tidak valid');voucherDisc=0;document.getElementById('voucherInfo').classList.add('hidden');calcT();return;}
+  if(v.min && st<v.min){alert('Minimal transaksi Rp '+v.min.toLocaleString('id-ID')+' untuk menggunakan '+v.nama);return;}
   document.getElementById('voucherInfo').classList.remove('hidden');
-  document.getElementById('voucherLabel').textContent='✓ '+v.label;
-  voucherDisc=v.type==='pct'?v.val:v.val;
+  const labelText=v.type==='percentage'?' ('+v.val+'%)':' (Rp '+v.val.toLocaleString('id-ID')+')';
+  const minText=v.min?'\nMin: Rp '+v.min.toLocaleString('id-ID'):'';
+  document.getElementById('voucherLabel').textContent='✓ '+v.nama+labelText+minText;
+  voucherDisc=v.val;
   document.getElementById('voucherInfo').dataset.type=v.type;
   calcT();
 }
@@ -273,13 +276,22 @@ if(view==="grid"){c.className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 ga
 else{c.className="space-y-1 overflow-y-scroll min-h-0";c.innerHTML=f.map(p=>`<div class="pc flex items-center gap-2 bg-base-100 border border-base-300 rounded p-1.5 cursor-pointer" onclick="add('${p.n}')"><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${p.n}</p><span class="text-[10px] text-base-content/60">${p.c}</span></div><span class="text-xs font-bold shrink-0 mr-1">${fmt(p.p)}</span><button class="btn btn-xs btn-soft btn-circle shrink-0" onclick="openNote('${p.n}',event)" title="Catatan"><span class="icon-[tabler--note] size-3"></span></button></div>`).join("");}}
 
 function add(n){const p=P.find(x=>x.n===n);const key=n+'|Regular|';const e=cart.find(x=>x.key===key);if(e)e.q++;else cart.push({key,n:p.n,p:p.p,q:1,variant:'Regular',note:'',extra:0});rCart();calcT();}
-function uQ(key,d){const i=cart.find(x=>x.key===key);i.q+=d;if(i.q<=0)cart=cart.filter(x=>x.key!==key);rCart();calcT();}
+function uQ(key,d){const i=cart.find(x=>x.key===key);i.q+=d;if(i.q<=0)cart=cart.filter(x=>x.key!==key);
+  // Recheck voucher min amount
+  const st=cart.reduce((s,item)=>s+(item.p+item.extra)*item.q,0);
+  const code=document.getElementById('voucherCode').value.trim().toUpperCase();
+  const v=DISCOUNTS.find(disc=>disc.code===code);
+  if(v&&v.min&&st<v.min){document.getElementById('voucherCode').value='';voucherDisc=0;document.getElementById('voucherInfo').classList.add('hidden');}
+  rCart();calcT();}
 function clearCart(){cart=[];rCart();calcT();}
 function rCart(){const c=document.getElementById("cart");const cnt=cart.reduce((s,i)=>s+i.q,0);document.getElementById("cc").textContent=cnt?"("+cnt+")":"";document.getElementById("ccM").textContent=cnt||"";if(!cart.length){c.innerHTML='<p class="text-center text-base-content/40 text-xs py-4">Empty</p>';return;}c.innerHTML=cart.map(i=>{const hasInfo=i.variant!=='Regular'||i.note;const unitPrice=i.p;const lineTotal=(unitPrice+i.extra)*i.q;return `<div class="py-1 border-b border-base-200 last:border-0"><div class="flex items-center gap-1"><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${i.n}</p>${hasInfo?`<p class="text-[9px] text-base-content/50">${i.variant!=='Regular'?'<span class="badge badge-xs">'+i.variant+'</span> ':''}${i.note?'📝 '+i.note:''}</p>`:''}<p class="text-[10px] text-base-content/60">${fmt(unitPrice)}${i.extra&&i.variant!=='Regular'?' <span class="text-primary">(+'+fmt(i.extra)+')</span>':''}</p></div><div class="join shrink-0"><button class="btn btn-xs join-item" onclick="uQ('${i.key}',-1)">−</button><span class="btn btn-xs join-item no-animation font-bold">${i.q}</span><button class="btn btn-xs join-item" onclick="uQ('${i.key}',1)">+</button></div><span class="text-xs font-bold w-14 text-right shrink-0">${fmt(lineTotal)}</span></div></div>`;}).join("");}
 function calcT(){const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);
-  // Voucher
+  // Voucher with max amount check
   const vType=document.getElementById('voucherInfo').dataset.type;
-  const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;
+  const code=document.getElementById('voucherCode').value.trim().toUpperCase();
+  const v=DISCOUNTS.find(d=>d.code===code);
+  let vAmt=0;
+  if(voucherDisc&&v){vAmt=v.type==='pct'?af*voucherDisc/100:voucherDisc;if(v.max&&vAmt>v.max)vAmt=v.max;}
   if(voucherDisc)document.getElementById('voucherAmt').textContent='-'+fmt(Math.round(vAmt));
   af=Math.max(0,af-vAmt);
   const g=Math.round(af+af*tv/100+shipCost);document.getElementById("sub").textContent=fmt(st);document.getElementById("tot").textContent=fmt(g);}
