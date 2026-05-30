@@ -71,4 +71,9 @@ class Product extends BaseModel
         return $this->hasOne(Category::getModel(), Category::field_key(), 'product_id_category');
     }
 
+    public function variants()
+    {
+        return $this->hasMany(Variant::class, 'product_id', 'product_id');
+    }
+
 }
