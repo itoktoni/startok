@@ -8,8 +8,8 @@
             </div>
         </div>
         <div class="flex-1 min-w-0 text-left">
-            <p class="font-medium text-sm truncate">{{ auth()->user()->name }} ( {{ ucfirst(auth()->user()->role) }} )</p>
-            <p class="text-xs text-base-content/50 truncate">{{ auth()->user()->email }}</p>
+            <p class="font-medium text-sm truncate">{{ ucfirst(auth()->user()->role) }}</p>
+            <p class="text-xs text-base-content/50 truncate">{{ auth()->user()->name }}</p>
         </div>
         <span class="icon-[tabler--dots-vertical] size-4 text-base-content/40"></span>
     </button>
