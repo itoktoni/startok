@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified', 'access'])->group(function () {
     // POS Routes
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::get('/pos/table', [PosController::class, 'index'])->name('pos.table');
+    Route::post('/pos-checkout', [PosController::class, 'checkout'])->name('pos.checkout');
 });
 
 require __DIR__.'/settings.php';

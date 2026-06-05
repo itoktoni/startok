@@ -21,7 +21,7 @@
     <strong class="text-sm">POS</strong>
     <div class="flex items-center gap-2">
         <span id="syncStatus" class="badge badge-xs badge-success">Online</span>
-        <span id="pendingSync" class="badge badge-xs badge-warning hidden">0 pending</span>
+        <button id="pendingSync" class="badge badge-xs badge-warning hidden cursor-pointer" onclick="clearPending()">0 pending</button>
         <span class="text-xs text-base-content/60" id="clk"></span>
     </div>
 </nav>
@@ -92,6 +92,17 @@
             <p class="text-center text-base-content/40 text-xs py-4">Empty</p>
         </div>
         <div class="border-t border-base-300 p-2 space-y-1.5 shrink-0">
+            <!-- Customer -->
+            <div class="text-xs mb-2">
+                <span class="text-base-content/60">Customer</span>
+                <select id="custSelect" class="select select-sm w-full mt-1" onchange="onCustChange(this)">
+                    <option value="">Walk-in Customer</option>
+                    @foreach($customers as $c)
+                    <option value="{{ $c['id'] }}">{{ $c['nama'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="border-b border-base-300 -mx-2 my-1"></div>
             <!-- Shipping -->
             <div class="text-xs mb-2">
                 <span class="text-base-content/60">Pengiriman</span>
@@ -205,7 +216,8 @@
     const P=@json($products ?? []);
     const CATEGORIES=@json($categories ?? ['All']);
     const DISCOUNTS=@json($discounts ?? []);
-    let cart=[],cat="All",view="grid",dP=true,pay="",noteProd=null,shipCost=0,voucherDisc=0;
+    const CUSTOMERS=@json($customers ?? []);
+    let cart=[],cat="All",view="grid",dP=true,pay="",noteProd=null,shipCost=0,voucherDisc=0,customerId=null;
     const fmt=n=>"Rp "+n.toLocaleString("id-ID");
 
     // Dexie DB for offline storage
@@ -254,6 +266,13 @@
         return orderCode;
     }
 
+    // Clear all pending orders
+    async function clearPending() {
+        if (!confirm('Hapus semua order pending?')) return;
+        await db.orders.where('status').equals('pending').delete();
+        await updatePendingBadge();
+    }
+
     // Sync pending orders to server
     async function syncPendingOrders() {
         if (!isOnline) return;
@@ -279,6 +298,7 @@
         await updatePendingBadge();
     }
 
+function onCustChange(sel){customerId=sel.value||null;}
 function applyVoucher(){
   const code=document.getElementById('voucherCode').value.trim().toUpperCase();
   const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);
@@ -375,7 +395,7 @@ function calcT(){const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(d
   if(voucherDisc)document.getElementById('voucherAmt').textContent='-'+fmt(Math.round(vAmt));
   af=Math.max(0,af-vAmt);
   const g=Math.round(af+af*tv/100+shipCost);document.getElementById("sub").textContent=fmt(st);document.getElementById("tot").textContent=fmt(g);}
-async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({name:i.n,price:i.p,quantity:i.q,variant:i.variant,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt)};try{if(isOnline){const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}else{await saveOrderLocal(data);alert('Order disimpan offline! Akan sync saat online.');clearCart();}}catch(e){await saveOrderLocal(data);alert('Koneksi gagal - order disimpan offline! Akan sync saat online.');clearCart();}}
+async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({name:i.n,price:i.p,quantity:i.q,variant:i.variant,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt),customer_id:customerId};try{if(isOnline){const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}else{await saveOrderLocal(data);alert('Order disimpan offline! Akan sync saat online.');clearCart();}}catch(e){await saveOrderLocal(data);alert('Koneksi gagal - order disimpan offline! Akan sync saat online.');clearCart();}}
 function expPDF(){if(!cart.length)return alert("Empty!");const d=document.createElement('div');d.style.cssText='padding:16px;font:12px sans-serif';d.innerHTML='<h3>Struk - '+new Date().toLocaleString('id-ID')+'</h3><hr><br>'+cart.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.n} x${i.q}</span><span>${fmt((i.p+i.extra)*i.q)}</span></div>`).join('')+'<hr><div style="display:flex;justify-content:space-between;font-weight:bold;margin-top:8px"><span>Total</span><span>'+document.getElementById("tot").textContent+'</span></div>';html2pdf().set({margin:5,filename:'struk.pdf',jsPDF:{format:[80,200],unit:'mm'}}).from(d).save();}
 document.querySelectorAll(".cat").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".cat").forEach(x=>{x.className="cat btn btn-xs btn-outline shrink-0"});b.className="cat btn btn-xs btn-primary shrink-0";cat=b.dataset.c;render();}));
 document.querySelectorAll(".pay").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".pay").forEach(x=>{x.className="pay btn btn-xs btn-outline flex-1"});b.className="pay btn btn-xs btn-primary flex-1";pay=b.dataset.m;document.getElementById("qr").classList.toggle("hidden",pay!=="qris");}));

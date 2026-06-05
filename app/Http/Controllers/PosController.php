@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Variant;
 use App\Models\Discount;
 use App\Models\PosOrder;
@@ -56,10 +57,21 @@ class PosController extends Controller
             ];
         })->toArray();
 
+        // Transform customers
+        $customers = Customer::all()->map(function ($c) {
+            return [
+                'id' => $c->customer_id,
+                'nama' => $c->customer_nama,
+                'phone' => $c->customer_phone ?? '',
+                'address' => $c->customer_address ?? '',
+            ];
+        })->toArray();
+
         return view('pages.pos', [
             'products' => $posProducts,
             'categories' => $posCategories,
             'discounts' => $discounts,
+            'customers' => $customers,
             'store_lat' => config('shipping.store_lat'),
             'store_lng' => config('shipping.store_lng'),
             'price_per_km' => config('shipping.price_per_km'),
@@ -104,6 +116,7 @@ class PosController extends Controller
             'items.*.variant' => 'nullable|string',
             'items.*.note' => 'nullable|string',
             'items.*.extra' => 'nullable|numeric',
+            'customer_id' => 'nullable|exists:customer,customer_id',
             'payment_method' => 'required|string',
             'subtotal' => 'required|numeric',
             'discount' => 'nullable|numeric',
@@ -124,6 +137,7 @@ class PosController extends Controller
             // Create order
             $order = PosOrder::create([
                 'pos_order_code' => PosOrder::generateCode(),
+                'customer_id' => $request->customer_id ?? null,
                 'pos_payment_method' => $request->payment_method,
                 'pos_subtotal' => $request->subtotal,
                 'pos_discount' => $request->discount ?? 0,
