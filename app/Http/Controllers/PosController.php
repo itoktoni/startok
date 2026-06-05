@@ -143,11 +143,10 @@ class PosController extends Controller
             foreach ($request->items as $item) {
                 PosOrderItem::create([
                 'pos_order_id' => $order->pos_id,
-                    'pos_detail_product_name' => $item['name'],
+                    'pos_detail_product_id' => $item['product_id'] ?? null,
                     'pos_detail_unit_price' => $item['price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_extra_price' => $item['extra'] ?? 0,
-                    'pos_detail_variant' => $item['variant'] ?? null,
                     'pos_detail_note' => $item['note'] ?? null,
                     'pos_detail_line_total' => ($item['price'] + ($item['extra'] ?? 0)) * $item['quantity'],
                 ]);

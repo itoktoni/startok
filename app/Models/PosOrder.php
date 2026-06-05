@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -45,6 +46,7 @@ class PosOrder extends BaseModel
     protected $fillable = [
         'pos_id',
         'pos_order_code',
+        'customer_id',
         'pos_payment_method',
         'pos_subtotal',
         'pos_discount',
@@ -93,6 +95,11 @@ class PosOrder extends BaseModel
     public function items(): HasMany
     {
         return $this->hasMany(PosOrderItem::class, 'pos_order_id', 'pos_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'customer_id');
     }
 
     /**

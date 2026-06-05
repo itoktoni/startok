@@ -6,20 +6,17 @@
         ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']
     ]" />
 
-    <form method="POST" action="{{ isset($model) && $model->exists ? route('sales-order.postUpdate', ['id' => $model->pos_id]) : moduleRoute('postCreate') }}">
-        @csrf
-        @if(isset($model) && $model->exists)
-            @method('PUT')
-        @endif
+    <x-form :model="$model">
 
         {{-- Order Header --}}
         <div class="grid grid-cols-12 gap-3 mb-4">
             <div class="col-span-12 md:col-span-6">
                 <x-card label="Order Information">
                     <x-input col="12" name="pos_order_code" label="Order Code" :value="$model->pos_order_code ?? ''" disabled />
-                    <x-select col="6" name="pos_payment_method" label="Payment Method" :options="['cash' => 'Cash', 'qris' => 'QRIS', 'cod' => 'COD']" :value="$model->pos_payment_method ?? ''" />
-                    <x-select col="6" name="pos_status" label="Status" :options="['pending' => 'Pending', 'completed' => 'Completed', 'cancelled' => 'Cancelled']" :value="$model->pos_status ?? 'pending'" />
-                    <x-input col="12" name="pos_shipping_type" label="Shipping Type" :value="$model->pos_shipping_type ?? ''" />
+                    <x-select col="12" name="customer_id" label="Customer" :options="$customers->pluck('label', 'value')->toArray()" :default="$model->customer_id ?? ''" placeholder="-- Select Customer --" onchange="onCustomerChange(this)" />
+                    <x-select col="6" name="pos_payment_method" label="Payment Method" :options="['cash' => 'Cash', 'qris' => 'QRIS', 'cod' => 'COD']" :default="$model->pos_payment_method ?? ''" />
+                    <x-select col="6" name="pos_status" label="Status" :options="['pending' => 'Pending', 'completed' => 'Completed', 'cancelled' => 'Cancelled']" :default="$model->pos_status ?? 'pending'" />
+                    <x-select col="12" name="pos_shipping_type" label="Shipping Type" :options="['cod_berbah' => 'COD Berbah', 'cod_piyungan' => 'COD Piyungan', 'delivery' => 'Delivery']" :default="$model->pos_shipping_type ?? 'cod_berbah'" />
                 </x-card>
             </div>
             <div class="col-span-12 md:col-span-6">
@@ -41,7 +38,8 @@
                         <thead>
                             <tr class="bg-base-200">
                                 <th class="w-10 text-center">#</th>
-                                <th class="min-w-[250px]">Product</th>
+                                <th class="min-w-[200px]">Product</th>
+                                <th class="min-w-[180px]">Variant</th>
                                 <th class="w-24">Qty</th>
                                 <th class="w-36">Price</th>
                                 <th class="w-36 text-right">Line Total</th>
@@ -54,20 +52,25 @@
                                     <tr class="item-row">
                                         <td class="text-center row-num">{{ $index + 1 }}</td>
                                         <td>
-                                            <select name="items[{{ $index }}][product_id]" class="product-select select select-sm select-bordered w-full" onchange="updatePrice(this)">
+                                            <select name="items[{{ $index }}][product_id]" class="product-select select select-sm select-bordered w-full" onchange="onProductChange(this)">
                                                 <option value="">Select Product</option>
                                                 @foreach($products ?? [] as $product)
-                                                    <option value="{{ $product['value'] }}" data-price="{{ $product['price'] }}" {{ $item->pos_detail_product_name == $product['label'] ? 'selected' : '' }}>
+                                                    <option value="{{ $product['value'] }}" data-price="{{ $product['price'] }}" {{ $item->pos_detail_product_id == $product['value'] ? 'selected' : '' }}>
                                                         {{ $product['label'] }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="items[{{ $index }}][quantity]" value="{{ $item->pos_detail_quantity }}" min="1" class="input input-sm input-bordered w-full qty-input" onchange="calcRow(this)">
+                                            <select name="items[{{ $index }}][variant_id]" class="variant-select select select-sm select-bordered w-full" onchange="onVariantChange(this)" data-selected="{{ $item->pos_detail_variant_id ?? '' }}">
+                                                <option value="">No Variant</option>
+                                            </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="items[{{ $index }}][unit_price]" value="{{ $item->pos_detail_unit_price }}" class="input input-sm input-bordered w-full price-input" onchange="calcRow(this)">
+                                            <input type="number" name="items[{{ $index }}][quantity]" value="{{ $item->pos_detail_quantity }}" min="1" class="input input-sm input-bordered w-full qty-input" oninput="calcRow(this)">
+                                        </td>
+                                        <td>
+                                            <input type="number" name="items[{{ $index }}][unit_price]" value="{{ $item->pos_detail_unit_price }}" class="input input-sm input-bordered w-full price-input" oninput="calcRow(this)">
                                         </td>
                                         <td>
                                             <input type="number" name="items[{{ $index }}][line_total]" value="{{ $item->pos_detail_line_total }}" class="input input-sm input-bordered w-full text-right line-total" readonly>
@@ -83,7 +86,7 @@
                                 <tr class="item-row">
                                     <td class="text-center row-num">1</td>
                                     <td>
-                                        <select name="items[0][product_id]" class="product-select select select-sm select-bordered w-full" onchange="updatePrice(this)">
+                                        <select name="items[0][product_id]" class="product-select select select-sm select-bordered w-full" onchange="onProductChange(this)">
                                             <option value="">Select Product</option>
                                             @foreach($products ?? [] as $product)
                                                 <option value="{{ $product['value'] }}" data-price="{{ $product['price'] }}">{{ $product['label'] }}</option>
@@ -91,10 +94,15 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="number" name="items[0][quantity]" value="1" min="1" class="input input-sm input-bordered w-full qty-input" onchange="calcRow(this)">
+                                        <select name="items[0][variant_id]" class="variant-select select select-sm select-bordered w-full" onchange="onVariantChange(this)">
+                                            <option value="">No Variant</option>
+                                        </select>
                                     </td>
                                     <td>
-                                        <input type="number" name="items[0][unit_price]" value="0" class="input input-sm input-bordered w-full price-input" onchange="calcRow(this)">
+                                        <input type="number" name="items[0][quantity]" value="1" min="1" class="input input-sm input-bordered w-full qty-input" oninput="calcRow(this)">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="items[0][unit_price]" value="0" class="input input-sm input-bordered w-full price-input" oninput="calcRow(this)">
                                     </td>
                                     <td>
                                         <input type="number" name="items[0][line_total]" value="0" class="input input-sm input-bordered w-full text-right line-total" readonly>
@@ -109,7 +117,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="bg-base-200 font-semibold">
-                                <td colspan="3" class="text-right">Subtotal</td>
+                                <td colspan="4" class="text-right">Subtotal</td>
                                 <td colspan="2" class="text-right" id="tfoot_subtotal">Rp 0</td>
                                 <td></td>
                             </tr>
@@ -134,11 +142,25 @@
                             <input type="number" name="pos_subtotal" id="pos_subtotal" value="{{ $model->pos_subtotal ?? 0 }}" class="input input-sm input-bordered w-32 text-right" readonly>
                         </div>
                         <div class="flex justify-between items-center text-sm mb-2">
-                            <span class="text-base-content/60">Discount</span>
-                            <input type="number" name="pos_discount" id="pos_discount" value="{{ $model->pos_discount ?? 0 }}" step="0.01" class="input input-sm input-bordered w-32 text-right" onchange="calcTotal()">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base-content/60">Discount</span>
+                                <select name="pos_discount_id" id="pos_discount_id" class="select select-sm select-bordered w-48" onchange="applyDiscount(this)">
+                                    <option value="">No Discount</option>
+                                    @foreach($discounts ?? [] as $discount)
+                                        <option value="{{ $discount['value'] }}" data-type="{{ $discount['type'] }}" data-value="{{ $discount['value_amount'] }}" data-max="{{ $discount['max_amount'] }}" data-min="{{ $discount['min_transaction'] }}">
+                                            {{ $discount['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" name="pos_discount" id="pos_discount" value="{{ $model->pos_discount ?? 0 }}">
+                            </div>
+                            <span id="pos_discount_display" class="text-sm font-medium w-32 text-right">-Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center text-sm mb-2">
-                            <span class="text-base-content/60">Tax (11%)</span>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="pos_tax_enabled" class="checkbox checkbox-sm" onchange="calcTotal()" checked>
+                                <span class="text-base-content/60">Tax (11%)</span>
+                            </label>
                             <input type="number" name="pos_tax" id="pos_tax" value="{{ $model->pos_tax ?? 0 }}" step="0.01" class="input input-sm input-bordered w-32 text-right" readonly>
                         </div>
                         <div class="divider my-2"></div>
@@ -158,40 +180,70 @@
                 {{ isset($model) && $model->exists ? 'Update Order' : 'Create Order' }}
             </button>
         </div>
-    </form>
+    </x-form>
 
-    @push('scripts')
     <script>
         let rowCount = {{ isset($model) && $model->exists ? $model->items->count() : 1 }};
         const products = @json($products ?? []);
+        const variants = @json($variants ?? []);
+        const customers = @json($customers ?? []);
 
-        // Use event delegation for dynamically added rows
-        document.getElementById('tB').addEventListener('change', function(e) {
-            if (e.target.classList.contains('product-select')) {
-                updatePrice(e.target);
-            } else if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
-                calcRow(e.target);
+        function onCustomerChange(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const customerId = selectedOption ? selectedOption.value : '';
+            const addressInput = document.querySelector('[name="pos_shipping_address"]');
+            if (customerId && customers.length) {
+                const customer = customers.find(c => c.value == customerId);
+                if (customer && customer.address) {
+                    addressInput.value = customer.address;
+                }
             }
-        });
-
-        // Also bind to existing selects on page load
-        document.querySelectorAll('.product-select').forEach(function(select) {
-            select.addEventListener('change', function() {
-                updatePrice(this);
-            });
-        });
+        }
 
         function formatCurrency(num) {
             return 'Rp ' + Math.round(num).toLocaleString('id-ID');
         }
 
-        function updatePrice(select) {
+        function populateVariants(row, productId) {
+            const variantSelect = row.querySelector('.variant-select');
+            variantSelect.innerHTML = '<option value="">No Variant</option>';
+            if (productId && variants[productId]) {
+                variants[productId].forEach(function(v) {
+                    const opt = document.createElement('option');
+                    opt.value = v.value;
+                    opt.textContent = v.label;
+                    opt.setAttribute('data-price', v.price);
+                    variantSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function onProductChange(select) {
             const selectedOption = select.options[select.selectedIndex];
-            const price = selectedOption ? (selectedOption.getAttribute('data-price') || 0) : 0;
+            const productId = selectedOption ? selectedOption.value : '';
+            const productPrice = selectedOption ? (parseFloat(selectedOption.getAttribute('data-price')) || 0) : 0;
+            const row = select.closest('tr');
+
+            populateVariants(row, productId);
+
+            const priceInput = row.querySelector('.price-input');
+            priceInput.value = productPrice;
+            calcRow(select);
+        }
+
+        function onVariantChange(select) {
+            const selectedOption = select.options[select.selectedIndex];
             const row = select.closest('tr');
             const priceInput = row.querySelector('.price-input');
-            if (priceInput) {
-                priceInput.value = parseFloat(price) || 0;
+            const productSelect = row.querySelector('.product-select');
+            const productOption = productSelect.options[productSelect.selectedIndex];
+            const productPrice = productOption ? (parseFloat(productOption.getAttribute('data-price')) || 0) : 0;
+
+            if (selectedOption && selectedOption.value) {
+                const variantPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+                priceInput.value = productPrice + variantPrice;
+            } else {
+                priceInput.value = productPrice;
             }
             calcRow(select);
         }
@@ -215,12 +267,18 @@
 
             const discount = parseFloat(document.getElementById('pos_discount').value) || 0;
             let afterDiscount = subtotal - discount;
-            let tax = afterDiscount * 0.11;
+            const taxEnabled = document.getElementById('pos_tax_enabled').checked;
+            let tax = taxEnabled ? afterDiscount * 0.11 : 0;
             let total = afterDiscount + tax;
 
             document.getElementById('pos_subtotal').value = subtotal.toFixed(2);
             document.getElementById('pos_tax').value = tax.toFixed(2);
             document.getElementById('pos_total').value = total.toFixed(2);
+
+            const discountDisplay = document.getElementById('pos_discount_display');
+            if (discountDisplay) {
+                discountDisplay.textContent = discount > 0 ? '-' + formatCurrency(discount) : '-Rp 0';
+            }
 
             const tfootSubtotal = document.getElementById('tfoot_subtotal');
             if (tfootSubtotal) {
@@ -240,15 +298,20 @@
             newRow.innerHTML = `
                 <td class="text-center row-num">${rowCount}</td>
                 <td>
-                    <select name="items[${rowCount}][product_id]" class="product-select select select-sm select-bordered w-full">
+                    <select name="items[${rowCount}][product_id]" class="product-select select select-sm select-bordered w-full" onchange="onProductChange(this)">
                         ${optionsHtml}
                     </select>
                 </td>
                 <td>
-                    <input type="number" name="items[${rowCount}][quantity]" value="1" min="1" class="input input-sm input-bordered w-full qty-input">
+                    <select name="items[${rowCount}][variant_id]" class="variant-select select select-sm select-bordered w-full" onchange="onVariantChange(this)">
+                        <option value="">No Variant</option>
+                    </select>
                 </td>
                 <td>
-                    <input type="number" name="items[${rowCount}][unit_price]" value="0" class="input input-sm input-bordered w-full price-input">
+                    <input type="number" name="items[${rowCount}][quantity]" value="1" min="1" class="input input-sm input-bordered w-full qty-input" oninput="calcRow(this)">
+                </td>
+                <td>
+                    <input type="number" name="items[${rowCount}][unit_price]" value="0" class="input input-sm input-bordered w-full price-input" oninput="calcRow(this)">
                 </td>
                 <td>
                     <input type="number" name="items[${rowCount}][line_total]" value="0" class="input input-sm input-bordered w-full text-right line-total" readonly>
@@ -278,10 +341,56 @@
             });
         }
 
-        // Initialize calculation on page load
+        function applyDiscount(select) {
+            const opt = select.options[select.selectedIndex];
+            if (!opt || !opt.value) {
+                document.getElementById('pos_discount').value = 0;
+                calcTotal();
+                return;
+            }
+
+            const type = opt.getAttribute('data-type');
+            const value = parseFloat(opt.getAttribute('data-value')) || 0;
+            const maxAmount = parseFloat(opt.getAttribute('data-max')) || 0;
+            const minTransaction = parseFloat(opt.getAttribute('data-min')) || 0;
+
+            let subtotal = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                subtotal += parseFloat(row.querySelector('.line-total').value) || 0;
+            });
+
+            if (minTransaction > 0 && subtotal < minTransaction) {
+                alert('Minimum transaction for this discount is Rp ' + minTransaction.toLocaleString('id-ID'));
+                select.value = '';
+                document.getElementById('pos_discount').value = 0;
+                calcTotal();
+                return;
+            }
+
+            let discountAmount = type === 'percentage' ? subtotal * value / 100 : value;
+
+            if (maxAmount > 0 && discountAmount > maxAmount) {
+                discountAmount = maxAmount;
+            }
+
+            document.getElementById('pos_discount').value = discountAmount.toFixed(2);
+            calcTotal();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.item-row').forEach(function(row) {
+                const productSelect = row.querySelector('.product-select');
+                if (productSelect && productSelect.value) {
+                    populateVariants(row, productSelect.value);
+
+                    const variantSelect = row.querySelector('.variant-select');
+                    const selectedId = variantSelect.getAttribute('data-selected');
+                    if (selectedId) {
+                        variantSelect.value = selectedId;
+                    }
+                }
+            });
             calcTotal();
         });
     </script>
-    @endpush
 </x-layouts::app>

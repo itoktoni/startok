@@ -20,7 +20,7 @@ class PosOrderItem extends BaseModel
     public static $filterColumns = [
         'pos_detail_id' => 'Pos Detail Id',
         'pos_order_id' => 'Pos Order Id',
-        'pos_detail_product_name' => 'Pos Detail Product Name',
+        'pos_detail_product_id' => 'Product Id',
         'pos_detail_quantity' => 'Pos Detail Quantity',
     ];
 
@@ -30,7 +30,7 @@ class PosOrderItem extends BaseModel
     public static $sortColumns = [
         'pos_detail_id',
         'pos_order_id',
-        'pos_detail_product_name',
+        'pos_detail_product_id',
         'pos_detail_quantity',
         'pos_detail_line_total',
     ];
@@ -43,11 +43,11 @@ class PosOrderItem extends BaseModel
     protected $fillable = [
         'pos_detail_id',
         'pos_order_id',
-        'pos_detail_product_name',
+        'pos_detail_product_id',
         'pos_detail_unit_price',
         'pos_detail_quantity',
         'pos_detail_extra_price',
-        'pos_detail_variant',
+        'pos_detail_variant_id',
         'pos_detail_note',
         'pos_detail_line_total',
     ];
@@ -59,11 +59,11 @@ class PosOrderItem extends BaseModel
     {
         return [
             'pos_order_id' => 'required|exists:pos_orders,pos_id',
-            'pos_detail_product_name' => 'string',
+            'pos_detail_product_id' => 'nullable|exists:product,product_id',
             'pos_detail_unit_price' => 'numeric',
             'pos_detail_quantity' => 'integer|min:1',
             'pos_detail_extra_price' => 'numeric',
-            'pos_detail_variant' => 'string|nullable',
+            'pos_detail_variant_id' => 'nullable|exists:variants,variant_id',
             'pos_detail_note' => 'string|nullable',
             'pos_detail_line_total' => 'numeric',
         ];
@@ -71,7 +71,17 @@ class PosOrderItem extends BaseModel
 
     public static function field_name()
     {
-        return 'pos_detail_product_name';
+        return 'pos_detail_product_id';
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'pos_detail_product_id', 'product_id');
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(Variant::class, 'pos_detail_variant_id', 'variant_id');
     }
 
     /**

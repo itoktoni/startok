@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Category;
-use App\Models\Pos;
-use App\Models\PosItem;
+use App\Models\PosOrder;
+use App\Models\PosOrderItem;
 use App\Models\Product;
 use Livewire\Component;
 
@@ -222,34 +222,36 @@ class PosSystem extends Component
         }
 
         $totals = $this->calcTotal();
-        $posNo = 'POS-'.date('Ymd').'-'.str_pad((Pos::max('pos_id') ?? 0) + 1, 4, '0', STR_PAD_LEFT);
 
-        $pos = Pos::create([
-            'pos_no' => $posNo,
-            'pos_total' => $totals['total'],
-            'pos_payment' => $totals['total'],
-            'pos_change' => 0,
+        $order = PosOrder::create([
+            'pos_order_code' => PosOrder::generateCode(),
             'pos_payment_method' => $this->payMethod,
-            'pos_keterangan' => '',
-            'pos_created_at' => now(),
+            'pos_subtotal' => $totals['subtotal'],
+            'pos_discount' => $totals['discount'],
+            'pos_tax' => round($totals['afterDisc'] * 0.11),
+            'pos_shipping_cost' => $this->shipCost,
+            'pos_total' => $totals['total'],
+            'pos_shipping_type' => $this->shipCost > 0 ? 'delivery' : 'cod_berbah',
+            'pos_shipping_address' => $this->shipAddress ?: null,
+            'pos_status' => 'completed',
         ]);
 
         foreach ($this->cart as $item) {
-            PosItem::create([
-                'pos_id' => $pos->pos_id,
-                'product_id' => $item['product_id'],
-                'product_nama' => $item['product_nama'],
-                'product_harga' => $item['product_harga'],
-                'pos_qty' => $item['qty'],
-                'pos_item_total' => ($item['product_harga'] + $item['extra']) * $item['qty'],
-                'pos_item_note' => $item['variant'].($item['note'] ? ' - '.$item['note'] : ''),
+            PosOrderItem::create([
+                'pos_order_id' => $order->pos_id,
+                'pos_detail_product_id' => $item['product_id'],
+                'pos_detail_unit_price' => $item['product_harga'],
+                'pos_detail_quantity' => $item['qty'],
+                'pos_detail_extra_price' => $item['extra'],
+                'pos_detail_note' => $item['note'] ?: null,
+                'pos_detail_line_total' => ($item['product_harga'] + $item['extra']) * $item['qty'],
             ]);
         }
 
         $this->cart = [];
         $this->payMethod = 'cash';
         session()->forget('pos_cart');
-        $this->dispatch('notify', message: 'Transaksi berhasil!');
+        $this->dispatch('notify', message: 'Transaksi berhasil! Order: ' . $order->pos_order_code);
     }
 
     public function openMap()

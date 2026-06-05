@@ -4,9 +4,10 @@
         <div class="divider my-1 text-xs">Menu</div>
         <x-sidebar-item route="{{ route('pos.index') }}" icon="shopping-cart" label="POS" />
         <x-sidebar-item route="{{ route('product.getTable') }}" icon="package" label="Product" />
+        <x-sidebar-item route="{{ route('customer.getTable') }}" icon="users" label="Customer" />
         <x-sidebar-item route="{{ route('category.getTable') }}" icon="package" label="Category" />
         <x-sidebar-item route="{{ route('user.getTable') }}" icon="user" label="User" />
-        <x-sidebar-item route="{{ route('sales-order.getTable') }}" icon="shopping-cart" label="Sales Order" />
+        <x-sidebar-item route="{{ route('salesorder.getTable') }}" icon="shopping-cart" label="Sales Order" />
         <div class="divider my-1 text-xs">System</div>
         <x-sidebar-item route="#" icon="settings" label="Settings" />
     </x-slot:nav>

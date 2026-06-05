@@ -1,17 +1,26 @@
-<?php /** @var App\Models\Pos $model */ ?>
+<?php /** @var App\Models\Customer $table */ ?>
 
-<x-layouts::app :title="__('POS Table')">
-    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => 'POS']]" />
+<x-layouts::app>
+    <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
+        {{-- Filters --}}
         <x-filter :per-page="25" :fields="$fields">
             <x-slot:advanced>
                 @foreach ($fields as $key => $advance)
                 <x-filter-item :label="$advance" :name="$key"/>
                 @endforeach
+
                 <x-button variant="primary" class="btn-block" onclick="applyAdvanced()">Apply</x-button>
                 <x-button variant="soft" class="btn-block" onclick="resetAdvanced()">Reset</x-button>
             </x-slot:advanced>
         </x-filter>
+
+        {{-- Table --}}
+        @php
+            $currentSort = request('sort.0', '');
+            $sortField = str_replace(':desc','',str_replace(':asc','',$currentSort));
+            $sortDir = str_contains($currentSort, ':desc') ? 'desc' : 'asc';
+        @endphp
 
         <x-table>
             <x-slot:head>
@@ -21,6 +30,7 @@
                 <x-table-sort field="{{ $column }}" label="{{ formatLabel($column) }}" :sortField="$sortField" :sortDir="$sortDir" />
                 @endforeach
             </x-slot:head>
+
             <x-slot:body>
                 @foreach($data as $table)
                 <tr>
@@ -32,6 +42,7 @@
                 </tr>
                 @endforeach
             </x-slot:body>
+
             <x-slot:mobile>
                 <x-table-mobile-select :model="$model" :total="$data"/>
                 <div class="p-2 space-y-2" id="mBody">
@@ -48,20 +59,15 @@
                     @endforeach
                 </div>
             </x-slot:mobile>
+
         </x-table>
 
         <x-pagination :paginator="$data" />
         <x-action :model="$model" :action="['create', 'delete']"/>
+
     </div>
 
     <input type="hidden" class="module" value="{{ module() }}">
     <script src="/js/table.js"></script>
-    <script>
-        document.addEventListener('livewire:load', function() {
-            initTable('{{ $sortField }}', '{{ $sortDir }}');
-        });
-        if (typeof Livewire === 'undefined') {
-            initTable('{{ $sortField }}', '{{ $sortDir }}');
-        }
-    </script>
+    <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
 </x-layouts::app>
