@@ -26,11 +26,14 @@ class PosController extends Controller
         $posProducts = $products->map(function ($product) {
             $variants = $product->variants->map(function ($v) {
                 return [
+                    'variant_id' => $v->variant_id,
                     'variant_nama' => $v->variant_nama,
                     'variant_harga' => (int) $v->variant_harga,
+                    'variant_active' => $v->variant_active,
                 ];
             })->toArray();
             return [
+                'product_id' => $product->product_id,
                 'product_nama' => $product->product_nama,
                 'product_harga' => (int) $product->product_harga,
                 'product_category' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
@@ -96,6 +99,7 @@ class PosController extends Controller
 
         return response()->json($products->map(function ($product) {
             return [
+                'product_id' => $product->product_id,
                 'product_nama' => $product->product_nama,
                 'product_harga' => (int) $product->product_harga,
                 'product_category' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
@@ -110,9 +114,11 @@ class PosController extends Controller
     {
         $request->validate([
             'items' => 'required|array',
+            'items.*.product_id' => 'required|exists:product,product_id',
             'items.*.name' => 'required|string',
             'items.*.price' => 'required|numeric',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.variant_id' => 'nullable|exists:variants,variant_id',
             'items.*.variant' => 'nullable|string',
             'items.*.note' => 'nullable|string',
             'items.*.extra' => 'nullable|numeric',
@@ -158,6 +164,7 @@ class PosController extends Controller
                 PosOrderItem::create([
                 'pos_order_id' => $order->pos_id,
                     'pos_detail_product_id' => $item['product_id'] ?? null,
+                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
                     'pos_detail_unit_price' => $item['price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_extra_price' => $item['extra'] ?? 0,
@@ -207,5 +214,145 @@ class PosController extends Controller
     {
         $order = PosOrder::with('items')->findOrFail($id);
         return response()->json($order);
+    }
+
+    /**
+     * API: Return POS data for frontend fetch.
+     */
+    public function apiData()
+    {
+        $products = Product::with(['has_category', 'variants'])->get()->map(function ($product) {
+            $variants = $product->variants->map(function ($v) {
+                return [
+                    'variant_id' => $v->variant_id,
+                    'variant_nama' => $v->variant_nama,
+                    'variant_harga' => (int) $v->variant_harga,
+                    'variant_active' => $v->variant_active,
+                ];
+            })->toArray();
+            return [
+                'product_id' => $product->product_id,
+                'product_nama' => $product->product_nama,
+                'product_harga' => (int) $product->product_harga,
+                'product_category' => $product->has_category ? $product->has_category->{Category::field_name()} : 'Lainnya',
+                'variants' => $variants,
+            ];
+        });
+
+        $categories = Category::all()->map(function ($category) {
+            return [
+                'category_nama' => $category->{Category::field_name()},
+            ];
+        })->toArray();
+
+        $discounts = Discount::where('discount_active', true)->get()->map(function ($d) {
+            return [
+                'code' => $d->discount_code,
+                'nama' => $d->discount_nama,
+                'type' => $d->discount_type,
+                'val' => (int) $d->discount_value,
+                'min' => (int) $d->discount_min_transaction,
+                'max' => $d->discount_max_amount ? (int) $d->discount_max_amount : null,
+            ];
+        })->toArray();
+
+        $customers = Customer::all()->map(function ($c) {
+            return [
+                'id' => $c->customer_id,
+                'nama' => $c->customer_nama,
+                'phone' => $c->customer_phone ?? '',
+                'address' => $c->customer_address ?? '',
+            ];
+        })->toArray();
+
+        return response()->json([
+            'products' => $products,
+            'categories' => $categories,
+            'discounts' => $discounts,
+            'customers' => $customers,
+            'store_lat' => config('shipping.store_lat'),
+            'store_lng' => config('shipping.store_lng'),
+            'price_per_km' => config('shipping.price_per_km'),
+        ]);
+    }
+
+    /**
+     * API: Checkout for frontend fetch.
+     */
+    public function apiCheckout(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|exists:product,product_id',
+            'items.*.name' => 'required|string',
+            'items.*.price' => 'required|numeric',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.variant_id' => 'nullable|exists:variants,variant_id',
+            'items.*.variant' => 'nullable|string',
+            'items.*.note' => 'nullable|string',
+            'items.*.extra' => 'nullable|numeric',
+            'customer_id' => 'nullable|exists:customer,customer_id',
+            'payment_method' => 'required|string',
+            'subtotal' => 'required|numeric',
+            'discount' => 'nullable|numeric',
+            'tax' => 'nullable|numeric',
+            'shipping_cost' => 'nullable|numeric',
+            'shipping_type' => 'nullable|string',
+            'shipping_address' => 'nullable|string',
+            'shipping_lat' => 'nullable|numeric',
+            'shipping_lng' => 'nullable|numeric',
+            'voucher_code' => 'nullable|string',
+            'voucher_discount' => 'nullable|numeric',
+            'total' => 'required|numeric',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $order = PosOrder::create([
+                'pos_order_code' => PosOrder::generateCode(),
+                'customer_id' => $request->customer_id ?? null,
+                'pos_payment_method' => $request->payment_method,
+                'pos_subtotal' => $request->subtotal,
+                'pos_discount' => $request->discount ?? 0,
+                'pos_tax' => $request->tax ?? 0,
+                'pos_shipping_cost' => $request->shipping_cost ?? 0,
+                'pos_total' => $request->total,
+                'pos_shipping_type' => $request->shipping_type ?? 'cod_berbah',
+                'pos_shipping_address' => $request->shipping_address,
+                'pos_shipping_lat' => $request->shipping_lat,
+                'pos_shipping_lng' => $request->shipping_lng,
+                'pos_voucher_code' => $request->voucher_code,
+                'pos_voucher_discount' => $request->voucher_discount ?? 0,
+                'pos_status' => 'completed',
+            ]);
+
+            foreach ($request->items as $item) {
+                PosOrderItem::create([
+                    'pos_order_id' => $order->pos_id,
+                    'pos_detail_product_id' => $item['product_id'] ?? null,
+                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
+                    'pos_detail_unit_price' => $item['price'],
+                    'pos_detail_quantity' => $item['quantity'],
+                    'pos_detail_extra_price' => $item['extra'] ?? 0,
+                    'pos_detail_note' => $item['note'] ?? null,
+                    'pos_detail_line_total' => ($item['price'] + ($item['extra'] ?? 0)) * $item['quantity'],
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order processed successfully',
+                'order_id' => $order->pos_order_code,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process order: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

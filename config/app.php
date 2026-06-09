@@ -128,6 +128,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'MobileDetect' => MobileDetect::class,
+        'QR' => Milon\Barcode\Facades\DNS2DFacade::class,
     ])->toArray(),
 
 ];

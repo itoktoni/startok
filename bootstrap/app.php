@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         ModelAliasServiceProvider::class,
         CrudServiceProvider::class,
+        Milon\Barcode\BarcodeServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -24,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'access' => AccessMiddleware::class,
         ]);
+
+        $middleware->append([
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (ValidationException $e, Request $request) {
@@ -32,7 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'status' => false,
                     'code' => 422,
                     'message' => 'The given data was invalid.',
-                    'data' => $e->validator->errors()->getMessages(), // Custom errors key
+                    'data' => $e->validator->errors()->getMessages(),
                 ], 422);
             }
         });
