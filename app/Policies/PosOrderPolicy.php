@@ -2,6 +2,4 @@
 
 namespace App\Policies;
 
-class PosOrderPolicy extends BasePolicy
-{
-}
+class PosOrderPolicy extends BasePolicy {}

@@ -16,6 +16,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Minishlink\WebPush\Subscription;
+use Minishlink\WebPush\WebPush;
 
 /**
  * @mixin IdeHelperUser
@@ -95,6 +97,52 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    public function sendPushNotification(string $title, string $body, string $url = '/', ?string $icon = null): void
+    {
+        $subscriptions = $this->pushSubscriptions;
+
+        if ($subscriptions->isEmpty()) {
+            return;
+        }
+
+        $auth = [
+            'VAPID' => [
+                'subject' => config('push.vapid.subject'),
+                'publicKey' => config('push.vapid.public_key'),
+                'privateKey' => config('push.vapid.private_key'),
+            ],
+        ];
+
+        $webPush = new WebPush($auth);
+        $payload = json_encode([
+            'title' => $title,
+            'body' => $body,
+            'url' => $url,
+            'icon' => $icon ?? url('/apple-touch-icon.png'),
+        ]);
+
+        foreach ($subscriptions as $sub) {
+            $subscription = Subscription::create([
+                'endpoint' => $sub->endpoint,
+                'publicKey' => $sub->public_key,
+                'authToken' => $sub->auth_token,
+                'contentEncoding' => $sub->content_encoding ?? 'aes128gcm',
+            ]);
+            $webPush->queueNotification($subscription, $payload);
+        }
+
+        foreach ($webPush->flush() as $report) {
+            if (! $report->isSuccess() && $report->isSubscriptionExpired()) {
+                PushSubscription::where('endpoint', $report->getRequest()->getUri()->__toString())->delete();
+            }
+        }
     }
 
     /**

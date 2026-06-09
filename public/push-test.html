@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Notification Test</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; background: #f5f5f5; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 24px; max-width: 520px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; margin-bottom: 16px; }
+        .status { padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+        .status.ok { background: #d4edda; color: #155724; }
+        .status.err { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .status.warn { background: #fff3cd; color: #856404; }
+        button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin: 4px; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-red { background: #dc3545; color: white; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-gray { background: #6c757d; color: white; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #log { margin-top: 16px; padding: 12px; background: #1e1e1e; color: #0f0; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .step { padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 12px; }
+        .step h3 { font-size: 14px; margin-bottom: 8px; color: #555; }
+        .step.done { border-color: #28a745; background: #f8fff9; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔔 Push Notification Test</h1>
+        <div id="statusBox" class="status info">Initializing...</div>
+
+        <div class="step" id="step1">
+            <h3>Step 1: Login</h3>
+            <div class="row">
+                <input id="email" type="email" placeholder="Email" value="">
+                <input id="password" type="password" placeholder="Password" value="">
+            </div>
+            <button class="btn-gray" onclick="doLogin()" id="btnLogin">Login</button>
+        </div>
+
+        <div class="step" id="step2">
+            <h3>Step 2: Subscribe Push</h3>
+            <button class="btn-green" onclick="doSubscribe()" id="btnSub" disabled>Subscribe</button>
+            <button class="btn-red" onclick="doUnsubscribe()" id="btnUnsub" disabled>Unsubscribe</button>
+        </div>
+
+        <div class="step" id="step3">
+            <h3>Step 3: Send Test Notification</h3>
+            <div class="row">
+                <input id="msgTitle" placeholder="Title" value="Halo Bunda!">
+                <input id="msgBody" placeholder="Body" value="Ini test push notification">
+            </div>
+            <button class="btn-blue" onclick="doSend()" id="btnSend" disabled>Send to User 1</button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+    const API = '/api';
+    let token = localStorage.getItem('push_test_token') || '';
+    let swReg = null;
+
+    function log(msg) {
+        const el = document.getElementById('log');
+        el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+        el.scrollTop = el.scrollHeight;
+        console.log('[PushTest]', msg);
+    }
+
+    function setStatus(text, type) {
+        const el = document.getElementById('statusBox');
+        el.textContent = text;
+        el.className = 'status ' + type;
+    }
+
+    function headers() {
+        const h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+        if (token) h['Authorization'] = 'Bearer ' + token;
+        return h;
+    }
+
+    async function apiFetch(path, opts = {}) {
+        const res = await fetch(API + path, { ...opts, headers: headers() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            const msg = data.message || JSON.stringify(data) || `HTTP ${res.status}`;
+            throw new Error(msg);
+        }
+        return data;
+    }
+
+    async function init() {
+        // Check SW support
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            setStatus('Push NOT supported in this browser', 'err');
+            return;
+        }
+
+        // Register SW
+        try {
+            swReg = await navigator.serviceWorker.register('/sw.js');
+            log('Service Worker registered');
+        } catch (e) {
+            log('SW register failed: ' + e.message);
+        }
+
+        // Check existing token
+        if (token) {
+            document.getElementById('step1').classList.add('done');
+            document.getElementById('btnSub').disabled = false;
+            document.getElementById('btnUnsub').disabled = false;
+            setStatus('Logged in. Ready to subscribe.', 'ok');
+            log('Using saved token');
+            await checkLocalSub();
+        } else {
+            setStatus('Login first, then subscribe.', 'warn');
+        }
+    }
+
+    async function checkLocalSub() {
+        if (!swReg) return;
+        const sub = await swReg.pushManager.getSubscription();
+        if (sub) {
+            log('Local push subscription exists');
+            document.getElementById('step2').classList.add('done');
+            document.getElementById('btnSend').disabled = false;
+            setStatus('Subscribed! Ready to send.', 'ok');
+        } else {
+            log('No local subscription yet');
+        }
+    }
+
+    // ============ STEP 1: LOGIN ============
+    async function doLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        if (!email || !password) { alert('Fill email & password'); return; }
+
+        try {
+            log('Logging in...');
+            const data = await apiFetch('/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password }),
+            });
+            token = data.access_token;
+            localStorage.setItem('push_test_token', token);
+            log('Login OK! Token saved.');
+            document.getElementById('step1').classList.add('done');
+            document.getElementById('btnSub').disabled = false;
+            document.getElementById('btnUnsub').disabled = false;
+            setStatus('Logged in! Now subscribe.', 'ok');
+            await checkLocalSub();
+        } catch (e) {
+            log('Login FAILED: ' + e.message);
+            setStatus('Login failed: ' + e.message, 'err');
+        }
+    }
+
+    // ============ STEP 2: SUBSCRIBE ============
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const arr = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; i++) arr[i] = rawData.charCodeAt(i);
+        return arr;
+    }
+
+    async function doSubscribe() {
+        if (!token) { alert('Login first!'); return; }
+        try {
+            // Request permission
+            const perm = await Notification.requestPermission();
+            log('Permission: ' + perm);
+            if (perm !== 'granted') { alert('Permission denied'); return; }
+
+            // Get VAPID key
+            log('Getting VAPID key...');
+            const vapidData = await apiFetch('/push/vapid-key');
+            log('VAPID key: ' + (vapidData.publicKey ? vapidData.publicKey.substring(0, 20) + '...' : 'MISSING'));
+            if (!vapidData.publicKey) { alert('No VAPID key on server'); return; }
+
+            // Subscribe browser
+            const sub = await swReg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidData.publicKey)
+            });
+            log('Browser subscribed! Endpoint: ' + sub.endpoint.substring(0, 60) + '...');
+
+            // Save to server
+            const subJson = sub.toJSON();
+            log('Saving to server: keys=' + JSON.stringify(Object.keys(subJson.keys || {})));
+            const result = await apiFetch('/push/subscribe', {
+                method: 'POST',
+                body: JSON.stringify(subJson),
+            });
+            log('Server: ' + JSON.stringify(result));
+
+            document.getElementById('step2').classList.add('done');
+            document.getElementById('btnSend').disabled = false;
+            setStatus('Subscribed & saved! Now send a test.', 'ok');
+        } catch (e) {
+            log('ERROR: ' + e.message);
+            setStatus('Subscribe failed: ' + e.message, 'err');
+        }
+    }
+
+    async function doUnsubscribe() {
+        try {
+            const sub = await swReg.pushManager.getSubscription();
+            if (!sub) { log('Already unsubscribed'); return; }
+
+            const endpoint = sub.endpoint;
+            await sub.unsubscribe();
+            log('Browser unsubscribed');
+
+            await apiFetch('/push/unsubscribe', {
+                method: 'POST',
+                body: JSON.stringify({ endpoint }),
+            }).catch(e => log('Server remove: ' + e.message));
+
+            document.getElementById('step2').classList.remove('done');
+            document.getElementById('btnSend').disabled = true;
+            setStatus('Unsubscribed', 'info');
+        } catch (e) {
+            log('ERROR: ' + e.message);
+        }
+    }
+
+    // ============ STEP 3: SEND ============
+    async function doSend() {
+        const title = document.getElementById('msgTitle').value;
+        const body = document.getElementById('msgBody').value;
+        log('Sending to user 1: "' + title + '"');
+
+        try {
+            const result = await apiFetch('/push/send', {
+                method: 'POST',
+                body: JSON.stringify({ user_id: 1, title, body, url: '/' }),
+            });
+            log('Result: ' + JSON.stringify(result));
+            if (result.sent > 0) {
+                setStatus('Notification sent! Check your desktop.', 'ok');
+            } else {
+                setStatus('Sent 0 notifications. Check logs.', 'warn');
+            }
+        } catch (e) {
+            log('Send ERROR: ' + e.message);
+            setStatus('Send failed: ' + e.message, 'err');
+        }
+    }
+
+    init();
+    </script>
+</body>
+</html>

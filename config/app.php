@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Facade;
+use Milon\Barcode\Facades\DNS2DFacade;
 use Riverskies\Laravel\MobileDetect\Facades\MobileDetect;
 
 return [
@@ -128,7 +129,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'MobileDetect' => MobileDetect::class,
-        'QR' => Milon\Barcode\Facades\DNS2DFacade::class,
+        'QR' => DNS2DFacade::class,
     ])->toArray(),
 
 ];

@@ -25,7 +25,7 @@ class SalesOrderController extends Controller
         $products = Product::select('product_id', 'product_nama', 'product_harga')->get()->map(function ($p) {
             return [
                 'value' => $p->product_id,
-                'label' => $p->product_nama . ' - Rp ' . number_format($p->product_harga),
+                'label' => $p->product_nama.' - Rp '.number_format($p->product_harga),
                 'price' => $p->product_harga,
             ];
         })->values();
@@ -34,7 +34,7 @@ class SalesOrderController extends Controller
             return $group->map(function ($v) {
                 return [
                     'value' => $v->variant_id,
-                    'label' => $v->variant_nama . ' - Rp ' . number_format($v->variant_harga),
+                    'label' => $v->variant_nama.' - Rp '.number_format($v->variant_harga),
                     'price' => $v->variant_harga,
                 ];
             })->values();
@@ -43,7 +43,7 @@ class SalesOrderController extends Controller
         $discounts = Discount::where('discount_active', true)->get()->map(function ($d) {
             return [
                 'value' => $d->discount_id,
-                'label' => $d->discount_code . ' - ' . $d->discount_nama,
+                'label' => $d->discount_code.' - '.$d->discount_nama,
                 'type' => $d->discount_type,
                 'value_amount' => $d->discount_value,
                 'max_amount' => $d->discount_max_amount,
@@ -54,7 +54,7 @@ class SalesOrderController extends Controller
         $customers = Customer::all()->map(function ($c) {
             return [
                 'value' => $c->customer_id,
-                'label' => $c->customer_nama . ($c->customer_phone ? ' - ' . $c->customer_phone : ''),
+                'label' => $c->customer_nama.($c->customer_phone ? ' - '.$c->customer_phone : ''),
                 'address' => $c->customer_address ?? '',
             ];
         })->values();
@@ -73,7 +73,7 @@ class SalesOrderController extends Controller
         $products = Product::select('product_id', 'product_nama', 'product_harga')->get()->map(function ($p) {
             return [
                 'value' => $p->product_id,
-                'label' => $p->product_nama . ' - Rp ' . number_format($p->product_harga),
+                'label' => $p->product_nama.' - Rp '.number_format($p->product_harga),
                 'price' => $p->product_harga,
             ];
         })->values();
@@ -82,7 +82,7 @@ class SalesOrderController extends Controller
             return $group->map(function ($v) {
                 return [
                     'value' => $v->variant_id,
-                    'label' => $v->variant_nama . ' - Rp ' . number_format($v->variant_harga),
+                    'label' => $v->variant_nama.' - Rp '.number_format($v->variant_harga),
                     'price' => $v->variant_harga,
                 ];
             })->values();
@@ -91,7 +91,7 @@ class SalesOrderController extends Controller
         $discounts = Discount::where('discount_active', true)->get()->map(function ($d) {
             return [
                 'value' => $d->discount_id,
-                'label' => $d->discount_code . ' - ' . $d->discount_nama,
+                'label' => $d->discount_code.' - '.$d->discount_nama,
                 'type' => $d->discount_type,
                 'value_amount' => $d->discount_value,
                 'max_amount' => $d->discount_max_amount,
@@ -102,7 +102,7 @@ class SalesOrderController extends Controller
         $customers = Customer::all()->map(function ($c) {
             return [
                 'value' => $c->customer_id,
-                'label' => $c->customer_nama . ($c->customer_phone ? ' - ' . $c->customer_phone : ''),
+                'label' => $c->customer_nama.($c->customer_phone ? ' - '.$c->customer_phone : ''),
                 'address' => $c->customer_address ?? '',
             ];
         })->values();
@@ -156,17 +156,19 @@ class SalesOrderController extends Controller
                 PosOrderItem::create([
                     'pos_order_id' => $order->pos_id,
                     'pos_detail_product_id' => $item['product_id'],
-                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
+                    'pos_detail_variant_id' => ! empty($item['variant_id']) ? $item['variant_id'] : null,
                     'pos_detail_unit_price' => $item['unit_price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_line_total' => $item['line_total'],
                 ]);
             }
 
-            flash()->success('Order created successfully: ' . $order->pos_order_code);
+            flash()->success('Order created successfully: '.$order->pos_order_code);
+
             return redirect()->action([self::class, 'getTable']);
         } catch (\Throwable $th) {
-            flash()->error('Failed to create order: ' . $th->getMessage());
+            flash()->error('Failed to create order: '.$th->getMessage());
+
             return redirect()->back()->withInput();
         }
     }
@@ -215,17 +217,19 @@ class SalesOrderController extends Controller
                 PosOrderItem::create([
                     'pos_order_id' => $order->pos_id,
                     'pos_detail_product_id' => $item['product_id'],
-                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
+                    'pos_detail_variant_id' => ! empty($item['variant_id']) ? $item['variant_id'] : null,
                     'pos_detail_unit_price' => $item['unit_price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_line_total' => $item['line_total'],
                 ]);
             }
 
-            flash()->success('Order updated successfully: ' . $order->pos_order_code);
+            flash()->success('Order updated successfully: '.$order->pos_order_code);
+
             return redirect()->action([self::class, 'getTable']);
         } catch (\Throwable $th) {
-            flash()->error('Failed to update order: ' . $th->getMessage());
+            flash()->error('Failed to update order: '.$th->getMessage());
+
             return redirect()->back()->withInput();
         }
     }

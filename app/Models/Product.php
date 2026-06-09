@@ -76,5 +76,4 @@ class Product extends BaseModel
     {
         return $this->hasMany(Variant::class, 'product_id', 'product_id');
     }
-
 }

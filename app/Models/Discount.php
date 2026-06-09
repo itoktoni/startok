@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
-
 /**
  * @mixin IdeHelperDiscount
  */
 class Discount extends BaseModel
 {
     protected $table = 'discounts';
+
     protected $primaryKey = 'discount_id';
+
     public $incrementing = true;
 
     /**
@@ -77,7 +77,7 @@ class Discount extends BaseModel
      */
     public function isValid($subtotal = 0): bool
     {
-        if (!$this->discount_active) {
+        if (! $this->discount_active) {
             return false;
         }
 
@@ -102,7 +102,7 @@ class Discount extends BaseModel
      */
     public function calculate($subtotal): float
     {
-        if (!$this->isValid($subtotal)) {
+        if (! $this->isValid($subtotal)) {
             return 0;
         }
 

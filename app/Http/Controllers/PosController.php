@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\Category;
 use App\Models\Customer;
-use App\Models\Variant;
 use App\Models\Discount;
 use App\Models\PosOrder;
 use App\Models\PosOrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +31,7 @@ class PosController extends Controller
                     'variant_active' => $v->variant_active,
                 ];
             })->toArray();
+
             return [
                 'product_id' => $product->product_id,
                 'product_nama' => $product->product_nama,
@@ -93,7 +93,7 @@ class PosController extends Controller
                 });
             })
             ->when($request->search, function ($query) use ($request) {
-                return $query->where('product_nama', 'like', '%' . $request->search . '%');
+                return $query->where('product_nama', 'like', '%'.$request->search.'%');
             })
             ->get();
 
@@ -162,9 +162,9 @@ class PosController extends Controller
             // Create order items
             foreach ($request->items as $item) {
                 PosOrderItem::create([
-                'pos_order_id' => $order->pos_id,
+                    'pos_order_id' => $order->pos_id,
                     'pos_detail_product_id' => $item['product_id'] ?? null,
-                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
+                    'pos_detail_variant_id' => ! empty($item['variant_id']) ? $item['variant_id'] : null,
                     'pos_detail_unit_price' => $item['price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_extra_price' => $item['extra'] ?? 0,
@@ -182,9 +182,10 @@ class PosController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to process order: ' . $e->getMessage(),
+                'message' => 'Failed to process order: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -213,6 +214,7 @@ class PosController extends Controller
     public function orderDetail($id)
     {
         $order = PosOrder::with('items')->findOrFail($id);
+
         return response()->json($order);
     }
 
@@ -230,6 +232,7 @@ class PosController extends Controller
                     'variant_active' => $v->variant_active,
                 ];
             })->toArray();
+
             return [
                 'product_id' => $product->product_id,
                 'product_nama' => $product->product_nama,
@@ -331,7 +334,7 @@ class PosController extends Controller
                 PosOrderItem::create([
                     'pos_order_id' => $order->pos_id,
                     'pos_detail_product_id' => $item['product_id'] ?? null,
-                    'pos_detail_variant_id' => !empty($item['variant_id']) ? $item['variant_id'] : null,
+                    'pos_detail_variant_id' => ! empty($item['variant_id']) ? $item['variant_id'] : null,
                     'pos_detail_unit_price' => $item['price'],
                     'pos_detail_quantity' => $item['quantity'],
                     'pos_detail_extra_price' => $item['extra'] ?? 0,
@@ -349,9 +352,10 @@ class PosController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to process order: ' . $e->getMessage(),
+                'message' => 'Failed to process order: '.$e->getMessage(),
             ], 500);
         }
     }

@@ -9,6 +9,7 @@
         <x-sidebar-item route="{{ route('user.getTable') }}" icon="user" label="User" />
         <x-sidebar-item route="{{ route('salesorder.getTable') }}" icon="shopping-cart" label="Sales Order" />
         <div class="divider my-1 text-xs">System</div>
+        <x-sidebar-item route="{{ route('notifications') }}" icon="bell" label="Notifications" />
         <x-sidebar-item route="#" icon="settings" label="Settings" />
     </x-slot:nav>
 </x-sidebar>

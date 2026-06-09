@@ -6,14 +6,16 @@ use Ibex\CrudGenerator\CrudServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Milon\Barcode\BarcodeServiceProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         ModelAliasServiceProvider::class,
         CrudServiceProvider::class,
-        Milon\Barcode\BarcodeServiceProvider::class,
+        BarcodeServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -27,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append([
-            \Illuminate\Http\Middleware\HandleCors::class,
+            HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

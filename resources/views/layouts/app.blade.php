@@ -18,7 +18,6 @@
     </main>
 
     @include('layouts.footer')
-</script>
 
     <script>
         function toggleSB(){document.getElementById('sb').classList.toggle('-translate-x-full');document.getElementById('ov').classList.toggle('hidden')}

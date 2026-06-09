@@ -18,18 +18,22 @@ class LangkahKecilAnak extends Model
         'tahun_lahir',
         'emoji',
         'avatar',
-        'skills',
-        'history',
-        'completed_skills',
         'settings',
     ];
 
     protected $casts = [
-        'skills' => 'array',
-        'history' => 'array',
-        'completed_skills' => 'array',
         'settings' => 'array',
     ];
+
+    public function skills()
+    {
+        return $this->hasMany(LangkahKecilSkill::class, 'anak_id');
+    }
+
+    public function completedSkills()
+    {
+        return $this->hasMany(LangkahKecilCompletedSkill::class, 'anak_id');
+    }
 
     public function challenges()
     {
