@@ -1,3 +1,17 @@
+let API_BASE_URL = '';
+let AUTH_TOKEN = '';
+
+self.addEventListener('message', function (event) {
+    if (event.data) {
+        if (event.data.type === 'SET_API_URL') {
+            API_BASE_URL = event.data.apiUrl || '';
+        }
+        if (event.data.type === 'SET_AUTH_TOKEN') {
+            AUTH_TOKEN = event.data.token || '';
+        }
+    }
+});
+
 self.addEventListener('push', function (event) {
     if (!event.data) return;
 
@@ -48,12 +62,13 @@ self.addEventListener('notificationclick', function (event) {
 self.addEventListener('pushsubscriptionchange', function (event) {
     event.waitUntil(
         self.registration.pushManager.subscribe(event.oldSubscription.options).then(function (subscription) {
-            return fetch('/api/push/subscribe', {
+            var headers = { 'Content-Type': 'application/json' };
+            if (AUTH_TOKEN) {
+                headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+            }
+            return fetch(API_BASE_URL + '/api/push/subscribe', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '',
-                },
+                headers: headers,
                 body: JSON.stringify(subscription.toJSON()),
             });
         })

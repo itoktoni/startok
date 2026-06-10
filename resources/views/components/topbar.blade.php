@@ -73,6 +73,22 @@
         return a;
     }
 
+    function apiUrl(path) {
+        var base = (window.PUSH_API_URL || '').replace(/\/$/, '');
+        return base + path;
+    }
+
+    function getAuthHeaders() {
+        var headers = {'Content-Type':'application/json','Accept':'application/json'};
+        if (window.PUSH_AUTH_TOKEN) {
+            headers['Authorization'] = 'Bearer ' + window.PUSH_AUTH_TOKEN;
+        } else {
+            var meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta) headers['X-CSRF-TOKEN'] = meta.content;
+        }
+        return headers;
+    }
+
     window.pushToggle = async function() {
         if (_loading) return;
         _loading = true;
@@ -85,10 +101,9 @@
                 var reg = await navigator.serviceWorker.ready;
                 var sub = await reg.pushManager.getSubscription();
                 if (sub) {
-                    var csrf = document.querySelector('meta[name="csrf-token"]').content;
-                    await fetch('/push/unsubscribe', {
+                    await fetch(apiUrl('/api/push/unsubscribe'), {
                         method: 'POST',
-                        headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({endpoint: sub.endpoint})
                     });
                     await sub.unsubscribe();
@@ -102,7 +117,9 @@
                 if (p !== 'granted') throw new Error('Izin notifikasi ditolak');
 
                 showDbg('Mengambil VAPID key...');
-                var vRes = await fetch('/api/push/vapid-key');
+                var vRes = await fetch(apiUrl('/api/push/vapid-key'), {
+                    headers: {'Accept': 'application/json'}
+                });
                 var vData = await vRes.json();
                 log('VAPID: ' + (vData.publicKey ? 'OK' : 'MISSING'));
                 if (!vData.publicKey) throw new Error('VAPID key tidak tersedia');
@@ -116,10 +133,9 @@
                 log('Subscribed: ' + sub.endpoint.substring(0,50));
 
                 showDbg('Menyimpan ke server...');
-                var csrf = document.querySelector('meta[name="csrf-token"]').content;
-                var sRes = await fetch('/push/subscribe', {
+                var sRes = await fetch(apiUrl('/api/push/subscribe'), {
                     method: 'POST',
-                    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(sub.toJSON())
                 });
                 var sData = await sRes.json();

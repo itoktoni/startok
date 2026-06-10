@@ -6,7 +6,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://langkahkecil.itoktoni.com'],
+    'allowed_origins' => [env('FRONTEND_URL', '*')],
 
     'allowed_origins_patterns' => [],
 

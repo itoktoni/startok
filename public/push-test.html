@@ -61,7 +61,7 @@
     </div>
 
     <script>
-    const API = '/api';
+    const API = (window.PUSH_API_URL || '').replace(/\/$/, '') + '/api';
     let token = localStorage.getItem('push_test_token') || '';
     let swReg = null;
 

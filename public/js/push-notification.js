@@ -1,6 +1,24 @@
 const PushNotification = {
     swRegistration: null,
     isSubscribed: false,
+    apiBaseUrl: (window.PUSH_API_URL || '').replace(/\/$/, ''),
+    authToken: window.PUSH_AUTH_TOKEN || null,
+
+    _getHeaders() {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
+        if (this.authToken) {
+            headers['Authorization'] = 'Bearer ' + this.authToken;
+        } else {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta) {
+                headers['X-CSRF-TOKEN'] = meta.content;
+            }
+        }
+        return headers;
+    },
 
     async init() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -11,6 +29,20 @@ const PushNotification = {
         try {
             this.swRegistration = await navigator.serviceWorker.register('/sw.js');
             console.log('Service Worker registered');
+
+            if (this.swRegistration.active && this.apiBaseUrl) {
+                this.swRegistration.active.postMessage({
+                    type: 'SET_API_URL',
+                    apiUrl: this.apiBaseUrl,
+                });
+            }
+
+            if (this.swRegistration.active && this.authToken) {
+                this.swRegistration.active.postMessage({
+                    type: 'SET_AUTH_TOKEN',
+                    token: this.authToken,
+                });
+            }
 
             const subscription = await this.swRegistration.pushManager.getSubscription();
             this.isSubscribed = subscription !== null;
@@ -24,7 +56,9 @@ const PushNotification = {
 
     async getVapidKey() {
         try {
-            const response = await fetch('/api/push/vapid-key');
+            const response = await fetch(this.apiBaseUrl + '/api/push/vapid-key', {
+                headers: { 'Accept': 'application/json' },
+            });
             const data = await response.json();
             return data.publicKey;
         } catch (error) {
@@ -65,13 +99,9 @@ const PushNotification = {
                 applicationServerKey: this.urlBase64ToUint8Array(vapidKey),
             });
 
-            const response = await fetch('/api/push/subscribe', {
+            const response = await fetch(this.apiBaseUrl + '/api/push/subscribe', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
+                headers: this._getHeaders(),
                 body: JSON.stringify(subscription.toJSON()),
             });
 
@@ -97,13 +127,9 @@ const PushNotification = {
 
             await subscription.unsubscribe();
 
-            await fetch('/api/push/unsubscribe', {
+            await fetch(this.apiBaseUrl + '/api/push/unsubscribe', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
+                headers: this._getHeaders(),
                 body: JSON.stringify({ endpoint: subscription.endpoint }),
             });
 
@@ -117,9 +143,10 @@ const PushNotification = {
 
     async checkStatus() {
         try {
-            const response = await fetch('/api/push/status', {
+            const response = await fetch(this.apiBaseUrl + '/api/push/status', {
                 headers: {
                     'Accept': 'application/json',
+                    ...(this.authToken ? { 'Authorization': 'Bearer ' + this.authToken } : {}),
                 },
             });
             const data = await response.json();
