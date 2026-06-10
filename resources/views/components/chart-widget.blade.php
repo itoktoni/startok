@@ -1,9 +1,10 @@
 @props(['title' => 'Chart', 'chart' => null])
 
-<div class="card bg-base-100 shadow-sm">
-    <div class="card-body p-4">
-        <h3 class="text-sm font-bold mb-2">{{ $title }}</h3>
-        {!! $chart->container() !!}
-        {!! $chart->script() !!}
-    </div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 form-card">
+    <h3 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+        {{ $title }}
+    </h3>
+    {!! $chart->container() !!}
+    {!! $chart->script() !!}
 </div>

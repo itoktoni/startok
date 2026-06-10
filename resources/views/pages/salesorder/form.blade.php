@@ -1,6 +1,6 @@
 <?php /** @var App\Models\PosOrder $model */ ?>
 
-<x-layouts::app>
+<x-layouts::warehouse>
     <x-breadcrumb :items="[
         ['url' => moduleRoute('getTable'), 'label' => 'Sales Order'],
         ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']
@@ -393,4 +393,4 @@
             calcTotal();
         });
     </script>
-</x-layouts::app>
+</x-layouts::warehouse>

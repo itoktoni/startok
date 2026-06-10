@@ -27,6 +27,26 @@ Route::middleware(['auth', 'verified', 'access'])->group(function () {
     // });
 
     Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
+    Route::view('dashboard-warehouse', 'dashboard-warehouse')->name('dashboard-warehouse');
+
+    // Warehouse Routes
+    Route::prefix('warehouse')->name('warehouse.')->group(function () {
+        Route::view('dashboard', 'warehouse.dashboard')->name('dashboard');
+        Route::view('register', 'warehouse.register')->name('register');
+        Route::view('stock', 'warehouse.stock')->name('stock');
+        Route::view('inbound', 'warehouse.inbound')->name('inbound');
+        Route::view('barang', 'warehouse.barang')->name('barang');
+        Route::view('active-tasks', 'warehouse.active-tasks')->name('active-tasks');
+        Route::view('forklift', 'warehouse.forklift')->name('forklift');
+        Route::view('generate-barcode', 'warehouse.generate-barcode')->name('generate-barcode');
+        Route::view('opname', 'warehouse.opname')->name('opname');
+        Route::view('outbound-orders', 'warehouse.outbound-orders')->name('outbound-orders');
+        Route::view('prepare-barang', 'warehouse.prepare-barang')->name('prepare-barang');
+        Route::view('putaway', 'warehouse.putaway')->name('putaway');
+        Route::view('selected-stock', 'warehouse.selected-stock')->name('selected-stock');
+        Route::view('split-barang', 'warehouse.split-barang')->name('split-barang');
+        Route::view('work-orders', 'warehouse.work-orders')->name('work-orders');
+    });
 
     // POS Routes
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');

@@ -1,6 +1,6 @@
 <?php /** @var App\Models\Customer $table */ ?>
 
-<x-layouts::app>
+<x-layouts::warehouse>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
@@ -45,7 +45,7 @@
 
             <x-slot:mobile>
                 <x-table-mobile-select :model="$model" :total="$data"/>
-                <div class="p-2 space-y-2" id="mBody">
+                <x-table-mobile-list>
                     @foreach($data as $table)
                     <x-table-mobile-item :id="$table->field_primary">
                         <x-table-mobile-header title="{{ $table->field_name }}" />
@@ -57,7 +57,7 @@
                         </x-table-mobile-footer>
                     </x-table-mobile-item>
                     @endforeach
-                </div>
+                </x-table-mobile-list>
             </x-slot:mobile>
 
         </x-table>
@@ -70,4 +70,4 @@
     <input type="hidden" class="module" value="{{ module() }}">
     <script src="/js/table.js"></script>
     <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
-</x-layouts::app>
+</x-layouts::warehouse>

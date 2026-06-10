@@ -76,7 +76,7 @@ function resetAdvanced() {
 }
 
 function toggleAll(el) {
-    document.querySelectorAll('tbody .checkbox').forEach(c => c.checked = el.checked);
+    document.querySelectorAll('tbody input[type="checkbox"]').forEach(c => c.checked = el.checked);
 }
 
 function mToggle(el) {
@@ -111,7 +111,7 @@ function updateMSel() {
 }
 
 function deleteSelected() {
-    const desktopIds = [...document.querySelectorAll('tbody .checkbox:checked')].map(c => c.value);
+    const desktopIds = [...document.querySelectorAll('tbody input[type="checkbox"]:checked')].map(c => c.value);
     const ids = desktopIds.length ? desktopIds : [...mSelected];
     if (!ids.length) return alert('No items selected');
     if (!confirm(`Delete ${ids.length} product(s)?`)) return;

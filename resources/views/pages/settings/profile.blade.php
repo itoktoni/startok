@@ -1,4 +1,4 @@
-<x-layouts::app>
+<x-layouts::warehouse>
     <x-breadcrumb :items="[['url' => route('dashboard'), 'label' => 'Dashboard'], ['url' => '', 'label' => 'Profile']]" />
 
     <x-form class="-mb-2" :action="route('profile.update')" method="POST">
@@ -30,4 +30,4 @@
         </div>
     @endif
 
-</x-layouts::app>
+</x-layouts::warehouse>
