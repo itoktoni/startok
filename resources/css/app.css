@@ -1,11 +1,5 @@
 @import "tailwindcss";
-@plugin "flyonui" {
-  themes: shadcn;
-}
 @plugin "@iconify/tailwind4";
-@import "../../node_modules/flyonui/variants.css";
-@source "../../node_modules/flyonui/dist/index.js";
-@source "../views";
 
 /* Material Design 3 Theme - Warehouse */
 @theme {
@@ -103,6 +97,203 @@
   --spacing-margin-desktop: 32px;
   --spacing-margin-mobile: 16px;
   --spacing-gutter: 16px;
+}
+
+/* FlyonUI replacement - manual button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.1s;
+  cursor: pointer;
+}
+.btn-xs {
+  height: 1.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.75rem;
+}
+.btn-sm {
+  height: 2rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.875rem;
+}
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.btn-primary:hover {
+  background-color: #001d6b;
+}
+.btn-outline {
+  border: 1px solid var(--color-outline);
+  background: transparent;
+  color: var(--color-on-surface-variant);
+}
+.btn-outline:hover {
+  background-color: var(--color-surface-container-low);
+}
+.btn-soft {
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-on-surface);
+}
+.btn-soft:hover {
+  background-color: var(--color-surface-container-low);
+}
+.btn-error {
+  background-color: var(--color-error);
+  color: var(--color-on-error);
+}
+.btn-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: 9999px;
+}
+.btn-block {
+  width: 100%;
+}
+
+/* Input styles */
+.input {
+  width: 100%;
+  border: 1px solid var(--color-outline-variant);
+  background: #ffffff;
+  color: var(--color-on-surface);
+  outline: none;
+}
+.input-xs {
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+}
+.input-sm {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+}
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* Select styles */
+.select {
+  width: 100%;
+  border: 1px solid var(--color-outline-variant);
+  background: #ffffff;
+  color: var(--color-on-surface);
+  outline: none;
+}
+.select-sm {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+}
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* Join (input group) styles */
+.join {
+  display: flex;
+}
+.join-item {
+  border-radius: 0;
+}
+.join-item:first-child {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+.join-item:last-child {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+.badge-xs {
+  height: 1rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.75rem;
+}
+.badge-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.badge-success {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+.badge-warning {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background-color: var(--color-outline-variant);
+  margin: 1rem 0;
+}
+
+/* Card */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 0.75rem;
+}
+.card-body {
+  padding: 1rem;
+}
+.card-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Radio */
+.radio {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--color-outline);
+  border-radius: 50%;
+  appearance: none;
+  position: relative;
+  cursor: pointer;
+}
+.radio:before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.1s;
+}
+.radio:checked:before {
+  background: var(--color-primary);
+}
+.radio-xs {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Theme colors - add missing base colors */
+@theme {
+  --color-base-100: var(--color-surface-container-lowest);
+  --color-base-200: var(--color-surface-container-low);
+  --color-base-300: var(--color-outline-variant);
+  --color-base-content: var(--color-on-surface);
 }
 
 /* Material Symbols */
