@@ -1,350 +1,177 @@
-<x-layouts::app :title="__('Dashboard')">
-
-    {{-- Stat Widgets --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 lg:mt-0">
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4 flex-row items-center gap-3">
-                <div class="bg-primary/10 rounded-xl p-2.5">
-                    <span
-                        class="icon-[tabler--currency-dollar] size-6 text-primary">
-                    </span>
-                </div>
-                <div>
-                    <p class="text-xs text-base-content/50">Revenue</p>
-                    <p class="text-lg font-bold leading-tight">Rp 45.2M</p>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4 flex-row items-center gap-3">
-                <div class="bg-success/10 rounded-xl p-2.5"><span
-                        class="icon-[tabler--shopping-cart] size-6 text-success"></span></div>
-                <div>
-                    <p class="text-xs text-base-content/50">Orders</p>
-                    <p class="text-lg font-bold leading-tight">1,248</p>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4 flex-row items-center gap-3">
-                <div class="bg-info/10 rounded-xl p-2.5"><span class="icon-[tabler--users] size-6 text-info"></span>
-                </div>
-                <div>
-                    <p class="text-xs text-base-content/50">Customers</p>
-                    <p class="text-lg font-bold leading-tight">856</p>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4 flex-row items-center gap-3">
-                <div class="bg-warning/10 rounded-xl p-2.5"><span
-                        class="icon-[tabler--package] size-6 text-warning"></span></div>
-                <div>
-                    <p class="text-xs text-base-content/50">Products</p>
-                    <p class="text-lg font-bold leading-tight">324</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Chart --}}
-    <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-4">
-            <h3 class="text-sm font-bold mb-2">Sales Overview</h3>
-            {!! $chart->container() !!}
-        </div>
-    </div>
-
-    {{-- Quick Menu --}}
-    <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-4">
-            <h3 class="text-sm font-bold mb-3">Quick Menu</h3>
-            <div class="grid grid-cols-4 lg:grid-cols-8 gap-2">
-                <a href="/product/table"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-primary/5 hover:bg-primary/10 border border-primary/10 transition">
-                    <span
-                        class="icon-[tabler--file-invoice] size-7 text-primary group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-primary">Invoice</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-success/5 hover:bg-success/10 border border-success/10 transition">
-                    <span
-                        class="icon-[tabler--shopping-cart] size-7 text-success group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-success">POS</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-info/5 hover:bg-info/10 border border-info/10 transition">
-                    <span
-                        class="icon-[tabler--forms] size-7 text-info group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-info">Forms</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-warning/5 hover:bg-warning/10 border border-warning/10 transition">
-                    <span
-                        class="icon-[tabler--report-analytics] size-7 text-warning group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-warning">Reports</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-secondary/5 hover:bg-secondary/10 border border-secondary/10 transition">
-                    <span
-                        class="icon-[tabler--users] size-7 text-secondary group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-secondary">Customers</span>
-                </a>
-                <a href="/product/table"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-accent/5 hover:bg-accent/10 border border-accent/10 transition">
-                    <span
-                        class="icon-[tabler--package] size-7 text-accent group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-accent">Products</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-neutral/5 hover:bg-neutral/15 border border-neutral/10 transition">
-                    <span
-                        class="icon-[tabler--settings] size-7 text-neutral group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-neutral">Settings</span>
-                </a>
-                <a href="#"
-                    class="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-neutral/5 hover:bg-neutral/15 border border-neutral/10 transition">
-                    <span
-                        class="icon-[tabler--help-circle] size-7 text-neutral group-hover:scale-110 transition-transform"></span>
-                    <span class="text-[11px] font-medium text-neutral">Help</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- Menu List --}}
-    <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-4">
-            <h3 class="text-sm font-bold mb-1">Menu</h3>
-            <div class="divide-y divide-base-200">
-                <a href="/product/table" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded"><span
-                        class="icon-[tabler--file-invoice] size-5 text-primary"></span><span
-                        class="flex-1 text-xs font-medium">Invoice Management</span><span
-                        class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span></a>
-                <a href="#" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded"><span
-                        class="icon-[tabler--shopping-cart] size-5 text-success"></span><span
-                        class="flex-1 text-xs font-medium">Point of Sale</span><span
-                        class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span></a>
-                <a href="#" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded"><span
-                        class="icon-[tabler--forms] size-5 text-info"></span><span
-                        class="flex-1 text-xs font-medium">Form Components</span><span
-                        class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span></a>
-                <a href="#" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded"><span
-                        class="icon-[tabler--report-analytics] size-5 text-warning"></span><span
-                        class="flex-1 text-xs font-medium">Reports & Analytics</span><span
-                        class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span></a>
-                <a href="#" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded"><span
-                        class="icon-[tabler--settings] size-5 text-base-content/60"></span><span
-                        class="flex-1 text-xs font-medium">Settings</span><span
-                        class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span></a>
-            </div>
-        </div>
-    </div>
-
-    {{-- Tabs --}}
-    <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-4">
-            <div class="flex gap-1 border-b border-base-300 mb-3">
-                <button class="tab-btn px-3 py-1.5 text-xs font-medium border-b-2 border-primary text-primary"
-                    onclick="showTab('trx')">Transaksi</button>
-                <button
-                    class="tab-btn px-3 py-1.5 text-xs font-medium border-b-2 border-transparent text-base-content/50"
-                    onclick="showTab('act')">Aktivitas</button>
-                <button
-                    class="tab-btn px-3 py-1.5 text-xs font-medium border-b-2 border-transparent text-base-content/50"
-                    onclick="showTab('prod')">Products</button>
-            </div>
-
-            <div id="tab-trx">
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3 p-2.5 bg-base-200 rounded-lg">
-                        <div class="bg-success/10 rounded-full p-1.5"><span
-                                class="icon-[tabler--arrow-down-left] size-4 text-success"></span></div>
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Payment from PT. Maju Jaya</p>
-                            <p class="text-[10px] text-base-content/50">17 May 2026, 08:30</p>
-                        </div><span class="text-xs font-bold text-success">+Rp 15.5M</span>
+<x-layouts::app title="Dashboard - WMS Portal">
+    <div>
+        <section class="mb-8">
+            <div class="grid grid-cols-4 gap-4">
+                @php
+                $quickActions = [
+                    ['label' => 'Scan Inbound', 'icon' => 'qr_code_scanner', 'bgClass' => 'bg-primary-container/10', 'iconClass' => 'text-primary'],
+                    ['label' => 'Picking', 'icon' => 'pan_tool_alt', 'bgClass' => 'bg-secondary-container/10', 'iconClass' => 'text-secondary'],
+                    ['label' => 'Stock Opname', 'icon' => 'inventory', 'bgClass' => 'bg-tertiary-container/10', 'iconClass' => 'text-tertiary'],
+                    ['label' => 'Relocation', 'icon' => 'sync_alt', 'bgClass' => 'bg-surface-variant', 'iconClass' => 'text-on-surface-variant'],
+                ];
+                @endphp
+                @foreach($quickActions as $action)
+                <button class="flex flex-col items-center gap-2 group bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm hover:shadow-md transition-all">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center group-active:scale-95 transition-transform border border-outline-variant shadow-sm {{ $action['bgClass'] }}">
+                        <span class="material-symbols-outlined text-2xl {{ $action['iconClass'] }}">{{ $action['icon'] }}</span>
                     </div>
-                    <div class="flex items-center gap-3 p-2.5 bg-base-200 rounded-lg">
-                        <div class="bg-error/10 rounded-full p-1.5"><span
-                                class="icon-[tabler--arrow-up-right] size-4 text-error"></span></div>
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Purchase SSD 1TB x10</p>
-                            <p class="text-[10px] text-base-content/50">16 May 2026, 14:20</p>
-                        </div><span class="text-xs font-bold text-error">-Rp 15M</span>
+                    <span class="font-label-caps text-label-caps text-on-surface text-center">{{ $action['label'] }}</span>
+                </button>
+                @endforeach
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="widget-card">
+                <h3 class="font-headline-md text-headline-md mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+                    Operational Metrics
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    @php
+                    $metrics = [
+                        ['label' => 'Inbound', 'value' => '482', 'change' => '+5%', 'changeClass' => 'text-green-600', 'valueClass' => 'text-primary'],
+                        ['label' => 'Outbound', 'value' => '315', 'change' => '-2%', 'changeClass' => 'text-red-600', 'valueClass' => 'text-secondary'],
+                        ['label' => 'Low Stock', 'value' => '12', 'icon' => 'warning', 'changeClass' => 'text-error', 'valueClass' => 'text-error'],
+                        ['label' => 'Pending Splits', 'value' => '24', 'sub' => 'Active', 'valueClass' => 'text-on-surface'],
+                    ];
+                    @endphp
+                    @foreach($metrics as $metric)
+                    <div class="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
+                        <p class="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">{{ $metric['label'] }}</p>
+                        <div class="flex items-end justify-between">
+                            <span class="font-headline-md text-headline-md {{ $metric['valueClass'] }}">{{ $metric['value'] }}</span>
+                            @if(isset($metric['change']))
+                                <span class="font-label-caps text-label-caps font-bold {{ $metric['changeClass'] }}">{{ $metric['change'] }}</span>
+                            @elseif(isset($metric['icon']))
+                                <span class="material-symbols-outlined text-sm {{ $metric['changeClass'] }}">{{ $metric['icon'] }}</span>
+                            @elseif(isset($metric['sub']))
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">{{ $metric['sub'] }}</span>
+                            @endif
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3 p-2.5 bg-base-200 rounded-lg">
-                        <div class="bg-success/10 rounded-full p-1.5"><span
-                                class="icon-[tabler--arrow-down-left] size-4 text-success"></span></div>
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Payment from CV. Berkah</p>
-                            <p class="text-[10px] text-base-content/50">15 May 2026, 10:15</p>
-                        </div><span class="text-xs font-bold text-success">+Rp 4.5M</span>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="widget-card">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-10 h-10 rounded-xl bg-secondary-container/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-secondary text-xl">warehouse</span>
                     </div>
-                    <div class="flex items-center gap-3 p-2.5 bg-base-200 rounded-lg">
-                        <div class="bg-success/10 rounded-full p-1.5"><span
-                                class="icon-[tabler--arrow-down-left] size-4 text-success"></span></div>
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">POS Sale #1247</p>
-                            <p class="text-[10px] text-base-content/50">15 May 2026, 09:00</p>
-                        </div><span class="text-xs font-bold text-success">+Rp 285K</span>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Warehouse Occupancy</h3>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="relative w-28 h-28 shrink-0">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle class="text-surface-container" cx="56" cy="56" fill="transparent" r="48" stroke="currentColor" stroke-width="10" />
+                            <circle class="text-secondary" cx="56" cy="56" fill="transparent" r="48" stroke="currentColor" stroke-dasharray="301.6" stroke-dashoffset="96.5" stroke-linecap="round" stroke-width="10" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="font-headline-md text-headline-md text-on-surface font-bold">68%</span>
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Used</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 space-y-3">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-body-sm text-body-sm text-on-surface-variant">Utilized</span>
+                                <span class="font-data-mono text-data-mono text-on-surface font-bold">42,160</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                                <div class="h-full bg-secondary rounded-full" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-body-sm text-body-sm text-on-surface-variant">Available</span>
+                                <span class="font-data-mono text-data-mono text-on-surface font-bold">19,840</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                                <div class="h-full bg-outline-variant rounded-full" style="width: 32%"></div>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-outline-variant">
+                            <p class="font-label-caps text-label-caps text-on-surface-variant">Status: Near Optimal</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-act" class="hidden">
-                <ul class="timeline timeline-vertical timeline-compact timeline-sm">
-                    <li>
-                        <div class="timeline-start text-[10px] text-base-content/50">10:30</div>
-                        <div class="timeline-middle"><span
-                                class="icon-[tabler--circle-filled] size-3 text-primary"></span></div>
-                        <div class="timeline-end timeline-box text-xs">Invoice INV-2026-0001 created</div>
-                        <hr>
-                    </li>
-                    <li>
-                        <hr>
-                        <div class="timeline-start text-[10px] text-base-content/50">09:15</div>
-                        <div class="timeline-middle"><span
-                                class="icon-[tabler--circle-filled] size-3 text-success"></span></div>
-                        <div class="timeline-end timeline-box text-xs">Payment received Rp 4.5M</div>
-                        <hr>
-                    </li>
-                    <li>
-                        <hr>
-                        <div class="timeline-start text-[10px] text-base-content/50">08:45</div>
-                        <div class="timeline-middle"><span
-                                class="icon-[tabler--circle-filled] size-3 text-info"></span></div>
-                        <div class="timeline-end timeline-box text-xs">New customer registered</div>
-                        <hr>
-                    </li>
-                    <li>
-                        <hr>
-                        <div class="timeline-start text-[10px] text-base-content/50">08:00</div>
-                        <div class="timeline-middle"><span
-                                class="icon-[tabler--circle-filled] size-3 text-warning"></span></div>
-                        <div class="timeline-end timeline-box text-xs">Stock alert: Mouse Wireless low</div>
-                    </li>
-                </ul>
+            <div class="widget-card md:col-span-2">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-primary-container/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-xl">monitoring</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-on-surface">Performance</h3>
+                    </div>
+                    <span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-2 py-1 rounded-full">LIVE</span>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="font-body-sm text-body-sm text-on-surface-variant">Throughput Goal</span>
+                            <span class="font-data-mono text-data-mono text-on-surface font-bold">796 / 850</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full" style="width: 93%"></div>
+                        </div>
+                        <p class="font-label-caps text-label-caps text-secondary mt-1">93% Complete</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 pt-3 border-t border-outline-variant">
+                        <div class="text-center p-2 bg-surface-container rounded-lg">
+                            <span class="material-symbols-outlined text-green-600 text-lg mb-1 block">check_circle</span>
+                            <p class="font-data-mono text-data-mono text-on-surface font-bold">0.04%</p>
+                            <p class="font-label-caps text-label-caps text-on-surface-variant">Error Rate</p>
+                        </div>
+                        <div class="text-center p-2 bg-surface-container rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-lg mb-1 block">schedule</span>
+                            <p class="font-data-mono text-data-mono text-on-surface font-bold">14m</p>
+                            <p class="font-label-caps text-label-caps text-on-surface-variant">Avg Lead</p>
+                        </div>
+                        <div class="text-center p-2 bg-surface-container rounded-lg">
+                            <span class="material-symbols-outlined text-secondary text-lg mb-1 block">local_shipping</span>
+                            <p class="font-data-mono text-data-mono text-on-surface font-bold">88%</p>
+                            <p class="font-label-caps text-label-caps text-on-surface-variant">Fleet Util</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="tab-prod" class="hidden">
-                <div class="hidden md:block overflow-x-auto">
-                    <table class="table table-xs w-full">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>SKU</th>
-                                <th>Stock</th>
-                                <th>Price</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="font-medium">Laptop ASUS ROG</td>
-                                <td class="font-mono text-base-content/60">SKU-001</td>
-                                <td>12</td>
-                                <td>Rp 15.0M</td>
-                                <td><span class="badge badge-xs badge-success">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-medium">Monitor LG 27"</td>
-                                <td class="font-mono text-base-content/60">SKU-002</td>
-                                <td>28</td>
-                                <td>Rp 4.5M</td>
-                                <td><span class="badge badge-xs badge-success">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-medium">Mouse Wireless</td>
-                                <td class="font-mono text-base-content/60">SKU-004</td>
-                                <td>3</td>
-                                <td>Rp 350K</td>
-                                <td><span class="badge badge-xs badge-warning">Low Stock</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-medium">Keyboard Mechanical</td>
-                                <td class="font-mono text-base-content/60">SKU-003</td>
-                                <td>45</td>
-                                <td>Rp 1.2M</td>
-                                <td><span class="badge badge-xs badge-success">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-medium">Printer Laser</td>
-                                <td class="font-mono text-base-content/60">SKU-010</td>
-                                <td>0</td>
-                                <td>Rp 3.2M</td>
-                                <td><span class="badge badge-xs badge-error">Out</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="widget-card md:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-headline-md text-headline-md flex items-center gap-2">
+                        <span class="material-symbols-outlined text-on-surface-variant text-xl">history</span>
+                        Recent Activity
+                    </h3>
+                    <button class="text-primary font-label-caps text-label-caps hover:underline">VIEW ALL</button>
                 </div>
-                <div class="md:hidden space-y-2">
-                    <div class="bg-base-200 rounded-lg p-2.5 flex items-center gap-3">
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Laptop ASUS ROG</p>
-                            <p class="text-[10px] text-base-content/50">SKU-001 · Stock: 12</p>
+                <div class="space-y-0">
+                    @php
+                    $activities = [
+                        ['icon' => 'login', 'iconBg' => 'bg-primary/5', 'iconColor' => 'text-primary', 'title' => '#WMS-9021 Pallet Intake', 'subtitle' => 'Aisle 4 · User: J. Doe', 'status' => 'COMPLETE', 'statusClass' => 'bg-green-50 text-green-700', 'time' => '14:22'],
+                        ['icon' => 'logout', 'iconBg' => 'bg-secondary/5', 'iconColor' => 'text-secondary', 'title' => '#WMS-8842 Dock 7 Outbound', 'subtitle' => 'Priority Air · User: S. Lee', 'status' => 'PROCESSING', 'statusClass' => 'bg-blue-50 text-blue-700', 'time' => '14:15'],
+                        ['icon' => 'sync', 'iconBg' => 'bg-tertiary/5', 'iconColor' => 'text-tertiary', 'title' => '#WMS-9104 Stock Relocation', 'subtitle' => 'Zone C to Zone B', 'status' => 'READY', 'statusClass' => 'bg-surface-container-high text-on-surface-variant', 'time' => '13:48'],
+                    ];
+                    @endphp
+                    @foreach($activities as $activity)
+                    <div class="flex items-center gap-4 py-3 border-b border-outline-variant last:border-0">
+                        <div class="p-2 rounded-lg shrink-0 {{ $activity['iconBg'] }}">
+                            <span class="material-symbols-outlined text-sm {{ $activity['iconColor'] }}">{{ $activity['icon'] }}</span>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold">Rp 15.0M</p><span
-                                class="badge badge-xs badge-success">Active</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-body-sm text-body-sm font-semibold text-on-surface truncate">{{ $activity['title'] }}</p>
+                            <p class="font-label-caps text-label-caps text-on-surface-variant">{{ $activity['subtitle'] }}</p>
                         </div>
-                    </div>
-                    <div class="bg-base-200 rounded-lg p-2.5 flex items-center gap-3">
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Monitor LG 27"</p>
-                            <p class="text-[10px] text-base-content/50">SKU-002 · Stock: 28</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold">Rp 4.5M</p><span
-                                class="badge badge-xs badge-success">Active</span>
-                        </div>
-                    </div>
-                    <div class="bg-base-200 rounded-lg p-2.5 flex items-center gap-3">
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Mouse Wireless</p>
-                            <p class="text-[10px] text-base-content/50">SKU-004 · Stock: 3</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold">Rp 350K</p><span
-                                class="badge badge-xs badge-warning">Low</span>
+                        <div class="text-right shrink-0">
+                            <span class="font-label-caps text-[9px] font-bold px-2 py-0.5 rounded block mb-1 {{ $activity['statusClass'] }}">{{ $activity['status'] }}</span>
+                            <p class="text-[9px] text-outline font-data-mono text-data-mono">{{ $activity['time'] }}</p>
                         </div>
                     </div>
-                    <div class="bg-base-200 rounded-lg p-2.5 flex items-center gap-3">
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Keyboard Mechanical</p>
-                            <p class="text-[10px] text-base-content/50">SKU-003 · Stock: 45</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold">Rp 1.2M</p><span
-                                class="badge badge-xs badge-success">Active</span>
-                        </div>
-                    </div>
-                    <div class="bg-base-200 rounded-lg p-2.5 flex items-center gap-3">
-                        <div class="flex-1">
-                            <p class="text-xs font-medium">Printer Laser</p>
-                            <p class="text-[10px] text-base-content/50">SKU-010 · Stock: 0</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold">Rp 3.2M</p><span
-                                class="badge badge-xs badge-error">Out</span>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="{{ $chart->cdn() }}"></script>
-    {{ $chart->script() }}
-    <script>
-        function showTab(id) {
-            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + id).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.className =
-                    'tab-btn px-3 py-1.5 text-xs font-medium border-b-2 border-transparent text-base-content/50';
-            });
-            event.target.className = 'tab-btn px-3 py-1.5 text-xs font-medium border-b-2 border-primary text-primary';
-        }
-    </script>
 </x-layouts::app>

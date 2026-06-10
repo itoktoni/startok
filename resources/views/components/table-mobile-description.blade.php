@@ -1,2 +1,2 @@
 @props(['description' => null])
-<p class="text-xs text-base-content/50">{{ $description }}</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">{{ $description }}</p>

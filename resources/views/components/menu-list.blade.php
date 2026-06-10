@@ -1,16 +1,14 @@
 @props(['items' => [], 'title' => 'Menu'])
 
-<div class="card bg-base-100 shadow-sm">
-    <div class="card-body p-4">
-        <h3 class="text-sm font-bold mb-1">{{ $title }}</h3>
-        <div class="divide-y divide-base-200">
-            @foreach($items as $item)
-            <a href="{{ $item['url'] ?? '#' }}" class="flex items-center gap-3 py-3 px-1 hover:bg-base-200 rounded">
-                <span class="{{ $item['icon_class'] ?? 'size-5' }} {{ $item['icon_color'] ?? 'text-primary' }}">{!! $item['icon'] ?? '' !!}</span>
-                <span class="flex-1 text-xs font-medium">{{ $item['label'] ?? '' }}</span>
-                <span class="icon-[tabler--chevron-right] size-4 text-base-content/30"></span>
-            </a>
-            @endforeach
-        </div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 form-card">
+    <h3 class="font-headline-md text-headline-md text-on-surface mb-4">{{ $title }}</h3>
+    <div class="divide-y divide-outline-variant/50">
+        @foreach($items as $item)
+        <a href="{{ $item['url'] ?? '#' }}" class="flex items-center gap-3 py-3 px-2 hover:bg-surface-container rounded-lg transition-colors">
+            <span class="material-symbols-outlined text-on-surface-variant">{{ $item['icon'] ?? 'arrow_right' }}</span>
+            <span class="flex-1 font-body-sm text-body-sm text-on-surface">{{ $item['label'] ?? '' }}</span>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant">chevron_right</span>
+        </a>
+        @endforeach
     </div>
 </div>

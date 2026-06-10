@@ -228,6 +228,9 @@
 
     // Online/Offline Status
     let isOnline = navigator.onLine;
+    let posData = null;
+    let posDataLoaded = false;
+
     function updateOnlineStatus() {
         isOnline = navigator.onLine;
         const statusEl = document.getElementById('syncStatus');
@@ -236,8 +239,63 @@
             statusEl.className = isOnline ? 'badge badge-xs badge-success' : 'badge badge-xs badge-error';
         }
     }
-    window.addEventListener('online', () => { updateOnlineStatus(); syncPendingOrders(); });
+    window.addEventListener('online', () => { updateOnlineStatus(); syncPendingOrders(); loadPosData(); });
     window.addEventListener('offline', () => { updateOnlineStatus(); });
+
+    async function loadPosData() {
+        if (!isOnline) {
+            const cached = localStorage.getItem('posData');
+            if (cached) {
+                posData = JSON.parse(cached);
+                posDataLoaded = true;
+                applyPosData();
+            }
+            return;
+        }
+        try {
+            const res = await fetch('/pos/data');
+            const json = await res.json();
+            posData = json;
+            posDataLoaded = true;
+            localStorage.setItem('posData', JSON.stringify(json));
+            applyPosData();
+        } catch (e) {
+            console.log('Failed to load POS data:', e);
+        }
+    }
+
+    function applyPosData() {
+        if (!posData) return;
+        if (posData.products) P = posData.products;
+        if (posData.categories) {
+            const catNames = posData.categories.map(c => c.category_nama);
+            CATEGORIES.length = 0; CATEGORIES.push(...catNames);
+            const catContainer = document.getElementById('categories');
+            if (catContainer) {
+                catContainer.innerHTML = '<button class="cat btn btn-xs btn-primary shrink-0" data-c="All">All</button>' +
+                    posData.categories.map(c => `<button class="cat btn btn-xs btn-outline shrink-0" data-c="${c.category_nama}">${c.category_nama}</button>`).join('');
+                document.querySelectorAll('.cat').forEach(b => b.addEventListener('click', () => {
+                    document.querySelectorAll('.cat').forEach(x => x.className = 'cat btn btn-xs btn-outline shrink-0');
+                    b.className = 'cat btn btn-xs btn-primary shrink-0';
+                    cat = b.dataset.c;
+                    render();
+                }));
+            }
+        }
+        if (posData.discounts) DISCOUNTS.length = 0; DISCOUNTS.push(...posData.discounts);
+        if (posData.customers) {
+            const custSelect = document.getElementById('custSelect');
+            if (custSelect) {
+                custSelect.innerHTML = '<option value="">Walk-in Customer</option>' +
+                    posData.customers.map(c => `<option value="${c.id}">${c.nama}</option>`).join('');
+            }
+            CUSTOMERS.length = 0; CUSTOMERS.push(...posData.customers);
+        }
+        if (posData.store_lat) STORE_LAT = posData.store_lat;
+        if (posData.store_lng) STORE_LNG = posData.store_lng;
+        if (posData.price_per_km) PRICE_PER_KM = posData.price_per_km;
+        render();
+    }
 
     // Update pending sync badge
     async function updatePendingBadge() {
@@ -352,10 +410,10 @@ function getMyLocation(){
 function confirmMap(){document.getElementById('shipCost').textContent=fmt(shipCost);document.getElementById('shipDetail').classList.remove('hidden');closeMap();calcT();}
 
 
-function openNote(name,e){e.stopPropagation();noteProd=name;const p=P.find(x=>x.product_nama===name);document.getElementById('noteTitle').textContent=name;document.getElementById('noteInput').value='';const sel=document.getElementById('noteVariant');sel.innerHTML='';const variants=p.variants||[];if(variants.length===0){sel.innerHTML='<option value="0">Regular (+Rp 0)</option>';}else{variants.forEach((v,i)=>{const diff=v.variant_harga-p.product_harga;const label=diff>=0?'+Rp '+diff.toLocaleString('id-ID'):'-Rp '+Math.abs(diff).toLocaleString('id-ID');sel.innerHTML+=`<option value="${v.variant_harga}">${v.variant_nama} (${label})</option>`;});}sel.selectedIndex=0;document.getElementById('noteTotal').textContent=fmt(p.product_harga);document.getElementById('noteModal').classList.remove('hidden');}
+function openNote(name,e){e.stopPropagation();noteProd=name;const p=P.find(x=>x.product_nama===name);document.getElementById('noteTitle').textContent=name;document.getElementById('noteInput').value='';const sel=document.getElementById('noteVariant');sel.innerHTML='';const variants=p.variants||[];if(variants.length===0){sel.innerHTML='<option value="0" data-price="0">Regular (+Rp 0)</option>';}else{variants.forEach((v,i)=>{const diff=v.variant_harga-p.product_harga;const label=diff>=0?'+Rp '+diff.toLocaleString('id-ID'):'-Rp '+Math.abs(diff).toLocaleString('id-ID');sel.innerHTML+=`<option value="${v.variant_id}" data-price="${v.variant_harga}">${v.variant_nama} (${label})</option>`;});}sel.selectedIndex=0;document.getElementById('noteTotal').textContent=fmt(p.product_harga);document.getElementById('noteModal').classList.remove('hidden');}
 function closeNote(){document.getElementById('noteModal').classList.add('hidden');}
 function updateNotePrice(){const p=P.find(x=>x.product_nama===noteProd);const extra=+document.getElementById('noteVariant').value;document.getElementById('noteTotal').textContent=fmt(p.product_harga+extra);}
-function submitNote(){if(!noteProd)return;const p=P.find(x=>x.product_nama===noteProd);const sel=document.getElementById('noteVariant');const extra=+sel.value;const vLabel=sel.options[sel.selectedIndex].text.split(' (')[0];const note=document.getElementById('noteInput').value;const key=noteProd+'|'+vLabel+'|'+note;const e=cart.find(x=>x.key===key);if(e)e.q++;else cart.push({key,n:p.product_nama,p:p.product_harga,extra:extra,q:1,variant:vLabel,note});rCart();calcT();closeNote();}
+function submitNote(){if(!noteProd)return;const p=P.find(x=>x.product_nama===noteProd);const sel=document.getElementById('noteVariant');const extra=+sel.value;const vLabel=sel.options[sel.selectedIndex].text.split(' (')[0];const vVal=sel.value;const note=document.getElementById('noteInput').value;const key=p.product_id+'|'+vLabel+'|'+note;const e=cart.find(x=>x.key===key);if(e)e.q++;else cart.push({key,id:p.product_id,n:p.product_nama,p:p.product_harga,extra:extra,q:1,variant:vLabel,note,vid:vVal});rCart();calcT();closeNote();}
 
 
 function switchTab(t){
@@ -375,7 +433,7 @@ function render(){const c=document.getElementById("prods"),q=document.getElement
 if(view==="grid"){c.className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-1.5 content-start overflow-y-scroll min-h-0";c.innerHTML=f.map(p=>`<div class="pc card bg-base-100 border border-base-300 cursor-pointer" onclick="add('${p.product_nama}')"><figure class="px-1 pt-1"><img src="https://placehold.co/100x70/f1f5f9/475569?text=${encodeURIComponent(p.product_nama.split(' ')[0])}" class="rounded w-full h-14 object-cover"></figure><div class="p-1.5 pb-0"><p class="text-[11px] font-medium truncate">${p.product_nama}</p><p class="text-[11px] font-bold">${fmt(p.product_harga)}</p></div><div class="border-t border-base-200 mt-1.5 px-1.5 py-1"><button class="btn btn-xs btn-soft btn-block gap-0.5" onclick="openNote('${p.product_nama}',event)"><span class="icon-[tabler--note] size-3"></span><span class="text-[9px]">Catatan</span></button></div></div>`).join("");}
 else{c.className="space-y-1 overflow-y-scroll min-h-0";c.innerHTML=f.map(p=>`<div class="pc flex items-center gap-2 bg-base-100 border border-base-300 rounded p-1.5 cursor-pointer" onclick="add('${p.product_nama}')"><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${p.product_nama}</p><span class="text-[10px] text-base-content/60">${p.product_category}</span></div><span class="text-xs font-bold shrink-0 mr-1">${fmt(p.product_harga)}</span><button class="btn btn-xs btn-soft btn-circle shrink-0" onclick="openNote('${p.product_nama}',event)" title="Catatan"><span class="icon-[tabler--note] size-3"></span></button></div>`).join("");}}
 
-function add(n){const p=P.find(x=>x.product_nama===n);const key=n+'|Regular|';const e=cart.find(x=>x.key===key);if(e)e.q++;else cart.push({key,n:p.product_nama,p:p.product_harga,q:1,variant:'Regular',note:'',extra:0});rCart();calcT();}
+function add(n){const p=P.find(x=>x.product_nama===n);const key=p.product_id+'|Regular|';const e=cart.find(x=>x.key===key);if(e)e.q++;else cart.push({key,id:p.product_id,n:p.product_nama,p:p.product_harga,q:1,variant:'Regular',note:'',extra:0,vid:null});rCart();calcT();}
 function uQ(key,d){const i=cart.find(x=>x.key===key);i.q+=d;if(i.q<=0)cart=cart.filter(x=>x.key!==key);
   // Recheck voucher min amount
   const st=cart.reduce((s,item)=>s+(item.p+item.extra)*item.q,0);
@@ -395,7 +453,7 @@ function calcT(){const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(d
   if(voucherDisc)document.getElementById('voucherAmt').textContent='-'+fmt(Math.round(vAmt));
   af=Math.max(0,af-vAmt);
   const g=Math.round(af+af*tv/100+shipCost);document.getElementById("sub").textContent=fmt(st);document.getElementById("tot").textContent=fmt(g);}
-async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({name:i.n,price:i.p,quantity:i.q,variant:i.variant,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt),customer_id:customerId};try{if(isOnline){const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}else{await saveOrderLocal(data);alert('Order disimpan offline! Akan sync saat online.');clearCart();}}catch(e){await saveOrderLocal(data);alert('Koneksi gagal - order disimpan offline! Akan sync saat online.');clearCart();}}
+async function checkout(){if(!cart.length)return alert("Empty!");if(!pay)return alert("Select payment!");const st=cart.reduce((s,i)=>s+(i.p+i.extra)*i.q,0);const dv=+(document.getElementById("dsc").value)||0;const tv=+(document.getElementById("tax").value)||0;const disc=dP?st*dv/100:dv;let af=Math.max(0,st-disc);const vType=document.getElementById('voucherInfo').dataset.type;const vAmt=vType==='pct'?af*voucherDisc/100:voucherDisc;if(voucherDisc)af=Math.max(0,af-vAmt);const g=Math.round(af+af*tv/100+shipCost);const shipType=document.querySelector('input[name="ship"]:checked')?.value||'cod_berbah';const shipAddr=document.getElementById('shipAddr')?.value||'';const data={items:cart.map(i=>({product_id:i.id,name:i.n,price:i.p,quantity:i.q,variant:i.variant,variant_id:i.vid,note:i.note,extra:i.extra})),payment_method:pay,subtotal:st,discount:disc,tax:tv,shipping_cost:shipCost,total:g,shipping_type:shipType,shipping_address:shipAddr,voucher_code:document.getElementById('voucherCode').value||null,voucher_discount:Math.round(vAmt),customer_id:customerId};try{if(isOnline){const res=await fetch('/pos-checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]')?.content||''},body:JSON.stringify(data)});const result=await res.json();if(result.success){alert('Order '+result.order_id+' berhasil!');clearCart();}else{alert('Gagal: '+result.message);}}else{await saveOrderLocal(data);alert('Order disimpan offline! Akan sync saat online.');clearCart();}}catch(e){await saveOrderLocal(data);alert('Koneksi gagal - order disimpan offline! Akan sync saat online.');clearCart();}}
 function expPDF(){if(!cart.length)return alert("Empty!");const d=document.createElement('div');d.style.cssText='padding:16px;font:12px sans-serif';d.innerHTML='<h3>Struk - '+new Date().toLocaleString('id-ID')+'</h3><hr><br>'+cart.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.n} x${i.q}</span><span>${fmt((i.p+i.extra)*i.q)}</span></div>`).join('')+'<hr><div style="display:flex;justify-content:space-between;font-weight:bold;margin-top:8px"><span>Total</span><span>'+document.getElementById("tot").textContent+'</span></div>';html2pdf().set({margin:5,filename:'struk.pdf',jsPDF:{format:[80,200],unit:'mm'}}).from(d).save();}
 document.querySelectorAll(".cat").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".cat").forEach(x=>{x.className="cat btn btn-xs btn-outline shrink-0"});b.className="cat btn btn-xs btn-primary shrink-0";cat=b.dataset.c;render();}));
 document.querySelectorAll(".pay").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".pay").forEach(x=>{x.className="pay btn btn-xs btn-outline flex-1"});b.className="pay btn btn-xs btn-primary flex-1";pay=b.dataset.m;document.getElementById("qr").classList.toggle("hidden",pay!=="qris");}));

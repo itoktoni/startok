@@ -1,14 +1,9 @@
-<x-sidebar>
-    <x-slot:nav>
-        <x-sidebar-item route="{{ route('dashboard') }}" icon="dashboard" label="Dashboard" />
-        <div class="divider my-1 text-xs">Menu</div>
-        <x-sidebar-item route="{{ route('pos.index') }}" icon="shopping-cart" label="POS" />
-        <x-sidebar-item route="{{ route('product.getTable') }}" icon="package" label="Product" />
-        <x-sidebar-item route="{{ route('customer.getTable') }}" icon="users" label="Customer" />
-        <x-sidebar-item route="{{ route('category.getTable') }}" icon="package" label="Category" />
-        <x-sidebar-item route="{{ route('user.getTable') }}" icon="user" label="User" />
-        <x-sidebar-item route="{{ route('salesorder.getTable') }}" icon="shopping-cart" label="Sales Order" />
-        <div class="divider my-1 text-xs">System</div>
-        <x-sidebar-item route="#" icon="settings" label="Settings" />
-    </x-slot:nav>
-</x-sidebar>
+{{-- Desktop Sidebar --}}
+@php
+    $totalMenuItems = collect(config('menu.sidebar'))->sum(fn($section) => count($section['items']));
+@endphp
+<aside class="hidden md:flex flex-col fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 z-40 transition-transform duration-300 px-3 pt-4 border-r border-outline-variant/50 shadow-sm" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+    <nav class="flex-1 space-y-2 overflow-y-auto pb-4 sidebar-scroll {{ $totalMenuItems > 15 ? 'pr-3' : '' }}">
+        <x-menu-items />
+    </nav>
+</aside>

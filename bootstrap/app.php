@@ -6,13 +6,16 @@ use Ibex\CrudGenerator\CrudServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Milon\Barcode\BarcodeServiceProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         ModelAliasServiceProvider::class,
         CrudServiceProvider::class,
+        BarcodeServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -24,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'access' => AccessMiddleware::class,
         ]);
+
+        $middleware->append([
+            HandleCors::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (ValidationException $e, Request $request) {
@@ -32,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'status' => false,
                     'code' => 422,
                     'message' => 'The given data was invalid.',
-                    'data' => $e->validator->errors()->getMessages(), // Custom errors key
+                    'data' => $e->validator->errors()->getMessages(),
                 ], 422);
             }
         });

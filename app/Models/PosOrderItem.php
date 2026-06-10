@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PosOrderItem extends BaseModel
 {
     protected $table = 'pos_order_items';
+
     protected $primaryKey = 'pos_detail_id';
+
     public $incrementing = true;
 
     /**

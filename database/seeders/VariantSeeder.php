@@ -73,9 +73,9 @@ class VariantSeeder extends Seeder
         foreach ($variants as $name => $priceDiff) {
             Variant::create([
                 'product_id' => $product->product_id,
-                'variant_nama' => $brand . ' ' . $name,
+                'variant_nama' => $brand.' '.$name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'Variant ' . $name . ' untuk ' . $product->product_nama,
+                'variant_deskripsi' => 'Variant '.$name.' untuk '.$product->product_nama,
             ]);
         }
     }
@@ -95,7 +95,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'Variant ' . $name,
+                'variant_deskripsi' => 'Variant '.$name,
             ]);
         }
     }
@@ -115,7 +115,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'Paket ' . $name,
+                'variant_deskripsi' => 'Paket '.$name,
             ]);
         }
     }
@@ -135,7 +135,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'VGA ' . $name,
+                'variant_deskripsi' => 'VGA '.$name,
             ]);
         }
     }
@@ -163,7 +163,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'Storage ' . $name,
+                'variant_deskripsi' => 'Storage '.$name,
             ]);
         }
     }
@@ -183,7 +183,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'PSU ' . $name,
+                'variant_deskripsi' => 'PSU '.$name,
             ]);
         }
     }
@@ -204,7 +204,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => 'Monitor ' . $name,
+                'variant_deskripsi' => 'Monitor '.$name,
             ]);
         }
     }
@@ -224,7 +224,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => $product->product_nama . ' ' . $name,
+                'variant_deskripsi' => $product->product_nama.' '.$name,
             ]);
         }
     }
@@ -243,7 +243,7 @@ class VariantSeeder extends Seeder
                 'product_id' => $product->product_id,
                 'variant_nama' => $name,
                 'variant_harga' => $basePrice + $priceDiff,
-                'variant_deskripsi' => $product->product_nama . ' ' . $name,
+                'variant_deskripsi' => $product->product_nama.' '.$name,
             ]);
         }
     }

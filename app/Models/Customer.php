@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
-
 class Customer extends BaseModel
 {
     protected $table = 'customer';
+
     protected $keyType = 'int';
+
     protected $primaryKey = 'customer_id';
 
     public $timestamps = false;
+
     public $incrementing = true;
 
     /**
@@ -20,7 +21,7 @@ class Customer extends BaseModel
         'customer_id' => 'Id',
         'customer_nama' => 'Nama',
         'customer_phone' => 'Phone',
-        'customer_address' => 'Address'
+        'customer_address' => 'Address',
     ];
 
     /**
@@ -30,7 +31,7 @@ class Customer extends BaseModel
         'customer_id',
         'customer_nama',
         'customer_phone',
-        'customer_address'
+        'customer_address',
     ];
 
     /**
@@ -42,7 +43,7 @@ class Customer extends BaseModel
         'customer_id',
         'customer_nama',
         'customer_phone',
-        'customer_address'
+        'customer_address',
     ];
 
     /**
@@ -51,17 +52,16 @@ class Customer extends BaseModel
     public function rules(): array
     {
         return [
-			'customer_nama' => 'required|string',
-			'customer_phone' => 'string',
-			'customer_address' => 'string',
+            'customer_nama' => 'required|string',
+            'customer_phone' => 'string',
+            'customer_address' => 'string',
         ];
     }
 
-    public function toArray(){}
+    public function toArray() {}
 
     public static function field_name()
     {
         return 'customer_nama';
     }
-
 }

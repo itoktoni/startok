@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="shadcn">
-<head>
-    @include('partials.head')
-</head>
-<body class="bg-base-200 min-h-screen text-[13px]">
-    <div id="ov" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden" onclick="closeSB()"></div>
+<html class="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+ @include('layouts.head')
+
+<body class="text-on-surface bg-surface antialiased font-body-sm" x-data="warehouseApp()">
+
+    {{-- Overlay for mobile drawer --}}
+    <div class="fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-200" :class="drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'" @click="drawerOpen = false"></div>
+
+    @include('layouts.header')
+
+    @include('layouts.mobile')
 
     @include('layouts.sidebar')
 
-    <x-topbar :title="$title ?? null" />
-
-    {{-- Main content --}}
-    <main class="lg:ml-56 pt-11 lg:pt-0 pb-28 lg:pb-12">
-        <div class="p-2 lg:p-3 space-y-3">
+    {{-- Main Content --}}
+    <main class="pt-20 pb-32 md:pb-24 px-4 md:px-6" :class="sidebarOpen ? 'md:ml-72' : 'md:ml-0'">
+        <div class="max-w-full md:max-w-[calc(100vw-18rem)] mx-auto">
             {{ $slot }}
         </div>
     </main>
 
-    @include('layouts.footer')
-</script>
+    {{-- Bottom Nav (Mobile) --}}
+    <x-bottom-nav />
 
-    <script>
-        function toggleSB(){document.getElementById('sb').classList.toggle('-translate-x-full');document.getElementById('ov').classList.toggle('hidden')}
-        function closeSB(){document.getElementById('sb').classList.add('-translate-x-full');document.getElementById('ov').classList.add('hidden')}
-        document.querySelector('main').addEventListener('click',()=>{if(innerWidth<1024)closeSB()});
+    @stack('scripts')
 
-    </script>
+    @include('layouts.script')
 
-    @include('layouts.alert')
 </body>
 </html>

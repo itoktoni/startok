@@ -47,7 +47,7 @@
 
             <x-slot:mobile>
                 <x-table-mobile-select :model="$model" :total="$data"/>
-                <div class="p-2 space-y-2" id="mBody">
+                <x-table-mobile-list>
                     @foreach($data as $table)
                     <x-table-mobile-item :id="$table->field_primary">
                         <x-table-mobile-header title="{{ $table->category_nama }}" />
@@ -59,7 +59,7 @@
                         </x-table-mobile-footer>
                     </x-table-mobile-item>
                     @endforeach
-                </div>
+                </x-table-mobile-list>
             </x-slot:mobile>
 
         </x-table>

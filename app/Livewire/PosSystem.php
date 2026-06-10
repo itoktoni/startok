@@ -25,9 +25,11 @@ class PosSystem extends Component
     public $noteProd = null;
 
     public $noteVariant = 'Regular';
+
     public $noteInput = '';
 
     public $shipAddress = '';
+
     public $showMap = false;
 
     public $view = 'grid';
@@ -39,10 +41,13 @@ class PosSystem extends Component
     ];
 
     public $discAmt = 0;
+
     public $discIsPct = false;
 
     public $voucherCode = '';
+
     public $voucherType = '';
+
     public $voucherVal = 0;
 
     public function mount()
@@ -84,7 +89,9 @@ class PosSystem extends Component
     public function addToCart($productId)
     {
         $product = Product::with('has_category')->find($productId);
-        if (! $product) return;
+        if (! $product) {
+            return;
+        }
         $key = $productId.'|Regular|';
 
         $existing = collect($this->cart)->firstWhere('key', $key);
@@ -121,12 +128,14 @@ class PosSystem extends Component
     {
         if (! $this->noteProd) {
             $this->noteProd = null;
+
             return;
         }
 
         $product = Product::find($this->noteProd);
         if (! $product) {
             $this->noteProd = null;
+
             return;
         }
 
@@ -251,7 +260,7 @@ class PosSystem extends Component
         $this->cart = [];
         $this->payMethod = 'cash';
         session()->forget('pos_cart');
-        $this->dispatch('notify', message: 'Transaksi berhasil! Order: ' . $order->pos_order_code);
+        $this->dispatch('notify', message: 'Transaksi berhasil! Order: '.$order->pos_order_code);
     }
 
     public function openMap()
@@ -283,6 +292,7 @@ class PosSystem extends Component
         if (! isset($map[$code])) {
             $this->voucherType = '';
             $this->voucherVal = 0;
+
             return;
         }
         [$this->voucherType, $this->voucherVal] = $map[$code];
