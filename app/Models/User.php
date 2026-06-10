@@ -22,7 +22,7 @@ use Minishlink\WebPush\WebPush;
 /**
  * @mixin IdeHelperUser
  */
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'trial_start_date', 'plan', 'plan_start_date', 'plan_end_date'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -45,24 +45,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'trial_start_date' => 'datetime',
+            'plan_start_date' => 'datetime',
+            'plan_end_date' => 'datetime',
         ];
     }
 
     /**
      * Columns available for filtering.
      */
-    public static $filterColumns = [
+public static $filterColumns = [
         'name' => 'Name',
         'email' => 'Email',
+        'phone' => 'Phone',
         'role' => 'Role',
     ];
 
-    /**
-     * Columns available for sorting.
-     */
     public static $sortColumns = [
         'name',
         'email',
+        'phone',
         'role',
     ];
 

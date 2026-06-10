@@ -6,6 +6,7 @@ use App\Http\Controllers\LangkahKecilController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PushNotificationController;
+use App\Actions\PlanAction;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,12 +23,58 @@ Route::get('/activities', [ActivityController::class, 'index'])->name('activitie
 Route::get('/activities/types', [ActivityController::class, 'types'])->name('activities.types');
 Route::get('/activities/{slug}', [ActivityController::class, 'show'])->name('activities.show');
 
+Route::get('/plans', function () {
+    $plans = \App\Models\SubscriptionPlan::where('is_active', true)
+        ->with('features')
+        ->orderBy('sort_order')
+        ->get()
+        ->map(fn ($plan) => [
+            'id' => $plan->id,
+            'slug' => $plan->slug,
+            'name' => $plan->name,
+            'description' => $plan->description,
+            'price' => $plan->price,
+            'currency' => $plan->currency,
+            'features' => $plan->features->map(fn ($f) => [
+                'slug' => $f->slug,
+                'name' => $f->name,
+                'value' => $f->value,
+            ]),
+        ]);
+
+    $discounts = \App\Models\Discount::where('discount_active', true)
+        ->where(function ($q) {
+            $q->whereNull('discount_start')->orWhere('discount_start', '<=', now());
+        })
+        ->where(function ($q) {
+            $q->whereNull('discount_end')->orWhere('discount_end', '>=', now());
+        })
+        ->get()
+        ->map(fn ($d) => [
+            'code' => $d->discount_code,
+            'name' => $d->discount_nama,
+            'type' => $d->discount_type,
+            'value' => $d->discount_value,
+            'min_transaction' => $d->discount_min_transaction,
+            'max_amount' => $d->discount_max_amount,
+        ]);
+
+    return response()->json([
+        'plans' => $plans,
+        'discounts' => $discounts,
+        'trial_days' => (int) env('LANGKAHKECIL_TRIAL_DAYS', 10),
+    ]);
+})->name('plans.index');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me'])->name('me');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::put('/password', [AuthController::class, 'changePassword'])->name('password.change');
+    Route::post('/purchase-plan', PlanAction::class . '@purchase')->name('purchase.plan');
+    Route::get('/validate-plan', PlanAction::class . '@validatePlan')->name('validate.plan');
     Route::post('/pos/checkout-api', [PosController::class, 'apiCheckout'])->name('pos.checkout-api');
+    Route::get('/notification/broadcast', [NotificationController::class, 'broadcast'])->name('notification.broadcast');
 
     Route::prefix('push')->group(function () {
         Route::post('/subscribe', [PushNotificationController::class, 'subscribe'])->name('push.subscribe');

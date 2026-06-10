@@ -2,11 +2,13 @@
 
 return [
 
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'broadcasting/*', 'pusher/auth'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', '*')],
+    'allowed_origins' => [
+        env('FRONTEND_URL', '*')
+    ],
 
     'allowed_origins_patterns' => [],
 

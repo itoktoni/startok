@@ -18,4 +18,12 @@
             el.scrollIntoView({ block: 'center', behavior: 'smooth' });
         });
     });
+    // Toast function for real-time notifications
+    window.showToast = function(title, body) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-20 right-4 z-50 bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-lg max-w-sm';
+        toast.innerHTML = '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary">notifications</span><div><p class="font-body-sm font-semibold text-on-surface">' + title + '</p><p class="font-body-sm text-on-surface-variant text-sm">' + (body || '') + '</p></div></div>';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    };
 </script>

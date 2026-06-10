@@ -33,6 +33,11 @@ Route::get('test-push', function () {
     }
 });
 
+Route::get('test-broadcast', function () {
+    \App\Events\NotificationSent::dispatch(1, 'Test Broadcast', 'Ini adalah test broadcast notification!');
+    return response()->json(['message' => 'Broadcast sent!']);
+});
+
 Route::middleware(['auth', 'verified', 'access'])->group(function () {
 
     Route::get('dashboard', DashboardController::class)->name('dashboard');

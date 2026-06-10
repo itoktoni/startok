@@ -6,6 +6,7 @@ use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\NotificationSent;
 
 class NotificationController extends Controller
 {
@@ -79,5 +80,11 @@ class NotificationController extends Controller
             'url' => $url,
             'type' => $type,
         ]);
+    }
+
+    public function broadcast(int $userId, string $title, ?string $body = null): JsonResponse
+    {
+        NotificationSent::dispatch($userId ?? Auth::id(), $title, $body);
+        return response()->json(['message' => 'Notification broadcasted']);
     }
 }
