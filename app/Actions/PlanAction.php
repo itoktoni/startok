@@ -163,7 +163,7 @@ class PlanAction
         $user = $request->user();
 
         if ($user->role === 'trial') {
-            $trialDays = (int) env('LANGKAHKECIL_TRIAL_DAYS', 10);
+            $trialDays = (int) config('langkahkecil.trial_days', 10);
             $trialStart = $user->trial_start_date;
             $trialEnd = $trialStart ? $trialStart->addDays($trialDays) : null;
             $isExpired = $trialEnd && Carbon::now()->isAfter($trialEnd);

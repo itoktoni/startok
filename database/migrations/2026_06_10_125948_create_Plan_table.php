@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('plan_value')->nullable();
             $table->integer('plan_status')->nullable();
             $table->integer('plan_fee')->nullable();
+            $table->integer('plan_recomended')->nullable();
+            $table->string('plan_color')->nullable();
             $table->string('plan_periode')->nullable();
             $table->string('plan_interval')->nullable();
 

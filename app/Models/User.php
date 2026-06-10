@@ -22,7 +22,7 @@ use Minishlink\WebPush\WebPush;
 /**
  * @mixin IdeHelperUser
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'trial_start_date', 'plan', 'plan_start_date', 'plan_end_date'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'plan', 'affiliate_code', 'affiliate_reff', 'affiliate_discount', 'komisi', 'rekening_nama', 'rekening_bank', 'rekening_nomor'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -45,16 +45,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'trial_start_date' => 'datetime',
-            'plan_start_date' => 'datetime',
-            'plan_end_date' => 'datetime',
+            'komisi' => 'integer',
         ];
     }
 
     /**
      * Columns available for filtering.
      */
-public static $filterColumns = [
+    public static $filterColumns = [
         'name' => 'Name',
         'email' => 'Email',
         'phone' => 'Phone',
@@ -104,6 +102,11 @@ public static $filterColumns = [
     public function pushSubscriptions()
     {
         return $this->hasMany(PushSubscription::class);
+    }
+
+    public function subscribe()
+    {
+        return $this->belongsTo(Subscribe::class, 'plan', 'subscribe_id');
     }
 
     public function sendPushNotification(string $title, string $body, string $url = '/', ?string $icon = null): void

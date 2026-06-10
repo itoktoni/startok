@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Affiliate;
+use App\Models\Cashout;
 use App\Models\Discount;
 use App\Models\LangkahKecilAnak;
 use App\Models\Plan;
+use App\Models\Subscribe;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,28 +17,58 @@ class AuthController extends Controller
 {
     private function userResponse(User $user): array
     {
+        $user->load('subscribe.plan');
+        $subscribe = $user->subscribe;
+
         return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone,
             'role' => $user->role,
-            'trial_start_date' => $user->trial_start_date?->toIso8601String(),
+            'affiliate_code' => $user->affiliate_code,
+            'affiliate_reff' => $user->affiliate_reff,
+            'affiliate_reff_nama' => $user->affiliate_reff ? User::where('affiliate_code', $user->affiliate_reff)->value('name') : null,
+            'affiliate_reff_discount' => $user->affiliate_reff ? (int) (User::where('affiliate_code', $user->affiliate_reff)->value('affiliate_discount') ?? 0) : 0,
+            'affiliate_discount' => $user->affiliate_discount,
+            'komisi' => $user->komisi,
+            'rekening_nama' => $user->rekening_nama,
+            'rekening_bank' => $user->rekening_bank,
+            'rekening_nomor' => $user->rekening_nomor,
+            'plan' => $subscribe ? [
+                'subscribe_id' => $subscribe->subscribe_id,
+                'plan_id' => $subscribe->subscribe_id_plan,
+                'plan_nama' => $subscribe->plan?->plan_nama,
+                'plan_value' => $subscribe->subsribe_value,
+                'plan_harga' => $subscribe->subscribe_harga,
+                'subscribe_start_at' => $subscribe->subscribe_start_at ? \Carbon\Carbon::parse($subscribe->subscribe_start_at)->toIso8601String() : null,
+                'subscribe_end_at' => $subscribe->subscribe_end_at ? \Carbon\Carbon::parse($subscribe->subscribe_end_at)->toIso8601String() : null,
+                'subscribe_trial_at' => $subscribe->subscribe_trial_at ? \Carbon\Carbon::parse($subscribe->subscribe_trial_at)->toIso8601String() : null,
+            ] : null,
         ];
     }
 
     private function plansData(): array
     {
-        return Plan::all()
-            ->map(fn ($plan) => [
-                'plan_id' => $plan->plan_id,
-                'plan_nama' => $plan->plan_nama,
-                'plan_keteranan' => $plan->plan_keteranan,
-                'plan_harga' => $plan->plan_harga,
-                'plan_fee' => $plan->plan_fee,
-                'plan_periode' => $plan->plan_periode,
-                'plan_interval' => $plan->plan_interval,
-            ])
+        return Plan::where('plan_status', 1)
+            ->orderBy('plan_harga')
+            ->get()
+            ->map(function ($p) {
+                $periodEnum = \App\PeriodEnum::tryFrom($p->plan_periode);
+                return [
+                    'id' => $p->plan_id,
+                    'name' => $p->plan_nama,
+                    'description' => $p->plan_keterangan,
+                    'value' => $p->plan_value,
+                    'price' => $p->plan_harga,
+                    'fee' => $p->plan_fee,
+                    'color' => $p->plan_color,
+                    'recommended' => (bool) $p->plan_recomended,
+                    'period' => $p->plan_periode,
+                    'period_label' => $periodEnum?->description() ?? $p->plan_periode,
+                    'interval' => $p->plan_interval,
+                ];
+            })
             ->toArray();
     }
 
@@ -64,9 +97,13 @@ class AuthController extends Controller
     {
         return [
             'server_date' => now()->toIso8601String(),
-            'trial_days' => (int) env('LANGKAHKECIL_TRIAL_DAYS', 10),
+            'trial_days' => (int) config('langkahkecil.trial_days', 10),
             'plans' => $this->plansData(),
             'discounts' => $this->discountsData(),
+            'affiliate_config' => [
+                'customer_discount_rate' => (int) config('langkahkecil.affiliate.customer_discount_rate', 20),
+                'commission_rate' => (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15),
+            ],
         ];
     }
 
@@ -105,7 +142,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
+            'ref' => 'nullable|string|max:30',
         ]);
 
         if ($validator->fails()) {
@@ -115,14 +153,61 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $affiliateReff = null;
+        if ($request->input('ref')) {
+            $referrer = User::where('affiliate_code', $request->input('ref'))->first();
+            if ($referrer) {
+                $affiliateReff = $request->input('ref');
+            }
+        }
+
+        $affiliateCode = strtoupper(substr(md5(uniqid($request->email, true)), 0, 8));
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => $request->password,
             'role' => 'trial',
-            'trial_start_date' => now(),
+            'affiliate_code' => $affiliateCode,
+            'affiliate_reff' => $affiliateReff,
         ]);
+
+        $freePlan = Plan::where('plan_harga', 0)->where('plan_status', 1)->first();
+        if ($freePlan) {
+            $trialDays = (int) config('langkahkecil.trial_days', 10);
+            $subscription = Subscribe::create([
+                'subscribe_id_user' => $user->id,
+                'subscribe_harga' => 0,
+                'subscribe_discount' => 0,
+                'subscribe_total' => 0,
+                'subscribe_id_plan' => $freePlan->plan_id,
+                'subsribe_value' => $freePlan->plan_value ?? 1,
+                'subscribe_trial_at' => now(),
+                'subscribe_start_at' => now(),
+                'subscribe_end_at' => now()->addDays($trialDays),
+                'subscribe_created_at' => now(),
+            ]);
+            $user->update(['plan' => $subscription->subscribe_id]);
+        }
+
+        if ($affiliateReff) {
+            $referrer = User::where('affiliate_code', $affiliateReff)->first();
+            if ($referrer) {
+                $registerBonus = (int) config('langkahkecil.affiliate.register_bonus', 500);
+                Affiliate::create([
+                    'affiliate_id_user' => $referrer->id,
+                    'affiliate_id_from_user' => $user->id,
+                    'affiliate_tipe' => 'register',
+                    'affiliate_jumlah' => $registerBonus,
+                    'affiliate_catatan' => "Bonus referral: " . $user->name . " bergabung",
+                    'affiliate_status' => 'pending',
+                    'affiliate_created_at' => now(),
+                    'affiliate_updated_at' => now(),
+                ]);
+                $referrer->increment('komisi', $registerBonus);
+            }
+        }
 
         $token = $user->createToken('api_token')->plainTextToken;
 
@@ -182,7 +267,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = $request->user();
@@ -195,5 +280,169 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Password berhasil diubah']);
+    }
+
+    public function updateAffiliateCode(Request $request)
+    {
+        $request->validate([
+            'affiliate_code' => 'required|string|min:4|max:20|alpha_dash',
+            'affiliate_discount' => 'nullable|integer|min:0|max:15',
+        ]);
+
+        $user = $request->user();
+        $code = strtoupper($request->affiliate_code);
+
+        $exists = User::where('affiliate_code', $code)->where('id', '!=', $user->id)->exists();
+        if ($exists) {
+            return response()->json(['message' => 'Kode sudah digunakan orang lain'], 422);
+        }
+
+        $data = ['affiliate_code' => $code];
+        if ($request->has('affiliate_discount')) {
+            $data['affiliate_discount'] = $request->affiliate_discount;
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'user' => $this->userResponse($user),
+        ]);
+    }
+
+    public function referralList(Request $request)
+    {
+        $user = $request->user();
+
+        $referrals = User::where('affiliate_reff', $user->affiliate_code)
+            ->select('id', 'name', 'email', 'role', 'created_at')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $this->maskEmail($u->email),
+                'role' => $u->role,
+                'joined_at' => $u->created_at->toIso8601String(),
+            ]);
+
+        $earnings = Affiliate::where('affiliate_id_user', $user->id)->get();
+
+        $totalEarning = $earnings->sum('affiliate_jumlah');
+        $totalRegister = $earnings->where('affiliate_tipe', 'register')->sum('affiliate_jumlah');
+        $totalUpgrade = $earnings->where('affiliate_tipe', 'upgrade')->sum('affiliate_jumlah');
+        $pendingEarning = $earnings->where('affiliate_status', 'pending')->sum('affiliate_jumlah');
+
+        return response()->json([
+            'total' => $referrals->count(),
+            'referrals' => $referrals,
+            'earnings' => [
+                'total' => $totalEarning,
+                'register' => $totalRegister,
+                'upgrade' => $totalUpgrade,
+                'pending' => $pendingEarning,
+            ],
+            'rates' => [
+                'register_bonus' => (int) config('langkahkecil.affiliate.register_bonus', 500),
+                'commission_rate' => (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15),
+                'commission_bonus' => (int) config('langkahkecil.affiliate.upgrade_commission_bonus', 1000),
+                'customer_discount' => (int) config('langkahkecil.affiliate.customer_discount_rate', 20),
+            ],
+            'cashout' => [
+                'minimum' => (int) config('langkahkecil.cashout.minimum', 50000),
+                'admin_rate' => (int) config('langkahkecil.cashout.admin_rate', 3),
+            ],
+            'banks' => config('langkahkecil.banks', []),
+        ]);
+    }
+
+    public function updateRekening(Request $request)
+    {
+        $request->validate([
+            'rekening_nama' => 'required|string|max:100',
+            'rekening_bank' => 'required|string|max:50',
+            'rekening_nomor' => 'required|string|max:30',
+        ]);
+
+        $user = $request->user();
+        $data = $request->only(['rekening_nama', 'rekening_bank', 'rekening_nomor']);
+
+        $user->update($data);
+
+        return response()->json([
+            'user' => $this->userResponse($user),
+        ]);
+    }
+
+    public function requestCashout(Request $request)
+    {
+        $minimum = (int) config('langkahkecil.cashout.minimum', 50000);
+        $adminRate = (int) config('langkahkecil.cashout.admin_rate', 3);
+
+        $request->validate([
+            'amount' => "required|integer|min:{$minimum}",
+        ]);
+
+        $user = $request->user();
+
+        if ($user->komisi < $request->amount) {
+            return response()->json(['message' => 'Saldo komisi tidak mencukupi'], 422);
+        }
+
+        if (!$user->rekening_nama || !$user->rekening_bank || !$user->rekening_nomor) {
+            return response()->json(['message' => 'Lengkapi data rekening terlebih dahulu'], 422);
+        }
+
+        $adminFee = (int) round($request->amount * $adminRate / 100);
+        $received = $request->amount - $adminFee;
+
+        $user->decrement('komisi', $request->amount);
+
+        $cashout = Cashout::create([
+            'cashout_id_user' => $user->id,
+            'cashout_jumlah' => $request->amount,
+            'cashout_admin_fee' => $adminFee,
+            'cashout_diterima' => $received,
+            'cashout_rekening_bank' => $user->rekening_bank,
+            'cashout_rekening_nomor' => $user->rekening_nomor,
+            'cashout_rekening_nama' => $user->rekening_nama,
+            'cashout_status' => 'pending',
+            'cashout_created_at' => now(),
+            'cashout_updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Permintaan pencairan berhasil diajukan. Maksimal 2 hari kerja.',
+            'komisi' => $user->fresh()->komisi,
+            'cashout' => $cashout,
+        ]);
+    }
+
+    public function cashoutList(Request $request)
+    {
+        $cashouts = Cashout::where('cashout_id_user', $request->user()->id)
+            ->orderByDesc('cashout_created_at')
+            ->limit(20)
+            ->get();
+
+        return response()->json(['cashouts' => $cashouts]);
+    }
+
+    private function maskEmail(string $email): string
+    {
+        $parts = explode('@', $email);
+        if (count($parts) !== 2) return $email;
+
+        $local = $parts[0];
+        $domain = $parts[1];
+
+        $localLen = strlen($local);
+        if ($localLen <= 2) {
+            $maskedLocal = $local . '***';
+        } else {
+            $maskedLocal = substr($local, 0, 2) . str_repeat('*', min($localLen - 2, 5));
+        }
+
+        return $maskedLocal . '@' . $domain;
     }
 }

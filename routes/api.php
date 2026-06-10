@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LangkahKecilController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PushNotificationController;
 use App\Actions\PlanAction;
@@ -23,56 +24,53 @@ Route::get('/activities', [ActivityController::class, 'index'])->name('activitie
 Route::get('/activities/types', [ActivityController::class, 'types'])->name('activities.types');
 Route::get('/activities/{slug}', [ActivityController::class, 'show'])->name('activities.show');
 
-Route::get('/plans', function () {
-    $plans = \App\Models\SubscriptionPlan::where('is_active', true)
-        ->with('features')
-        ->orderBy('sort_order')
-        ->get()
-        ->map(fn ($plan) => [
-            'id' => $plan->id,
-            'slug' => $plan->slug,
-            'name' => $plan->name,
-            'description' => $plan->description,
-            'price' => $plan->price,
-            'currency' => $plan->currency,
-            'features' => $plan->features->map(fn ($f) => [
-                'slug' => $f->slug,
-                'name' => $f->name,
-                'value' => $f->value,
-            ]),
-        ]);
+Route::prefix('langkahkecil')->group(function () {
+    Route::get('/plans', function () {
+        $plans = \App\Models\Plan::where('plan_status', 1)
+            ->orderBy('plan_harga')
+            ->get()
+            ->map(function ($p) {
+                $periodEnum = \App\PeriodEnum::tryFrom($p->plan_periode);
+                return [
+                    'id' => $p->plan_id,
+                    'name' => $p->plan_nama,
+                    'description' => $p->plan_keterangan,
+                    'value' => $p->plan_value,
+                    'price' => $p->plan_harga,
+                    'fee' => $p->plan_fee,
+                    'color' => $p->plan_color,
+                    'recommended' => (bool) $p->plan_recomended,
+                    'period' => $p->plan_periode,
+                    'period_label' => $periodEnum?->description() ?? $p->plan_periode,
+                    'interval' => $p->plan_interval,
+                ];
+            });
 
-    $discounts = \App\Models\Discount::where('discount_active', true)
-        ->where(function ($q) {
-            $q->whereNull('discount_start')->orWhere('discount_start', '<=', now());
-        })
-        ->where(function ($q) {
-            $q->whereNull('discount_end')->orWhere('discount_end', '>=', now());
-        })
-        ->get()
-        ->map(fn ($d) => [
-            'code' => $d->discount_code,
-            'name' => $d->discount_nama,
-            'type' => $d->discount_type,
-            'value' => $d->discount_value,
-            'min_transaction' => $d->discount_min_transaction,
-            'max_amount' => $d->discount_max_amount,
-        ]);
-
-    return response()->json([
-        'plans' => $plans,
-        'discounts' => $discounts,
-        'trial_days' => (int) env('LANGKAHKECIL_TRIAL_DAYS', 10),
-    ]);
-})->name('plans.index');
+        return response()->json(['plans' => $plans]);
+    })->name('langkahkecil.plans.index');
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me'])->name('me');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::put('/password', [AuthController::class, 'changePassword'])->name('password.change');
+    Route::put('/affiliate-code', [AuthController::class, 'updateAffiliateCode'])->name('affiliate.update');
+    Route::post('/rekening', [AuthController::class, 'updateRekening'])->name('rekening.update');
+    Route::post('/cashout', [AuthController::class, 'requestCashout'])->name('cashout.request');
+    Route::get('/cashouts', [AuthController::class, 'cashoutList'])->name('cashout.list');
+    Route::get('/referrals', [AuthController::class, 'referralList'])->name('referrals.list');
     Route::post('/purchase-plan', PlanAction::class . '@purchase')->name('purchase.plan');
     Route::get('/validate-plan', PlanAction::class . '@validatePlan')->name('validate.plan');
+
+    Route::prefix('payments')->group(function () {
+        Route::post('/', [PaymentController::class, 'create'])->name('payments.create');
+        Route::get('/{id}', [PaymentController::class, 'status'])->name('payments.status');
+        Route::post('/{id}/settle', [PaymentController::class, 'settle'])->name('payments.settle');
+        Route::post('/{id}/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
+        Route::get('/', [PaymentController::class, 'history'])->name('payments.history');
+        Route::post('/validate-discount', [PaymentController::class, 'validateDiscount'])->name('payments.validate-discount');
+    });
     Route::post('/pos/checkout-api', [PosController::class, 'apiCheckout'])->name('pos.checkout-api');
     Route::get('/notification/broadcast', [NotificationController::class, 'broadcast'])->name('notification.broadcast');
 

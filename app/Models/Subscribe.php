@@ -63,6 +63,7 @@ class Subscribe extends BaseModel
         'subscribe_discount',
         'subscribe_total',
         'subscribe_id_plan',
+        'subsribe_value',
         'subscribe_trial_at',
         'subscribe_start_at',
         'subscribe_end_at',
@@ -89,6 +90,11 @@ class Subscribe extends BaseModel
     public static function field_name()
     {
         return 'subscribe_nama';
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'subscribe_id_plan', 'plan_id');
     }
 
 }

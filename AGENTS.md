@@ -214,3 +214,91 @@ Lihat:
 - `resources/views/components/menu-items.blade.php`
 - `resources/views/components/bottom-nav.blade.php`
 - `resources/views/layouts/warehouse.blade.php`
+
+---
+
+## Database Naming Convention
+
+### Bahasa Indonesia
+
+Semua nama field menggunakan **bahasa Indonesia**. Contoh:
+
+| English | Indonesia |
+|---------|-----------|
+| name | nama |
+| note | catatan |
+| amount | jumlah |
+| status | status |
+| type | tipe |
+| description | keterangan |
+| price | harga |
+| date | tanggal |
+| image | gambar |
+| address | alamat |
+| phone | telepon |
+
+### Table Naming
+
+Table names use **plural snake_case** (default Laravel convention):
+
+```
+users, payments, affiliate, cashouts, plans
+```
+
+Exception: entity-specific tables can use singular if it represents a domain concept (e.g., `affiliate`).
+
+### Field Naming
+
+All fields use prefix `{table_singular}_` with the table name as prefix.
+
+#### Rules
+
+1. **Primary key**: `{table}_id` (e.g., `payment_id`, `affiliate_id`, `cashout_id`)
+2. **Foreign keys**: `{table}_id_{reference}` (e.g., `payment_id_user`, `affiliate_id_from_user`, `cashout_id_user`)
+3. **Regular fields**: `{table}_{field_indonesia}` (e.g., `payment_jumlah`, `payment_status`, `affiliate_tipe`)
+4. **Timestamps**: `{table}_created_at`, `{table}_updated_at` (e.g., `payment_created_at`)
+
+#### Examples
+
+| Table | PK | Foreign Keys | Fields |
+|-------|-----|-------------|--------|
+| `users` | `id` | - | `nama`, `email`, `role`, `komisi`, `affiliate_code`, `affiliate_reff`, `rekening_nama`, `rekening_bank`, `rekening_nomor` |
+| `payments` | `payment_id` | `payment_id_user`, `payment_id_plan` | `payment_order_code`, `payment_jumlah`, `payment_diskon`, `payment_total`, `payment_qris_string`, `payment_status`, `payment_metode`, `payment_paid_at`, `payment_expired_at`, `payment_created_at`, `payment_updated_at` |
+| `affiliate` | `affiliate_id` | `affiliate_id_user`, `affiliate_id_from_user`, `affiliate_id_payment` | `affiliate_tipe`, `affiliate_jumlah`, `affiliate_payment_jumlah`, `affiliate_commission_rate`, `affiliate_catatan`, `affiliate_status`, `affiliate_created_at`, `affiliate_updated_at` |
+| `cashouts` | `cashout_id` | `cashout_id_user` | `cashout_jumlah`, `cashout_admin_fee`, `cashout_diterima`, `cashout_rekening_bank`, `cashout_rekening_nomor`, `cashout_rekening_nama`, `cashout_status`, `cashout_catatan`, `cashout_created_at`, `cashout_updated_at` |
+
+#### Model Convention
+
+```php
+class Payment extends Model
+{
+    protected $primaryKey = 'payment_id';
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'payment_id_user');
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'payment_id_plan', 'plan_id');
+    }
+}
+```
+
+#### Creating New Table
+
+When creating a new table, follow this template (gunakan bahasa Indonesia untuk nama field):
+
+```php
+Schema::create('example', function (Blueprint $table) {
+    $table->id('example_id');
+    $table->integer('example_id_user');
+    $table->string('example_nama');
+    $table->integer('example_jumlah');
+    $table->enum('example_status', ['aktif', 'nonaktif'])->default('aktif');
+    $table->text('example_catatan')->nullable();
+    $table->dateTime('example_created_at')->nullable();
+    $table->dateTime('example_updated_at')->nullable();
+});
+```

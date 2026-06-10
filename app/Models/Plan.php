@@ -23,6 +23,8 @@ class Plan extends BaseModel
         'plan_keterangan' => 'Keteranan',
         'plan_harga' => 'Harga',
         'plan_fee' => 'Fee',
+        'plan_color' => 'Color',
+        'plan_recomended' => 'Rekomended',
         'plan_periode' => 'Periode',
         'plan_interval' => 'Interval'
     ];
@@ -36,6 +38,8 @@ class Plan extends BaseModel
         'plan_status',
         'plan_keterangan',
         'plan_harga',
+        'plan_color',
+        'plan_recomended',
         'plan_fee',
         'plan_periode',
         'plan_interval'
@@ -54,7 +58,9 @@ class Plan extends BaseModel
         'plan_harga',
         'plan_fee',
         'plan_periode',
-        'plan_interval'
+        'plan_interval',
+        'plan_recomended',
+        'plan_color'
     ];
 
     /**

@@ -1,0 +1,250 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Jobs\ProcessPaidPayment;
+use App\Models\Discount;
+use App\Models\Payment;
+use App\Models\Plan;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class PaymentController extends Controller
+{
+    public function create(Request $request)
+    {
+        $request->validate([
+            'plan_id' => 'required|integer|exists:plan,plan_id',
+        ]);
+
+        $user = $request->user();
+        $plan = Plan::findOrFail($request->plan_id);
+
+        $todayCount = Payment::where('payment_id_user', $user->id)
+            ->whereDate('payment_created_at', today())
+            ->count();
+
+        if ($todayCount >= 10) {
+            return response()->json(['message' => 'Batas pembayaran hari ini tercapai (maks 10x). Coba lagi besok.'], 429);
+        }
+
+        Payment::where('payment_id_user', $user->id)
+            ->where('payment_status', 'pending')
+            ->update(['payment_status' => 'cancelled', 'payment_updated_at' => now()]);
+
+        $qrisString = null;
+        $amount = $plan->plan_harga;
+        $discount = 0;
+
+        if ($user->affiliate_reff) {
+            $baseDiscountRate = (int) config('langkahkecil.affiliate.customer_discount_rate', 20);
+            $commissionRate = (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15);
+            $referrer = User::where('affiliate_code', $user->affiliate_reff)->first();
+            $affDiscount = $referrer?->affiliate_discount ?? 0;
+
+            $discountRate = $baseDiscountRate + max(0, $commissionRate - $affDiscount);
+            $discount = (int) round($amount * $discountRate / 100);
+            $amount = $amount - $discount;
+        }
+
+        if ($request->discount_code && $discount === 0) {
+            $dc = Discount::where('discount_code', $request->discount_code)
+                ->where('discount_active', true)
+                ->first();
+            if ($dc) {
+                if ($dc->discount_type === 'percentage') {
+                    $discount = (int) round($amount * $dc->discount_value / 100);
+                    if ($dc->discount_max_amount) $discount = min($discount, $dc->discount_max_amount);
+                } else {
+                    $discount = min($dc->discount_value, $amount);
+                }
+                $amount = $amount - $discount;
+            }
+        }
+
+        if ($amount > 0) {
+            $qrisString = nominalQRIS(env('QRIS'), $amount);
+        }
+
+        $payment = Payment::create([
+            'payment_id_user' => $user->id,
+            'payment_id_plan' => $plan->plan_id,
+            'payment_order_code' => Payment::generateCode(),
+            'payment_jumlah' => $plan->plan_harga,
+            'payment_diskon' => $discount,
+            'payment_total' => $amount,
+            'payment_qris_string' => $qrisString,
+            'payment_status' => 'pending',
+            'payment_metode' => 'qris',
+            'payment_expired_at' => now()->addMinutes(30),
+            'payment_created_at' => now(),
+            'payment_updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'payment' => $this->formatPayment($payment),
+        ]);
+    }
+
+    public function status(Request $request, $id)
+    {
+        $payment = Payment::where('payment_id_user', $request->user()->id)->findOrFail($id);
+
+        if ($payment->payment_status === 'pending' && \Carbon\Carbon::parse($payment->payment_expired_at)->isPast()) {
+            $payment->update(['payment_status' => 'expired', 'payment_updated_at' => now()]);
+        }
+
+        return response()->json([
+            'payment' => $this->formatPayment($payment),
+        ]);
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        $payment = Payment::where('payment_id_user', $request->user()->id)->findOrFail($id);
+
+        if ($payment->payment_status === 'pending') {
+            $payment->update(['payment_status' => 'cancelled', 'payment_updated_at' => now()]);
+        }
+
+        return response()->json([
+            'payment' => $this->formatPayment($payment),
+        ]);
+    }
+
+    public function settle(Request $request, $id)
+    {
+        $payment = Payment::where('payment_id_user', $request->user()->id)->findOrFail($id);
+
+        if ($payment->payment_status !== 'pending') {
+            return response()->json(['message' => 'Pembayaran sudah diproses'], 422);
+        }
+
+        if (\Carbon\Carbon::parse($payment->payment_expired_at)->isPast()) {
+            $payment->update(['payment_status' => 'expired', 'payment_updated_at' => now()]);
+            return response()->json(['message' => 'Pembayaran sudah kedaluwarsa'], 422);
+        }
+
+        $payment->update([
+            'payment_status' => 'paid',
+            'payment_paid_at' => now(),
+            'payment_updated_at' => now(),
+        ]);
+
+        ProcessPaidPayment::dispatch($payment->payment_id);
+
+        $payment->load('plan');
+
+        return response()->json([
+            'message' => 'Pembayaran berhasil!',
+            'payment' => $this->formatPayment($payment),
+        ]);
+    }
+
+    public function history(Request $request)
+    {
+        $payments = Payment::where('payment_id_user', $request->user()->id)
+            ->with('plan')
+            ->orderByDesc('payment_created_at')
+            ->limit(5)
+            ->get()
+            ->map(fn ($p) => $this->formatPayment($p));
+
+        return response()->json(['payments' => $payments]);
+    }
+
+    private function formatPayment(Payment $payment): array
+    {
+        return [
+            'id' => $payment->payment_id,
+            'order_code' => $payment->payment_order_code,
+            'plan_id' => $payment->payment_id_plan,
+            'plan_name' => $payment->plan?->plan_nama,
+            'amount' => $payment->payment_jumlah,
+            'discount' => $payment->payment_diskon,
+            'total' => $payment->payment_total,
+            'qris_string' => $payment->payment_qris_string,
+            'status' => $payment->payment_status,
+            'method' => $payment->payment_metode,
+            'paid_at' => $payment->payment_paid_at ? \Carbon\Carbon::parse($payment->payment_paid_at)->toIso8601String() : null,
+            'expired_at' => \Carbon\Carbon::parse($payment->payment_expired_at)->toIso8601String(),
+            'created_at' => $payment->payment_created_at ? \Carbon\Carbon::parse($payment->payment_created_at)->toIso8601String() : null,
+        ];
+    }
+
+    public function validateDiscount(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+            'plan_id' => 'required|integer|exists:plan,plan_id',
+        ]);
+
+        $code = strtoupper(trim($request->code));
+        $plan = Plan::findOrFail($request->plan_id);
+        $subtotal = $plan->plan_harga;
+
+        if ($subtotal <= 0) {
+            return response()->json(['valid' => false, 'message' => 'Tidak bisa menggunakan diskon untuk paket gratis']);
+        }
+
+        $discount = Discount::where('discount_code', $code)->first();
+
+        if ($discount) {
+            if (!$discount->discount_active) {
+                return response()->json(['valid' => false, 'message' => 'Diskon tidak aktif']);
+            }
+
+            $now = now();
+            if ($discount->discount_start && $now < $discount->discount_start) {
+                return response()->json(['valid' => false, 'message' => 'Diskon belum berlaku']);
+            }
+            if ($discount->discount_end && $now > $discount->discount_end) {
+                return response()->json(['valid' => false, 'message' => 'Diskon sudah kedaluwarsa']);
+            }
+
+            if ($discount->discount_min_transaction > 0 && $subtotal < $discount->discount_min_transaction) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Minimal transaksi Rp' . number_format($discount->discount_min_transaction),
+                ]);
+            }
+
+            $amount = $discount->discount_type === 'percentage'
+                ? (int) round($subtotal * $discount->discount_value / 100)
+                : (int) $discount->discount_value;
+
+            if ($discount->discount_max_amount && $amount > $discount->discount_max_amount) {
+                $amount = (int) $discount->discount_max_amount;
+            }
+
+            return response()->json([
+                'valid' => true,
+                'code' => $discount->discount_code,
+                'name' => $discount->discount_nama,
+                'type' => $discount->discount_type,
+                'rate' => $discount->discount_type === 'percentage' ? $discount->discount_value : null,
+                'amount' => $amount,
+            ]);
+        }
+
+        $referrer = User::where('affiliate_code', $code)->first();
+        if ($referrer) {
+            $baseRate = (int) config('langkahkecil.affiliate.customer_discount_rate', 13);
+            $commissionRate = (int) config('langkahkecil.affiliate.upgrade_commission_rate', 12);
+            $affDiscount = $referrer->affiliate_discount ?? 0;
+            $rate = $baseRate + max(0, $commissionRate - $affDiscount);
+            $amount = (int) round($subtotal * $rate / 100);
+
+            return response()->json([
+                'valid' => true,
+                'code' => $code,
+                'name' => 'Tambahan discount',
+                'type' => 'percentage',
+                'rate' => $rate,
+                'amount' => $amount,
+            ]);
+        }
+
+        return response()->json(['valid' => false, 'message' => 'Kode tidak ditemukan']);
+    }
+}
