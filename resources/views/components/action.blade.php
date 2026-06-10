@@ -42,4 +42,3 @@
         </div>
     </div>
 </div>
-<div class="h-28 md:h-16"></div>

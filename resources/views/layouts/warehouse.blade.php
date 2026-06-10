@@ -117,11 +117,11 @@
                         <p class="font-label-caps text-label-caps text-on-surface-variant">{{ auth()->user()->email ?? 'admin@wms.com' }}</p>
                     </div>
                     <div class="py-1">
-                        <a href="#" class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface">
+                        <a href="{{ route('profile.edit') }}" class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface">
                             <span class="material-symbols-outlined text-xl">person</span>
                             <span class="font-body-sm text-body-sm">My Profile</span>
                         </a>
-                        <a href="#" class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface">
+                        <a href="{{ route('settings.env') }}" class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface">
                             <span class="material-symbols-outlined text-xl">settings</span>
                             <span class="font-body-sm text-body-sm">Settings</span>
                         </a>
@@ -155,7 +155,7 @@
                 <span class="material-symbols-outlined text-on-surface-variant">close</span>
             </button>
         </div>
-        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        <nav class="flex-1 py-4 px-3 pb-24 space-y-1 overflow-y-auto">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('dashboard') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}" @click="drawerOpen = false">
                 <span class="material-symbols-outlined {{ request()->routeIs('dashboard') ? 'text-primary' : 'text-on-surface-variant' }}">dashboard</span>
                 <span class="font-body-sm">Dashboard</span>
@@ -245,6 +245,15 @@
             <a href="{{ route('user.getTable') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('user.*') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}" @click="drawerOpen = false">
                 <span class="material-symbols-outlined {{ request()->routeIs('user.*') ? 'text-primary' : 'text-on-surface-variant' }}">manage_accounts</span>
                 <span class="font-body-sm">Users</span>
+            </a>
+            <div class="px-4 pt-4 pb-1 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Settings</div>
+            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('profile.*') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}" @click="drawerOpen = false">
+                <span class="material-symbols-outlined {{ request()->routeIs('profile.*') ? 'text-primary' : 'text-on-surface-variant' }}">person</span>
+                <span class="font-body-sm">My Profile</span>
+            </a>
+            <a href="{{ route('settings.env') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('settings.env') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}" @click="drawerOpen = false">
+                <span class="material-symbols-outlined {{ request()->routeIs('settings.env') ? 'text-primary' : 'text-on-surface-variant' }}">settings</span>
+                <span class="font-body-sm">Environment</span>
             </a>
         </nav>
     </div>
@@ -344,6 +353,15 @@
             <a href="{{ route('user.getTable') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group {{ request()->routeIs('user.*') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}">
                 <span class="material-symbols-outlined {{ request()->routeIs('user.*') ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface' }}">manage_accounts</span>
                 <span class="font-body-sm">Users</span>
+            </a>
+            <div class="px-4 pt-4 pb-1 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Settings</div>
+            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group {{ request()->routeIs('profile.*') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('profile.*') ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface' }}">person</span>
+                <span class="font-body-sm">My Profile</span>
+            </a>
+            <a href="{{ route('settings.env') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group {{ request()->routeIs('settings.env') ? 'bg-primary-fixed text-primary font-semibold' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('settings.env') ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface' }}">settings</span>
+                <span class="font-body-sm">Environment</span>
             </a>
         </nav>
     </aside>

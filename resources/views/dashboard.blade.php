@@ -1,26 +1,6 @@
 <x-layouts::warehouse title="Dashboard - WMS Portal">
     <div>
-        <div class="mb-6 flex items-center gap-2 text-on-surface-variant font-body-sm">
-            <span class="cursor-pointer hover:text-primary transition-colors">Home</span>
-            <span class="material-symbols-outlined text-sm">chevron_right</span>
-            <span class="font-medium text-primary">Dashboard</span>
-        </div>
-
-        <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-                <p class="font-label-caps text-label-caps text-secondary uppercase tracking-widest mb-1">Global Logistics Center</p>
-                <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">System Overview</h2>
-            </div>
-            <div class="flex gap-2">
-                <div class="bg-surface-container-low border border-outline-variant px-4 py-2 rounded-lg flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant">NODE_ALPHA: ONLINE</span>
-                </div>
-            </div>
-        </div>
-
         <section class="mb-8">
-            <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase">Quick Actions</h3>
             <div class="grid grid-cols-4 gap-4">
                 @php
                 $quickActions = [

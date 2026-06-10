@@ -6,24 +6,28 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $sessionId = $request->session()->getId();
+
+        $otherSessions = DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $sessionId)
+            ->get();
+
         return view('pages.settings.profile', [
-            'user' => $request->user(),
+            'user' => $user,
+            'otherSessions' => $otherSessions,
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $request->user()->fill($request->validated());
@@ -39,9 +43,40 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit');
     }
 
-    /**
-     * Delete the user's account.
-     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => bcrypt($request->password),
+        ]);
+
+        flash()->success(__('Password updated successfully.'));
+
+        return Redirect::route('profile.edit');
+    }
+
+    public function destroyOtherSessions(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $sessionId = $request->session()->getId();
+
+        DB::table('sessions')
+            ->where('user_id', $request->user()->id)
+            ->where('id', '!=', $sessionId)
+            ->delete();
+
+        flash()->success(__('Other sessions deleted successfully.'));
+
+        return Redirect::route('profile.edit');
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
