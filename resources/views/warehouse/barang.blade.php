@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Inventory Browser - WMS Portal">
+<x-layouts::app title="Inventory Browser - WMS Portal">
     <div x-data="barangPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -129,4 +129,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

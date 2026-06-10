@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Register Product - WMS Portal">
+<x-layouts::app title="Register Product - WMS Portal">
     <div x-data="registerPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -76,4 +76,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

@@ -2,7 +2,7 @@
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-6 form-card">
     <div class="flex flex-col sm:flex-row gap-4 sm:items-end">
         <div class="relative sm:w-auto">
-            <select id="perPage" class="w-3xl h-12 pl-4 pr-10 bg-white border border-outline-variant rounded-lg font-body-sm appearance-none cursor-pointer focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all" onchange="buildUrl()">
+            <select id="perPage" class="h-12 pl-4 pr-10 bg-white border border-outline-variant rounded-lg font-body-sm appearance-none cursor-pointer focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all" onchange="buildUrl()">
                 @foreach($perPageOptions as $pp)
                 <option value="{{ $pp }}" {{ request('per_page', $perPage) == $pp ? 'selected' : '' }}>{{ $pp }} / page</option>
                 @endforeach

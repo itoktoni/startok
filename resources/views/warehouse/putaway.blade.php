@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Putaway - WMS Portal">
+<x-layouts::app title="Putaway - WMS Portal">
     <div x-data="putawayPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -202,4 +202,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Forklift Tasks - WMS Portal">
+<x-layouts::app title="Forklift Tasks - WMS Portal">
     <div x-data="forkliftPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -125,4 +125,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

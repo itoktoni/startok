@@ -1,6 +1,6 @@
 <?php /** @var App\Models\Product $table */ ?>
 
-<x-layouts::warehouse>
+<x-layouts::app>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
@@ -79,4 +79,4 @@
             }
         });
     </script>
-</x-layouts::warehouse>
+</x-layouts::app>

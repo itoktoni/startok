@@ -1,15 +1,14 @@
-<?php /** @var App\Models\Customer $model */ ?>
+<?php /** @var App\Models\Satuan $model */ ?>
 
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => moduleRoute('getTable'), 'label' => ucfirst(module())], ['url' => '', 'label' => isset($model) && $model->exists ? 'Update' : 'Create']]" />
 
     <x-form :model="$model">
         <x-card :label="ucfirst(module())">
-            @bind($model ?? null)
+            @bind($model)
 
-                <x-input col="6" name="customer_nama" />
-                <x-input col="6" name="customer_phone" />
-                <x-textarea col="12" name="customer_address" />
+                <x-input col="6" name="satuan_code" />
+                <x-input col="6" name="satuan_nama" />
 
             @endbind
         </x-card>

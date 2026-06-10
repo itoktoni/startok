@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Inbound Management - WMS Portal">
+<x-layouts::app title="Inbound Management - WMS Portal">
     <div x-data="inboundPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -169,4 +169,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

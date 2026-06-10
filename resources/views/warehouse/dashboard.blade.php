@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Dashboard - WMS Portal">
+<x-layouts::app title="Dashboard - WMS Portal">
     <div>
         <div class="mb-6 flex items-center gap-2 text-on-surface-variant font-body-sm">
             <span class="cursor-pointer hover:text-primary transition-colors">Home</span>
@@ -181,4 +181,4 @@
             </div>
         </div>
     </div>
-</x-layouts::warehouse>
+</x-layouts::app>

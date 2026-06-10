@@ -1,3 +1,3 @@
 <x-layouts::app :title="__('POS')">
     <livewire:pos-system />
-</x-layouts::warehouse>
+</x-layouts::app>

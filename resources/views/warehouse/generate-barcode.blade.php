@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Generate Barcode - WMS Portal">
+<x-layouts::app title="Generate Barcode - WMS Portal">
     <div x-data="generateBarcodePage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -125,4 +125,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

@@ -45,13 +45,28 @@
         border: 1px solid #c4c5d5 !important;
         border-radius: 0.5rem !important;
         min-height: 3rem !important;
-        height: 3rem !important;
-        padding: 0 2.5rem 0 1rem !important;
+        height: auto !important;
+        padding: 0.5rem 2.5rem 0.5rem 1rem !important;
         font-size: 0.875rem !important;
         line-height: 1.25rem !important;
         color: #191c1e !important;
         box-shadow: none !important;
         opacity: 1 !important;
+    }
+    .ts-wrapper.multi .ts-control {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 4px !important;
+        height: auto !important;
+    }
+    .ts-wrapper.multi .item {
+        background: #00288e !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 0.25rem !important;
+        padding: 2px 6px !important;
+        line-height: 1.4 !important;
     }
     .ts-wrapper .ts-control::after {
         content: '' !important;
@@ -110,16 +125,13 @@
     .ts-wrapper.has-error .ts-control {
         border-color: #ba1a1a !important;
     }
-    .ts-wrapper.multi .item {
-        background: #dde1ff !important;
-        color: #00288e !important;
-        border: none !important;
-        border-radius: 0.25rem !important;
-        padding: 2px 6px !important;
-    }
     .ts-wrapper.multi .remove {
-        color: #00288e !important;
+        color: #ffffff !important;
         border: none !important;
+        opacity: 0.7 !important;
+    }
+    .ts-wrapper.multi .remove:hover {
+        opacity: 1 !important;
     }
 </style>
 @endonce

@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Active Tasks - WMS Portal">
+<x-layouts::app title="Active Tasks - WMS Portal">
     <div x-data="activeTasksPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -87,4 +87,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

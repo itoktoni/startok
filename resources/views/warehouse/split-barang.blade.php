@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Split Barang - WMS Portal">
+<x-layouts::app title="Split Barang - WMS Portal">
     <div x-data="splitBarangPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -133,4 +133,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

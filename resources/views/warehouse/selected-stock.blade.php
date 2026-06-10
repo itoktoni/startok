@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Stock Detail - WMS Portal">
+<x-layouts::app title="Stock Detail - WMS Portal">
     <div x-data="selectedStockPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -132,4 +132,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

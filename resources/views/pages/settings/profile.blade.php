@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="My Profile">
+<x-layouts::app title="My Profile">
     <x-breadcrumb :items="[['url' => route('dashboard'), 'label' => 'Dashboard'], ['url' => '', 'label' => 'My Profile']]" />
 
 
@@ -151,4 +151,4 @@
             </div>
         </div>
     </div>
-</x-layouts::warehouse>
+</x-layouts::app>

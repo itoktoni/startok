@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Dashboard - WMS Portal">
+<x-layouts::app title="Dashboard - WMS Portal">
     <div>
         <section class="mb-8">
             <div class="grid grid-cols-4 gap-4">
@@ -174,4 +174,4 @@
             </div>
         </div>
     </div>
-</x-layouts::warehouse>
+</x-layouts::app>

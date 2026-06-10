@@ -1,4 +1,4 @@
-<?php /** @var App\Models\PosOrder $table */ ?>
+<?php /** @var App\Models\Satuan $table */ ?>
 
 <x-layouts::app>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
@@ -68,6 +68,13 @@
     </div>
 
     <input type="hidden" class="module" value="{{ module() }}">
-    <script src="/js/table.js"></script>
-    <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
+
+    <script src="/js/table.js" data-navigate-once></script>
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            if (typeof initTable === 'function') {
+                initTable('{{ $sortField }}', '{{ $sortDir }}');
+            }
+        });
+    </script>
 </x-layouts::app>

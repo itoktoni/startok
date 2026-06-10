@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Stock Opname - WMS Portal">
+<x-layouts::app title="Stock Opname - WMS Portal">
     <div x-data="opnamePage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -118,4 +118,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

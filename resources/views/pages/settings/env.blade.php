@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Settings - .env Editor">
+<x-layouts::app title="Settings - .env Editor">
     <x-breadcrumb :items="[['url' => route('dashboard'), 'label' => 'Dashboard'], ['url' => '', 'label' => 'Settings']]" />
 
     <form action="{{ route('settings.env.save') }}" method="POST">
@@ -76,4 +76,4 @@
             </p>
         </div>
     </div>
-</x-layouts::warehouse>
+</x-layouts::app>

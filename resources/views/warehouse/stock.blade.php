@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Stock Management - WMS Portal">
+<x-layouts::app title="Stock Management - WMS Portal">
     <div x-data="stockPage()">
         <div class="mb-6 flex items-center gap-2 text-on-surface-variant font-body-sm">
             <span class="cursor-pointer hover:text-primary transition-colors">Inventory</span>
@@ -227,4 +227,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>

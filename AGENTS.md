@@ -147,3 +147,70 @@ Tab buttons pada halaman profile menggunakan padding `py-4` agar tidak berdempet
 ### Contoh
 
 Lihat `resources/views/pages/settings/profile.blade.php`.
+
+---
+
+## Menu Configuration
+
+Menu didefinisikan di `config/menu.php` dan di-render oleh component Blade.
+
+### Config Structure (`config/menu.php`)
+
+```php
+return [
+    'sidebar' => [
+        [
+            'label' => 'Warehouse',  // null untuk section tanpa label
+            'items' => [
+                ['route' => 'warehouse.stock', 'icon' => 'inventory_2', 'label' => 'Stock Management'],
+                // ...
+            ],
+        ],
+    ],
+    'bottom_nav' => [
+        ['route' => 'warehouse.stock', 'icon' => 'inventory_2', 'label' => 'Stock'],
+        // max 5 items, item ke-3 (index 2) jadi center button
+    ],
+];
+```
+
+### Components
+
+| Component | Fungsi |
+|-----------|--------|
+| `<x-menu-items />` | Render sidebar/drawer menu dari config |
+| `<x-menu-items :mobile="true" />` | Render dengan `@click="drawerOpen = false"` |
+| `<x-bottom-nav />` | Render bottom nav dari config |
+
+### Penggunaan di Layout
+
+```blade
+{{-- Mobile Drawer --}}
+<nav class="flex-1 py-4 px-3 pb-24 space-y-1 overflow-y-auto">
+    <x-menu-items :mobile="true" />
+</nav>
+
+{{-- Desktop Sidebar --}}
+<nav class="flex-1 space-y-2 overflow-y-auto pr-3 pb-4">
+    <x-menu-items />
+</nav>
+
+{{-- Bottom Nav --}}
+<x-bottom-nav />
+```
+
+### Menambah Menu Baru
+
+1. Buka `config/menu.php`
+2. Tambah item di section yang sesuai:
+   - `sidebar` — untuk desktop sidebar dan mobile drawer
+   - `bottom_nav` — untuk bottom nav mobile (max 5 items)
+3. Format: `['route' => 'route.name', 'icon' => 'material_icon', 'label' => 'Display Label']`
+
+### Contoh
+
+Lihat:
+- `config/menu.php`
+- `resources/views/components/menu-items.blade.php`
+- `resources/views/components/bottom-nav.blade.php`
+- `resources/views/layouts/warehouse.blade.php`

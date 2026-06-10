@@ -1,4 +1,4 @@
-<x-layouts::warehouse>
+<x-layouts::app>
     <x-breadcrumb :items="[['url' => '/dashboard', 'label' => 'Home'], ['url' => '', 'label' => ucfirst(module())]]" />
     <div class="content mt-4 lg:mt-0">
         {{-- Filters --}}
@@ -68,4 +68,4 @@
     <input type="hidden" class="module" value="{{ module() }}">
     <script src="/js/table.js"></script>
     <script>initTable('{{ $sortField }}', '{{ $sortDir }}');</script>
-</x-layouts::warehouse>
+</x-layouts::app>

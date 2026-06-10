@@ -1,4 +1,4 @@
-<x-layouts::warehouse title="Outbound Orders - WMS Portal">
+<x-layouts::app title="Outbound Orders - WMS Portal">
     <div x-data="outboundOrdersPage()">
         <style>[x-cloak] { display: none !important; }</style>
 
@@ -124,4 +124,4 @@
         }
     </script>
     @endpush
-</x-layouts::warehouse>
+</x-layouts::app>
