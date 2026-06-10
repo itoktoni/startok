@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Variant extends BaseModel
 {
     protected $table = 'variants';
+
     protected $primaryKey = 'variant_id';
+
     public $incrementing = true;
 
     /**

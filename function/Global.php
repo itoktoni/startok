@@ -91,10 +91,11 @@ function moduleRoute($action = null, $params = [])
     return $route;
 }
 
-function nominalQRIS($qris_data, $amount) {
+function nominalQRIS($qris_data, $amount)
+{
     $amountStr = number_format($amount, 2, '.', '');
     $amountLength = strlen($amountStr);
-    $amountField = "54" . str_pad($amountLength, 2, '0', STR_PAD_LEFT) . $amountStr;
+    $amountField = '54'.str_pad($amountLength, 2, '0', STR_PAD_LEFT).$amountStr;
 
     // Hilangkan field 54 (nominal) yang lama
     $qris_data = preg_replace('/54\d{2}\d+/', '', $qris_data);
@@ -102,13 +103,15 @@ function nominalQRIS($qris_data, $amount) {
     // Hilangkan CRC lama (tag 63)
     $qris_data = preg_replace('/6304.{4}$/', '', $qris_data);
 
-    $new_qris = $qris_data . $amountField . "6304";
+    $new_qris = $qris_data.$amountField.'6304';
     $crc = strtoupper(dechex(crc16($new_qris)));
     $crc = str_pad($crc, 4, '0', STR_PAD_LEFT);
-    return $new_qris . $crc;
+
+    return $new_qris.$crc;
 }
 
-function crc16($data) {
+function crc16($data)
+{
     $crc = 0xFFFF;
     for ($i = 0; $i < strlen($data); $i++) {
         $crc ^= ord($data[$i]) << 8;
@@ -121,5 +124,6 @@ function crc16($data) {
             $crc &= 0xFFFF;
         }
     }
+
     return $crc;
 }

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -12,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PosOrder extends BaseModel
 {
     protected $table = 'pos_orders';
+
     protected $primaryKey = 'pos_id';
+
     public $incrementing = true;
 
     /**
@@ -110,6 +111,7 @@ class PosOrder extends BaseModel
         $prefix = 'POS';
         $date = now()->format('Ymd');
         $random = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
         return "{$prefix}{$date}{$random}";
     }
 }

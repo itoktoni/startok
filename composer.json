@@ -24,6 +24,7 @@
         "livewire/livewire": "^4.1",
         "lorisleiva/laravel-actions": "^2.10",
         "milon/barcode": "^13.1",
+        "minishlink/web-push": "^10.1",
         "php-flasher/flasher-laravel": "^2.6",
         "riverskies/laravel-mobile-detect": "^1.3"
     },
