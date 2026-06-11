@@ -16,6 +16,7 @@ class Payment extends Model
         'payment_order_code',
         'payment_jumlah',
         'payment_diskon',
+        'payment_diskon_code',
         'payment_total',
         'payment_qris_string',
         'payment_status',

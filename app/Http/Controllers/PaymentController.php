@@ -35,22 +35,13 @@ class PaymentController extends Controller
         $qrisString = null;
         $amount = $plan->plan_harga;
         $discount = 0;
+        $discountCode = null;
 
-        if ($user->affiliate_reff) {
-            $baseDiscountRate = (int) config('langkahkecil.affiliate.customer_discount_rate', 20);
-            $commissionRate = (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15);
-            $referrer = User::where('affiliate_code', $user->affiliate_reff)->first();
-            $affDiscount = $referrer?->affiliate_discount ?? 0;
-
-            $discountRate = $baseDiscountRate + max(0, $commissionRate - $affDiscount);
-            $discount = (int) round($amount * $discountRate / 100);
-            $amount = $amount - $discount;
-        }
-
-        if ($request->discount_code && $discount === 0) {
-            $dc = Discount::where('discount_code', $request->discount_code)
+        if ($request->discount_code) {
+            $dc = Discount::where('discount_code', strtoupper(trim($request->discount_code)))
                 ->where('discount_active', true)
                 ->first();
+
             if ($dc) {
                 if ($dc->discount_type === 'percentage') {
                     $discount = (int) round($amount * $dc->discount_value / 100);
@@ -59,6 +50,7 @@ class PaymentController extends Controller
                     $discount = min($dc->discount_value, $amount);
                 }
                 $amount = $amount - $discount;
+                $discountCode = $dc->discount_code;
             }
         }
 
@@ -72,6 +64,7 @@ class PaymentController extends Controller
             'payment_order_code' => Payment::generateCode(),
             'payment_jumlah' => $plan->plan_harga,
             'payment_diskon' => $discount,
+            'payment_diskon_code' => $discountCode,
             'payment_total' => $amount,
             'payment_qris_string' => $qrisString,
             'payment_status' => 'pending',
@@ -162,6 +155,7 @@ class PaymentController extends Controller
             'plan_name' => $payment->plan?->plan_nama,
             'amount' => $payment->payment_jumlah,
             'discount' => $payment->payment_diskon,
+            'discount_code' => $payment->payment_diskon_code,
             'total' => $payment->payment_total,
             'qris_string' => $payment->payment_qris_string,
             'status' => $payment->payment_status,
@@ -223,24 +217,6 @@ class PaymentController extends Controller
                 'name' => $discount->discount_nama,
                 'type' => $discount->discount_type,
                 'rate' => $discount->discount_type === 'percentage' ? $discount->discount_value : null,
-                'amount' => $amount,
-            ]);
-        }
-
-        $referrer = User::where('affiliate_code', $code)->first();
-        if ($referrer) {
-            $baseRate = (int) config('langkahkecil.affiliate.customer_discount_rate', 13);
-            $commissionRate = (int) config('langkahkecil.affiliate.upgrade_commission_rate', 12);
-            $affDiscount = $referrer->affiliate_discount ?? 0;
-            $rate = $baseRate + max(0, $commissionRate - $affDiscount);
-            $amount = (int) round($subtotal * $rate / 100);
-
-            return response()->json([
-                'valid' => true,
-                'code' => $code,
-                'name' => 'Tambahan discount',
-                'type' => 'percentage',
-                'rate' => $rate,
                 'amount' => $amount,
             ]);
         }

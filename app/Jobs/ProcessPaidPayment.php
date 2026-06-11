@@ -89,7 +89,7 @@ class ProcessPaidPayment implements ShouldQueue
 
     private function processAffiliateUpgrade(User $user, Plan $plan, Payment $payment): void
     {
-        if (!$user->affiliate_reff || $plan->plan_harga <= 0) {
+        if ($plan->plan_harga <= 0) {
             return;
         }
 
@@ -98,17 +98,52 @@ class ProcessPaidPayment implements ShouldQueue
             return;
         }
 
-        $referrer = User::where('affiliate_code', $user->affiliate_reff)->first();
+        $referrer = null;
+        $usedCustomCode = false;
+        $discountValue = 0;
+
+        if ($payment->payment_diskon_code) {
+            $discount = \App\Models\Discount::where('discount_code', $payment->payment_diskon_code)->first();
+            if ($discount && $discount->discount_created_by) {
+                $discountCreator = User::find($discount->discount_created_by);
+                if ($discountCreator && $discountCreator->affiliate_code) {
+                    $usedCustomCode = true;
+                    $discountValue = $discount->discount_type === 'percentage'
+                        ? (int) $discount->discount_value
+                        : (int) round($discount->discount_value / $plan->plan_harga * 100);
+
+                    $oldReff = $user->affiliate_reff;
+                    if ($oldReff !== $discountCreator->affiliate_code) {
+                        $user->update(['affiliate_reff' => $discountCreator->affiliate_code]);
+                        Log::info("AffiliateSwitch: user_id={$user->id} from={$oldReff} to={$discountCreator->affiliate_code} reason=discount_code={$payment->payment_diskon_code}");
+                    }
+
+                    $referrer = $discountCreator;
+                }
+            }
+        }
+
+        if (!$referrer && $user->affiliate_reff) {
+            $referrer = User::where('affiliate_code', $user->affiliate_reff)->first();
+        }
+
         if (!$referrer) {
             return;
         }
 
         $commissionRate = (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15);
         $commissionBonus = (int) config('langkahkecil.affiliate.upgrade_commission_bonus', 1000);
-        $affDiscount = $referrer->affiliate_discount ?? 0;
-        $effectiveRate = $affDiscount > 0 ? min($affDiscount, $commissionRate) : $commissionRate;
-        $commission = (int) round($plan->plan_harga * $effectiveRate / 100);
+
+        if ($usedCustomCode) {
+            $commissionRate = max(0, $commissionRate - $discountValue);
+        }
+
+        $commission = (int) round($plan->plan_harga * $commissionRate / 100);
         $total = $commission + $commissionBonus;
+
+        $note = $usedCustomCode
+            ? "Komisi {$commissionRate}% (diskon {$discountValue}% untuk customer) + bonus Rp" . number_format($commissionBonus) . " dari " . $user->name . " upgrade " . $plan->plan_nama
+            : "Komisi {$commissionRate}% + bonus Rp" . number_format($commissionBonus) . " dari " . $user->name . " upgrade " . $plan->plan_nama;
 
         Affiliate::create([
             'affiliate_id_user' => $referrer->id,
@@ -117,16 +152,14 @@ class ProcessPaidPayment implements ShouldQueue
             'affiliate_tipe' => 'upgrade',
             'affiliate_jumlah' => $total,
             'affiliate_payment_jumlah' => $plan->plan_harga,
-            'affiliate_commission_rate' => $effectiveRate,
-            'affiliate_catatan' => "Komisi {$effectiveRate}% + bonus Rp" . number_format($commissionBonus) . " dari " . $user->name . " upgrade " . $plan->plan_nama,
+            'affiliate_commission_rate' => $commissionRate,
+            'affiliate_catatan' => $note,
             'affiliate_status' => 'pending',
             'affiliate_created_at' => now(),
             'affiliate_updated_at' => now(),
         ]);
 
-        $referrer->increment('komisi', $total);
-
-        Log::info("AffiliateUpgrade: referrer_id={$referrer->id} from_user_id={$user->id} amount={$total}");
+        Log::info("AffiliateUpgrade: referrer_id={$referrer->id} from_user_id={$user->id} amount={$total} custom_code=" . ($usedCustomCode ? $payment->payment_diskon_code : 'none'));
     }
 
     public function failed(\Throwable $exception): void

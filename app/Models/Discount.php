@@ -2,16 +2,29 @@
 
 namespace App\Models;
 
+use App\Concerns\HasUserstamps;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 /**
  * @mixin IdeHelperDiscount
  */
 class Discount extends BaseModel
 {
+    use HasUserstamps, SoftDeletes;
+
     protected $table = 'discounts';
 
     protected $primaryKey = 'discount_id';
 
     public $incrementing = true;
+    public $timestamps = true;
+
+    const CREATED_AT = 'discount_created_at';
+    const UPDATED_AT = 'discount_updated_at';
+    const DELETED_AT = 'discount_deleted_at';
+    const CREATED_BY = 'discount_created_by';
+    const UPDATED_BY = 'discount_updated_by';
+    const DELETED_BY = 'discount_deleted_by';
 
     /**
      * Columns available for filtering.
@@ -49,6 +62,9 @@ class Discount extends BaseModel
         'discount_active',
         'discount_start',
         'discount_end',
+        'discount_created_by',
+        'discount_updated_by',
+        'discount_deleted_by',
     ];
 
     /**

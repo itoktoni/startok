@@ -19,7 +19,12 @@ return new class extends Migration
             $table->boolean('discount_active')->default(true);
             $table->dateTime('discount_start')->nullable();
             $table->dateTime('discount_end')->nullable();
-            $table->timestamps();
+            $table->dateTime('discount_created_at')->nullable();
+            $table->integer('discount_created_by')->nullable();
+            $table->dateTime('discount_updated_at')->nullable();
+            $table->integer('discount_updated_by')->nullable();
+            $table->dateTime('discount_deleted_at')->nullable();
+            $table->integer('discount_deleted_by')->nullable();
         });
     }
 

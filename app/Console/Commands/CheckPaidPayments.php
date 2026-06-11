@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class CheckPaidPayments extends Command
 {
-    protected $signature = 'payments:process-paid';
+    protected $signature = 'payment:process';
     protected $description = 'Find paid payments that need subscription/affiliate processing and dispatch jobs';
 
     public function handle(): int

@@ -22,7 +22,7 @@ use Minishlink\WebPush\WebPush;
 /**
  * @mixin IdeHelperUser
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'plan', 'affiliate_code', 'affiliate_reff', 'affiliate_discount', 'komisi', 'rekening_nama', 'rekening_bank', 'rekening_nomor'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'plan', 'affiliate_code', 'affiliate_reff', 'rekening_nama', 'rekening_bank', 'rekening_nomor'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -45,7 +45,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'komisi' => 'integer',
         ];
     }
 
@@ -97,6 +96,20 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    public function komisi(): int
+    {
+        $earned = Affiliate::where('affiliate_id_user', $this->id)
+            ->where('affiliate_status', '!=', 'rejected')
+            ->sum('affiliate_jumlah');
+
+        $cashout = Cashout::where('cashout_id_user', $this->id)
+            ->whereIn('cashout_status', ['pending', 'completed'])
+            ->selectRaw('SUM(cashout_jumlah + cashout_admin_fee) as total')
+            ->value('total') ?? 0;
+
+        return (int) $earned - (int) $cashout;
     }
 
     public function pushSubscriptions()

@@ -29,9 +29,7 @@ class AuthController extends Controller
             'affiliate_code' => $user->affiliate_code,
             'affiliate_reff' => $user->affiliate_reff,
             'affiliate_reff_nama' => $user->affiliate_reff ? User::where('affiliate_code', $user->affiliate_reff)->value('name') : null,
-            'affiliate_reff_discount' => $user->affiliate_reff ? (int) (User::where('affiliate_code', $user->affiliate_reff)->value('affiliate_discount') ?? 0) : 0,
-            'affiliate_discount' => $user->affiliate_discount,
-            'komisi' => $user->komisi,
+            'komisi' => $user->komisi(),
             'rekening_nama' => $user->rekening_nama,
             'rekening_bank' => $user->rekening_bank,
             'rekening_nomor' => $user->rekening_nomor,
@@ -101,7 +99,6 @@ class AuthController extends Controller
             'plans' => $this->plansData(),
             'discounts' => $this->discountsData(),
             'affiliate_config' => [
-                'customer_discount_rate' => (int) config('langkahkecil.affiliate.customer_discount_rate', 20),
                 'commission_rate' => (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15),
             ],
         ];
@@ -205,7 +202,6 @@ class AuthController extends Controller
                     'affiliate_created_at' => now(),
                     'affiliate_updated_at' => now(),
                 ]);
-                $referrer->increment('komisi', $registerBonus);
             }
         }
 
@@ -286,7 +282,6 @@ class AuthController extends Controller
     {
         $request->validate([
             'affiliate_code' => 'required|string|min:4|max:20|alpha_dash',
-            'affiliate_discount' => 'nullable|integer|min:0|max:15',
         ]);
 
         $user = $request->user();
@@ -297,12 +292,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Kode sudah digunakan orang lain'], 422);
         }
 
-        $data = ['affiliate_code' => $code];
-        if ($request->has('affiliate_discount')) {
-            $data['affiliate_discount'] = $request->affiliate_discount;
-        }
-
-        $user->update($data);
+        $user->update(['affiliate_code' => $code]);
 
         return response()->json([
             'user' => $this->userResponse($user),
@@ -336,6 +326,7 @@ class AuthController extends Controller
         return response()->json([
             'total' => $referrals->count(),
             'referrals' => $referrals,
+            'komisi' => $user->komisi(),
             'earnings' => [
                 'total' => $totalEarning,
                 'register' => $totalRegister,
@@ -346,7 +337,6 @@ class AuthController extends Controller
                 'register_bonus' => (int) config('langkahkecil.affiliate.register_bonus', 500),
                 'commission_rate' => (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15),
                 'commission_bonus' => (int) config('langkahkecil.affiliate.upgrade_commission_bonus', 1000),
-                'customer_discount' => (int) config('langkahkecil.affiliate.customer_discount_rate', 20),
             ],
             'cashout' => [
                 'minimum' => (int) config('langkahkecil.cashout.minimum', 50000),
@@ -376,7 +366,7 @@ class AuthController extends Controller
 
     public function requestCashout(Request $request)
     {
-        $minimum = (int) config('langkahkecil.cashout.minimum', 50000);
+        $minimum = (int) config('langkahkecil.cashout.minimum', 20000);
         $adminRate = (int) config('langkahkecil.cashout.admin_rate', 3);
 
         $request->validate([
@@ -384,19 +374,18 @@ class AuthController extends Controller
         ]);
 
         $user = $request->user();
+        $adminFee = (int) round($request->amount * $adminRate / 100);
+        $totalDeduct = $request->amount + $adminFee;
 
-        if ($user->komisi < $request->amount) {
-            return response()->json(['message' => 'Saldo komisi tidak mencukupi'], 422);
+        if ($user->komisi() < $totalDeduct) {
+            return response()->json(['message' => 'Saldo komisi tidak mencukupi (termasuk platform fee)'], 422);
         }
 
         if (!$user->rekening_nama || !$user->rekening_bank || !$user->rekening_nomor) {
             return response()->json(['message' => 'Lengkapi data rekening terlebih dahulu'], 422);
         }
 
-        $adminFee = (int) round($request->amount * $adminRate / 100);
-        $received = $request->amount - $adminFee;
-
-        $user->decrement('komisi', $request->amount);
+        $received = $request->amount;
 
         $cashout = Cashout::create([
             'cashout_id_user' => $user->id,
@@ -412,8 +401,8 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Permintaan pencairan berhasil diajukan. Maksimal 2 hari kerja.',
-            'komisi' => $user->fresh()->komisi,
+            'message' => 'Permintaan pencairan berhasil diajukan. Maksimal 1 hari kerja.',
+            'komisi' => $user->komisi(),
             'cashout' => $cashout,
         ]);
     }

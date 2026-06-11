@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\LangkahKecilController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
@@ -60,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cashout', [AuthController::class, 'requestCashout'])->name('cashout.request');
     Route::get('/cashouts', [AuthController::class, 'cashoutList'])->name('cashout.list');
     Route::get('/referrals', [AuthController::class, 'referralList'])->name('referrals.list');
+    Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+    Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+    Route::delete('/discounts/{id}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
     Route::post('/purchase-plan', PlanAction::class . '@purchase')->name('purchase.plan');
     Route::get('/validate-plan', PlanAction::class . '@validatePlan')->name('validate.plan');
 
