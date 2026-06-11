@@ -7,7 +7,6 @@ return [
     'affiliate' => [
         'register_bonus' => env('AFFILIATE_REGISTER_BONUS', 500),
         'upgrade_commission_rate' => env('AFFILIATE_UPGRADE_COMMISSION_RATE', 15),
-        'upgrade_commission_bonus' => env('AFFILIATE_UPGRADE_COMMISSION_BONUS', 1000),
         'max_discounts' => env('AFFILIATE_MAX_DISCOUNTS', 3),
         'max_discount_value' => env('AFFILIATE_MAX_discount_value', env('AFFILIATE_UPGRADE_COMMISSION_RATE', 15)),
         'max_discount_nominal' => env('AFFILIATE_MAX_DISCOUNT_NOMINAL', 10000),

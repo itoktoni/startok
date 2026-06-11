@@ -262,7 +262,7 @@ All fields use prefix `{table_singular}_` with the table name as prefix.
 
 | Table | PK | Foreign Keys | Fields |
 |-------|-----|-------------|--------|
-| `users` | `id` | - | `nama`, `email`, `role`, `komisi`, `affiliate_code`, `affiliate_reff`, `rekening_nama`, `rekening_bank`, `rekening_nomor` |
+| `users` | `id` | - | `nama`, `email`, `role`, `affiliate_code`, `affiliate_reff`, `rekening_nama`, `rekening_bank`, `rekening_nomor` |
 | `payments` | `payment_id` | `payment_id_user`, `payment_id_plan` | `payment_order_code`, `payment_jumlah`, `payment_diskon`, `payment_total`, `payment_qris_string`, `payment_status`, `payment_metode`, `payment_paid_at`, `payment_expired_at`, `payment_created_at`, `payment_updated_at` |
 | `affiliate` | `affiliate_id` | `affiliate_id_user`, `affiliate_id_from_user`, `affiliate_id_payment` | `affiliate_tipe`, `affiliate_jumlah`, `affiliate_payment_jumlah`, `affiliate_commission_rate`, `affiliate_catatan`, `affiliate_status`, `affiliate_created_at`, `affiliate_updated_at` |
 | `cashouts` | `cashout_id` | `cashout_id_user` | `cashout_jumlah`, `cashout_admin_fee`, `cashout_diterima`, `cashout_rekening_bank`, `cashout_rekening_nomor`, `cashout_rekening_nama`, `cashout_status`, `cashout_catatan`, `cashout_created_at`, `cashout_updated_at` |

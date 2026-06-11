@@ -336,7 +336,6 @@ class AuthController extends Controller
             'rates' => [
                 'register_bonus' => (int) config('langkahkecil.affiliate.register_bonus', 500),
                 'commission_rate' => (int) config('langkahkecil.affiliate.upgrade_commission_rate', 15),
-                'commission_bonus' => (int) config('langkahkecil.affiliate.upgrade_commission_bonus', 1000),
             ],
             'cashout' => [
                 'minimum' => (int) config('langkahkecil.cashout.minimum', 50000),
