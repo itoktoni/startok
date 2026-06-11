@@ -12,6 +12,7 @@ use App\Models\LangkahKecilSchedule;
 use App\Models\LangkahKecilSkill;
 use App\Models\LangkahKecilSkillActivity;
 use App\Models\LangkahKecilWorksheet;
+use App\Models\Subscribe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -48,6 +49,24 @@ class LangkahKecilController extends Controller
 
     public function addAnak(Request $request)
     {
+        $user = $request->user();
+        $userId = $user->id ?? null;
+
+        $maxChildren = 1;
+        if ($userId && $user->plan) {
+            $sub = Subscribe::find($user->plan);
+            if ($sub && $sub->subscribe_end_at && now()->lt($sub->subscribe_end_at)) {
+                $maxChildren = (int) ($sub->subsribe_value ?? 1);
+            }
+        }
+
+        $currentCount = LangkahKecilAnak::where('user_id', $userId)->count();
+        if ($currentCount >= $maxChildren) {
+            return response()->json([
+                'message' => "Maksimal {$maxChildren} anak. Upgrade plan untuk menambah lebih banyak.",
+            ], 422);
+        }
+
         $data = $request->validate([
             'nama' => 'required|string|max:255',
             'gender' => 'nullable|string|max:20',
@@ -60,7 +79,7 @@ class LangkahKecilController extends Controller
             'settings' => 'nullable|array',
         ]);
 
-        $data['user_id'] = $request->user()->id ?? null;
+        $data['user_id'] = $userId;
         if (! isset($data['umur']) && isset($data['tahun_lahir'])) {
             $data['umur'] = (int) date('Y') - (int) $data['tahun_lahir'];
         }
